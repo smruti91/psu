@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="csrf-token" content="<%= csrfToken %>">
+  <title>PSUs</title>
+  <!-- base:css -->
+  <link rel="stylesheet" href="/vendors/typicons/typicons.css">
+  <link rel="stylesheet" href="/vendors/css/vendor.bundle.base.css">
+  <!-- endinject -->
+  <!-- plugin css for this page -->
+  <!-- End plugin css for this page -->
+  <!-- inject:css -->
+  <link rel="stylesheet" href="/css/vertical-layout-light/style.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <!-- endinject -->
+  <link rel="shortcut icon" href="/images/favicon.png" />
+</head>
+<body>
+
+  <div class="container-scroller">
+    <!-- partial:partials/_navbar.html -->
+     <%- include('../partials/head.ejs') %>
+    <!-- partial -->
+  
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_settings-panel.html -->
+      
+      <!-- partial -->
+      <!-- partial:partials/_sidebar.html -->
+      <%- include('../partials/sidebar.ejs') %>
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+        <%- body %>
+        </div>
+        <!-- content-wrapper ends -->
+        <!-- partial:partials/_footer.html -->
+        
+        <!-- partial -->
+         <%- include('../partials/footer.ejs') %>
+
+         <div class="modal fade" id="dynamicViewModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+
+                <div class="modal-header">
+                  <h5 class="modal-title">PSU Details</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body" id="modalContent">
+                  <div class="text-center">
+                    <div class="spinner-border"></div>
+                  </div>
+                </div>
+                 <div class="modal-footer">
+                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                   </div>
+              </div>
+            </div>
+          </div>
+      </div>
+      
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <!-- base:js -->
+  <script src="/vendors/js/vendor.bundle.base.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page-->
+  <script src="/vendors/chart.js/Chart.min.js"></script>
+  <!-- End plugin js for this page-->
+  <!-- inject:js -->
+  <script src="/js/off-canvas.js"></script>
+  <script src="/js/hoverable-collapse.js"></script>
+  <script src="/js/template.js"></script>
+  <script src="/js/settings.js"></script>
+  <script src="/js/todolist.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <script src="/js/dashboard.js"></script>
+  <script src="/js/common.js"></script>
+    <script src="/js/getDeptData.js"></script>
+    <script src="/js/getPsData.js"></script>
+  <!-- End custom js for this page-->
+</body>
+
+</html>
+

@@ -1,0 +1,347 @@
+<% const yearWiseData = data.yearData; %>
+<% const balanceSheetData = data.balanceSheet[0]; %>
+<% const incomeSheetData = data.incomeSheet[0]; %>
+<% const govtRelData = data.govtRelation[0]; %>
+<% const annualReportData = data.annualReport[0]; %>
+<div class="mb-3">
+<h6>1. Year Wise Data </h6>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th style="width: 10%;">Sl. No</th>
+            <th style="width: 45%;">Field</th>
+            <th style="width: 45%;">Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>1</td>
+            <td>Authorized Share Capital</td>
+            <td>
+                <%= yearWiseData ? yearWiseData.Auth_Share_Capital : '-' %>
+            </td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>Subscribed Share Capital</td>
+            <td>
+                <%= yearWiseData ? yearWiseData.Sub_Share_Capital : '-' %>
+            </td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>Paid-up Share Capital</td>
+            <td>
+                <%= yearWiseData ? yearWiseData.Paid_Share_Capital : '-' %>
+            </td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>Govt Contribution</td>
+            <td>
+                <%= yearWiseData ? yearWiseData.Govt_Contri_Amt : '-' %>
+            </td>
+        </tr>
+        <tr>
+            <td>5</td>
+            <td>Govt Contribution Amount</td>
+            <td>
+                <%= yearWiseData ? yearWiseData.Govt_Contri_Amt : '-' %>
+            </td>
+        </tr>
+        <tr>
+            <td>6</td>
+            <td>Govt.Contribution in Percent</td>
+            <td>
+                <%= yearWiseData ? yearWiseData.Govt_Contri_Percent : '-' %>
+            </td>
+        </tr>
+        <tr>
+            <td>7</td>
+            <td>Name of the Share Holders</td>
+            <td>
+                <%= yearWiseData ? yearWiseData.NameOf_Share_Holder : '-' %>
+            </td>
+        </tr>
+        <tr>
+            <td>8</td>
+            <td>Profit & Loss</td>
+            <td>
+                <%= yearWiseData ? yearWiseData.Profit_Loss : '-' %>
+            </td>
+        </tr>
+        <tr>
+            <td>9</td>
+            <td>Profit After Tax (PAT)</td>
+            <td>
+                <%= yearWiseData ? yearWiseData.PAT : '-' %>
+            </td>
+        </tr>
+        <tr>
+            <td>10</td>
+            <td>Dividend Payable</td>
+
+            <td>
+                <%= yearWiseData ? yearWiseData.Dividend_Payable : '-' %>
+            </td>
+        </tr>
+        <tr>
+            <td>11</td>
+            <td>Dividend Paid</td>
+
+            <td>
+                <%= yearWiseData ? yearWiseData.Dividend_Paid : '-' %>
+            </td>
+        </tr>
+        <tr>
+            <td>12</td>
+            <td>Financial Year</td>
+
+            <td>
+                <%= yearWiseData ? yearWiseData.FinYr : '-' %>
+            </td>
+        </tr>
+
+        <td>13</td>
+        <td>Challan Receipt</td>
+        <td>
+            <% if (yearWiseData && yearWiseData.chaln_recipt) { %>
+                <a href="/<%= yearWiseData.chaln_recipt.replace(/^public\//,'') %>" target="_blank"
+                    class="btn btn-sm btn-info">
+                    View PDF
+                </a>
+                <% } else { %>
+                    -
+                    <% } %>
+        </td>
+        </tr>
+    </tbody>
+</table>
+</div>
+<div class="mb-3">
+    <h6>2. Balance Sheet </h6>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th style="width: 10%;">Sl. No</th>
+                <th style="width: 45%;">Field</th>
+                <th style="width: 45%;">Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>Total Assets</td>
+                <td>
+                    <%= balanceSheetData ? balanceSheetData.tot_asset : '-' %>
+                </td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Total Current Assets</td>
+                <td>
+                    <%= balanceSheetData ? balanceSheetData.tot_curr_asset : '-' %>
+                </td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>Total Liabilities</td>
+                <td>
+                    <%= balanceSheetData ? balanceSheetData.tot_liabilities : '-' %>
+                </td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>Total Current Liabilities</td>
+                <td>
+                    <%= balanceSheetData ? balanceSheetData.tot_curr_liabilities : '-' %>
+                </td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>Total long-term debt</td>
+                <td>
+                    <%= balanceSheetData ? balanceSheetData.tot_longterm_debt : '-' %>
+                </td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td>Total equity</td>
+                <td>
+                    <%= balanceSheetData ? balanceSheetData.tot_equity : '-' %>
+                </td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td>Inventory</td>
+                <td>
+                    <%= balanceSheetData ? balanceSheetData.inventory : '-' %>
+                </td>
+            </tr>
+            <tr>
+                <td>8</td>
+                <td>Accounts receivable</td>
+                <td>
+                    <%= balanceSheetData ? balanceSheetData.acc_receivable : '-' %>
+                </td>
+            </tr>
+            <tr>
+                <td>9</td>
+                <td>Accounts Payable</td>
+                <td>
+                    <%= balanceSheetData ? balanceSheetData.acc_payble : '-' %>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="mb-3">
+    <h6>3. Income Statement</h6>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th style="width: 10%;">Sl. No</th>
+                <th style="width: 45%;">Field</th>
+                <th style="width: 45%;">Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>Total Revenue</td>
+                <td>
+                    <%= incomeSheetData ? incomeSheetData.tot_revenue : '-' %>
+                </td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Cost of Goods Sold</td>
+                <td>
+                    <%= incomeSheetData ? incomeSheetData.cost_ofgoods_sold : '-' %>
+                </td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>Operating expenses</td>
+                <td>
+                    <%= incomeSheetData ? incomeSheetData.operating_expenses : '-' %>
+                </td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>Total expenses</td>
+                <td>
+                    <%= incomeSheetData ? incomeSheetData.tot_expenses : '-' %>
+                </td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>EBITDA</td>
+                <td>
+                    <%= incomeSheetData ? incomeSheetData.ebitda : '-' %>
+                </td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td>Depreciation & amortization</td>
+                <td>
+                    <%= incomeSheetData ? incomeSheetData.depreciation : '-' %>
+                </td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td>EBIT (Operating profit)</td>
+                <td>
+                    <%= incomeSheetData ? incomeSheetData.ebit_operating : '-' %>
+                </td>
+            </tr>
+            <tr>
+                <td>8</td>
+                <td>Interest Expenses</td>
+                <td>
+                    <%= incomeSheetData ? incomeSheetData.int_expenses : '-' %>
+                </td>
+            </tr>
+            <tr>
+                <td>9</td>
+                <td>Tax Expenses</td>
+                <td>
+                    <%= incomeSheetData ? incomeSheetData.tax_expenses : '-' %>
+                </td>
+            </tr>
+            <tr>
+                <td>10</td>
+                <td>Any Other Expenses</td>
+                <td>
+                    <%= incomeSheetData ? incomeSheetData.any_other_expenses : '-' %>
+                </td>
+            </tr>
+            <tr>
+                <td>11</td>
+                <td>Net Income</td>
+                <td>
+                    <%= incomeSheetData ? incomeSheetData.net_income : '-' %>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="mb-3">
+    <h6>4. Govt Relationship</h6>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th style="width: 10%;">Sl. No</th>
+                <th style="width: 45%;">Field</th>
+                <th style="width: 45%;">Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>Direct Budget Subsidies</td>
+                <td>
+                    <%= govtRelData ? govtRelData.direct_bud_subsidies : '-' %>
+                </td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Tax and state dues</td>
+                <td>
+                    <%= govtRelData ? govtRelData.tax_and_state_dues : '-' %>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="mb-3">
+    <h6>5. Annual Report </h6>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th style="width: 10%;">Sl. No</th>
+                <th style="width: 45%;">Field</th>
+                <th style="width: 45%;">Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>Annual Report</td>
+                <td>
+                    <% if (annualReportData && annualReportData.annual_report) { %>
+                        <a href="/<%= annualReportData.annual_report.replace(/^public\//,'') %>" target="_blank"
+                            class="btn btn-sm btn-info">
+                            View PDF
+                        </a>
+                        <% } else { %>
+                            -
+                            <% } %>
+                </td>
+            </tr>
+        </tbody>
+    </table>

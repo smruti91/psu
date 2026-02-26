@@ -1,0 +1,932 @@
+<!-- Stepper UI (hidden by default) -->
+ <h4 class="text-center text-info" >Add PSU Data For Year Of <%= Fin_Yr %> </h4>
+<div id="stepperContainer">
+    <div class="container mt-4" style="background: #325c87;
+    color: #fff;
+    padding-top: 10px;
+    border-radius: 20px;"
+    
+    >
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="stepper d-flex justify-content-between mb-4">
+                    <div class="step" id="step-indicator-1">
+                        <div class="circle">1</div>
+                        <div class="label">Year Wise Data</div>
+                    </div>
+                    <div class="step" id="step-indicator-2">
+                        <div class="circle">2</div>
+                        <div class="label">Balance Sheet</div>
+                    </div>
+                    <div class="step" id="step-indicator-3">
+                        <div class="circle">3</div>
+                        <div class="label">Income Statement</div>
+                    </div>
+                    <div class="step" id="step-indicator-4">
+                        <div class="circle">4</div>
+                        <div class="label">Govt. Relationship</div>
+                    </div>
+                    <div class="step" id="step-indicator-5">
+                        <div class="circle">5</div>
+                        <div class="label">Annual Report</div>
+                    </div>
+                </div>
+                
+                <div id="step-content-1" class="step-content">
+                    <form class="forms-sample" id="psuFormYearWiseData" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <div id="psuFormYearWiseDataErrors" class="alert alert-danger" style="display:none;"></div>
+                        <div id="psuFormYearWiseDataSuccess" class="alert alert-success" style="display:none;"></div>
+
+                        <div class="form-group row">
+                            <label for="exampleInputUsername2" class="col-sm-3 col-form-label">Name Of the
+                                PSU</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtNameofPSU" name="txtNameofPSU"
+                                    placeholder="Name of the PSU"
+                                    value="<%= typeof Psu_Name !== 'undefined' ? Psu_Name : (typeof user !== 'undefined' && user.Psu_Name ? user.Psu_Name : '') %>"
+                                    readonly>
+                                <div class="invalid-feedback" id="error_txtNameofPSU"></div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="exampleInputEmail2" class="col-sm-3 col-form-label">Authorized Share
+                                Capital</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtAuthorizedShareCap"
+                                    name="txtAuthorizedShareCap" placeholder="Authorized Share Capital"
+                                    value="<%= yearWiseData ? yearWiseData.Auth_Share_Capital : '' %>">
+                                <div class="invalid-feedback" id="error_txtAuthorizedShareCap"></div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="exampleInputMobile" class="col-sm-3 col-form-label">Subscribed Share
+                                Capital</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtSubShareCap" name="txtSubShareCap"
+                                    placeholder="Subscribed Share Capital"
+                                    value="<%= yearWiseData ? yearWiseData.Sub_Share_Capital : '' %>">
+                                <div class="invalid-feedback" id="error_txtSubShareCap"></div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="exampleInputPassword2" class="col-sm-3 col-form-label">Paid-up Share
+                                Capital</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtPaidUpShareCap" name="txtPaidUpShareCap"
+                                    placeholder="Paid-up Share Capital"
+                                    value="<%= yearWiseData ? yearWiseData.Paid_Share_Capital : '' %>">
+                                <div class="invalid-feedback" id="error_txtPaidUpShareCap"></div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="exampleInputConfirmPassword2" class="col-sm-3 col-form-label">Govt.
+                                Contribution in Amount</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtGovtContribution"
+                                    name="txtGovtContribution" placeholder="Govt. Contribution"
+                                    value="<%= yearWiseData ? yearWiseData.Govt_Contri_Amt : '' %>">
+                                <div class="invalid-feedback" id="error_txtGovtContribution"></div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="exampleInputConfirmPassword2" class="col-sm-3 col-form-label">Govt.
+                                Contribution in Percent</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtGovtContributionPercent"
+                                    name="txtGovtContributionPercent" placeholder="Govt. Contribution In Percent"
+                                    value="<%= yearWiseData ? yearWiseData.Govt_Contri_Percent : '' %>">
+                                <div class="invalid-feedback" id="error_txtGovtContributionPercent"></div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="exampleInputConfirmPassword2" class="col-sm-3 col-form-label">Name of the
+                                Share Holders</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtNameofShareHolders"
+                                    name="txtNameofShareHolders" placeholder="Name of the Share Holders"
+                                    value="<%= yearWiseData ? yearWiseData.NameOf_Share_Holder : '' %>">
+                                <div class="invalid-feedback" id="error_txtNameofShareHolders"></div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="exampleInputConfirmPassword2" class="col-sm-3 col-form-label">Profit &
+                                Loss</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtProfitLoss" name="txtProfitLoss"
+                                    placeholder="Profit & Loss"
+                                    value="<%= yearWiseData ? yearWiseData.Profit_Loss : '' %>">
+                                <div class="invalid-feedback" id="error_txtProfitLoss"></div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="exampleInputConfirmPassword2" class="col-sm-3 col-form-label">Profit After
+                                Tax (PAT)</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtPAT" name="txtPAT"
+                                    placeholder="Profit After Tax (PAT)"
+                                    value="<%= yearWiseData ? yearWiseData.PAT : '' %>">
+                                <div class="invalid-feedback" id="error_txtPAT"></div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="exampleInputConfirmPassword2" class="col-sm-3 col-form-label">Dividend
+                                Payable</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtDividendPayable"
+                                    name="txtDividendPayable" placeholder="Dividend Payable"
+                                    value="<%= yearWiseData ? yearWiseData.Dividend_Payable : '' %>">
+                                <div class="invalid-feedback" id="error_txtDividendPayable"></div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="exampleInputConfirmPassword2" class="col-sm-3 col-form-label">Dividend
+                                Paid</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtDividendpaid" name="txtDividendpaid"
+                                    value="<%= yearWiseData ? yearWiseData.Dividend_Paid : '' %>"
+                                    placeholder="Dividend Paid">
+                                <div class="invalid-feedback" id="error_txtDividendpaid"></div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="challanReceipt" class="col-sm-3 col-form-label">
+                                Challan Receipt
+                            </label>
+
+                            <div class="col-sm-9">
+
+                                <% if (yearWiseData && yearWiseData.chaln_recipt) { %>
+
+                                    <!-- Show View Button -->
+                                    <div class="mt-2">
+                                        <a href="/<%= yearWiseData.chaln_recipt.replace(/^public\//,'') %>"
+                                        target="_blank"
+                                        class="btn btn-sm btn-info">
+                                        View Current File
+                                        </a>
+
+                                        <!-- Delete Button -->
+                                        <button type="button"
+                                                class="btn btn-sm btn-danger delete-btn"
+                                                data-id="<%= yearWiseData.id %>">
+                                            Delete
+                                        </button>
+                                    </div>
+
+                                <% } else { %>
+
+                                    <!-- Show Upload Input Only If No File -->
+                                    <input type="file"
+                                        class="form-control"
+                                        id="challanReceipt"
+                                        name="chaln_recipt"
+                                        accept=".pdf">
+
+                                    <small class="form-text text-muted">
+                                        Accepted format: PDF (Max size: 5MB)
+                                    </small>
+
+                                    <div class="invalid-feedback" id="error_chaln_recipt"></div>
+
+                                <% } %>
+
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-4 py-5">
+                            <input type="hidden" name="txtFinYr" id="txtFinYr"
+                                value="<%= typeof Fin_Yr !== 'undefined' ? Fin_Yr : '' %>">
+                            <% if (yearWiseData) { %>
+                                <% if (yearWiseData.status === 0) { %>
+                                <input type="hidden" name="yearWiseId" id="yearWiseId" value="<%= yearWiseData.id %>">
+                                <button type="submit" class="btn btn-warning mr-2">Update</button>
+                                <% }%>
+                                <% } else { %>
+                                    <button type="submit" class="btn btn-info mr-2">Submit</button>
+                                    <% } %>
+                                        <button type="button" class="btn btn-primary" id="nextStep1">Next</button>
+                        </div>
+                    </form>
+
+                 
+                </div>
+                <div id="step-content-2" class="step-content" style="display:none;">
+                    <!-- Step 2: Balance Sheet Indicator -->
+                    <form class="forms-sample" id="psuFormBalanceSheet">
+                        <div id="psuFormBalanceSheetErrors" class="alert alert-danger" style="display:none;"></div>
+                        <div id="psuFormBalanceSheetSuccess" class="alert alert-success" style="display:none;"></div>
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Total Assets</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtTotalAssets" name="tot_asset"
+                                    placeholder="Total Assets"
+                                    value="<%= balanceSheetData ? balanceSheetData.tot_asset || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Total Current Assets</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtCurrentAssets" name="tot_curr_asset"
+                                    placeholder="Total Current Assets"
+                                    value="<%= balanceSheetData ? balanceSheetData.tot_curr_asset || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Total Liabilities</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtTotLiabilities" name="tot_liabilities"
+                                    placeholder="Total Liabilities"
+                                    value="<%= balanceSheetData ? balanceSheetData.tot_liabilities || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Total Current Liabilities</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtTotCurrLiabilities"
+                                    name="tot_curr_liabilities" placeholder="Total Current Liabilities"
+                                    value="<%= balanceSheetData ? balanceSheetData.tot_curr_liabilities || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Total long-term debt</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtTotalLongTermDebt"
+                                    name="tot_longterm_debt" placeholder="Total long-term debt"
+                                    value="<%= balanceSheetData ? balanceSheetData.tot_longterm_debt || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Total equity</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtTotalequity" name="tot_equity"
+                                    placeholder="Total equity"
+                                    value="<%= balanceSheetData ? balanceSheetData.tot_equity || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Inventory</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtInvetory" name="inventory"
+                                    placeholder="Inventory"
+                                    value="<%= balanceSheetData ? balanceSheetData.inventory || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Accounts receivable</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtAccountsReceivable" name="acc_receivable"
+                                    placeholder="Accounts receivable"
+                                    value="<%= balanceSheetData ? balanceSheetData.acc_receivable || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Accounts Payable</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtAccountsPayable" name="acc_payble"
+                                    placeholder="Accounts Payable"
+                                    value="<%= balanceSheetData ? balanceSheetData.acc_payble || '' : '' %>">
+                            </div>
+                        </div>
+                        <input type="hidden" name="psu_mstr_id" id="psu_mstr_id"
+                            value="<%= yearWiseData ? yearWiseData.id : '' %>">
+                        <div class="d-flex justify-content-between mt-4 py-4">
+                            <button type="button" class="btn btn-secondary" id="prevStep2">Previous</button>
+                        
+                        <div>
+                            <% if (balanceSheetData) { %>
+                                <% if (yearWiseData.status === 0) { %>
+                               <input type="hidden" name="balanceSheetId" id="balanceSheetId"
+                                    value="<%= balanceSheetData.id %>">
+                                <button type="submit" class="btn btn-warning" id="updateStep2">Update</button>
+                                <% }%>
+                                
+                                <% } else { %>
+                                    <button type="submit" class="btn btn-info" id="submitStep2">Submit</button>
+                                    <% } %>
+                                    <button type="button" class="btn btn-primary" id="nextStep2">Next</button>
+                        </div>
+                        </div>
+                    </form>
+                </div>
+                <div id="step-content-3" class="step-content" style="display:none;">
+                    <!-- Step 3: Income Statement Indicator -->
+                    <form class="forms-sample" id="psuFormIncomeStatement">
+                        <div id="psuFormIncomeStatementErrors" class="alert alert-danger" style="display:none;"></div>
+                        <div id="psuFormIncomeStatementSuccess" class="alert alert-success" style="display:none;"></div>
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Total Revenue</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtTotRevenue" name="tot_revenue"
+                                    placeholder="Total Revenue"
+                                    value="<%= incomeSheetData ? incomeSheetData.tot_revenue || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Cost of Goods Sold</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtCostofGoodsSold" name="cost_ofgoods_sold"
+                                    placeholder="Cost of Goods Sold"
+                                    value="<%= incomeSheetData ? incomeSheetData.cost_ofgoods_sold || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Operating expenses</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtOprexpenses" name="operating_expenses"
+                                    placeholder="Operating Expenses"
+                                    value="<%= incomeSheetData ? incomeSheetData.operating_expenses || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Total expenses</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtTotalExpenses" name="tot_expenses"
+                                    placeholder="Total Expenses"
+                                    value="<%= incomeSheetData ? incomeSheetData.tot_expenses || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">EBITDA</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtEbitda" name="ebitda"
+                                    placeholder="EBITDA"
+                                    value="<%= incomeSheetData ? incomeSheetData.ebitda || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Depreciation & amortization</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtDepAmor" name="depreciation"
+                                    placeholder="Depreciation & amortization"
+                                    value="<%= incomeSheetData ? incomeSheetData.depreciation || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">EBIT (Operating profit)</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtEbit" name="ebit_operating"
+                                    placeholder="EBIT (Operating profit)"
+                                    value="<%= incomeSheetData ? incomeSheetData.ebit_operating || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Interest Expenses</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtIntExpenses" name="int_expenses"
+                                    placeholder="Interest Expenses"
+                                    value="<%= incomeSheetData ? incomeSheetData.int_expenses || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Tax Expenses</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtTaxExpenses" name="tax_expenses"
+                                    placeholder="Tax Expenses"
+                                    value="<%= incomeSheetData ? incomeSheetData.tax_expenses || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Any Other Expenses</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtAnyExpenses" name="any_other_expenses"
+                                    placeholder="Any Other Expenses"
+                                    value="<%= incomeSheetData ? incomeSheetData.any_other_expenses || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Net Income</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtNetIncome" name="net_income"
+                                    placeholder="Net Income"
+                                    value="<%= incomeSheetData ? incomeSheetData.net_income || '' : '' %>">
+                            </div>
+                        </div>
+                        <input type="hidden" name="psu_mstr_id" id="psu_mstr_id"
+                            value="<%= yearWiseData ? yearWiseData.id : '' %>">
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" class="btn btn-secondary" id="prevStep3">Previous</button>
+                             <div>
+                            <% if (incomeSheetData) { %>
+                                <% if (yearWiseData.status === 0) { %>
+                                    <input type="hidden" name="incomeSheetId" id="incomeSheetId"
+                                        value="<%= incomeSheetData.id %>">
+                                    <button type="submit" class="btn btn-warning" id="updateStep3">Update</button>
+                                <% }%>
+                               
+                                <% } else { %>
+                                    <button type="submit" class="btn btn-info" id="submitStep3">Submit</button>
+                                    <% } %>
+                                     <button type="button" class="btn btn-primary" id="nextStep3">Next</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div id="step-content-4" class="step-content" style="display:none;">
+                    <!-- Step 4: Govt. Relationship -->
+                    <form class="forms-sample" id="psuFormGovtRel">
+                        <div id="psuFormGovtRelErrors" class="alert alert-danger" style="display:none;"></div>
+                        <div id="psuFormGovtRelSuccess" class="alert alert-success" style="display:none;"></div>
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Direct Budget Subsidies</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtDirBudgetSub" name="direct_bud_subsidies"
+                                    placeholder="Direct Budget Subsidies"
+                                    value="<%= govtRelData ? govtRelData.direct_bud_subsidies || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Tax and state dues</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtTaxAndStateDues"
+                                    name="tax_and_state_dues" placeholder="Tax and state dues"
+                                    value="<%= govtRelData ? govtRelData.tax_and_state_dues || '' : '' %>">
+                            </div>
+                        </div>
+                        <input type="hidden" name="psu_mstr_id" id="psu_mstr_id"
+                            value="<%= yearWiseData ? yearWiseData.id : '' %>">
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" class="btn btn-secondary" id="prevStep4">Previous</button>
+                            <% if (govtRelData) { %>
+                                 <% if (yearWiseData.status === 0) { %>
+                                     <input type="hidden" name="govtRelId" id="govtRelId" value="<%= govtRelData.id %>">
+                                     <button type="submit" class="btn btn-warning" id="updateStep4">Update</button>
+                                <% }%>
+                               
+                                <% } else { %>
+                                    <button type="submit" class="btn btn-success" id="submitStep4">Submit</button>
+                                    <% } %>
+                                 <button type="button" class="btn btn-primary" id="nextStep4">Next</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="step-content-5" class="step-content" style="display:none;">
+                    <!-- Step 5: Annual Report Upload -->
+                    <form class="forms-sample" id="psuFormAnnualReportUpload" enctype="multipart/form-data">
+                        <div id="psuFormUploadErrors" class="alert alert-danger" style="display:none;"></div>
+                        <div id="psuFormUploadSuccess" class="alert alert-success" style="display:none;"></div>
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <!-- <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Annual Report Upload</label>
+                            <div class="col-sm-9">
+                                <input type="file" class="form-control" id="txtAnnualReport" name="annual_report" accept=".pdf">
+                                <small class="form-text text-muted">Accepted format: PDF (Max size: 5MB)</small>
+                            </div>
+                        </div> -->
+
+                           <div class="form-group row">
+                            <label for="challanReceipt" class="col-sm-3 col-form-label">
+                                Upload Annual Report 
+                            </label>
+
+                            <div class="col-sm-9">
+
+                                <% if (annualReportData && annualReportData.annual_report) { %>
+
+                                    <!-- Show View Button -->
+                                    <div class="mt-2">
+                                        <a href="/<%= annualReportData.annual_report.replace(/^public\//,'') %>"
+                                        target="_blank"
+                                        class="btn btn-sm btn-info">
+                                        View Anual Report
+                                        </a>
+
+                                        <!-- Delete Button -->
+                                        <button type="button"
+                                                class="btn btn-sm btn-danger delete-annual-report-btn"
+                                                data-id="<%= annualReportData.id %>">
+                                            Delete
+                                        </button>
+                                    </div>
+
+                                <% } else { %>
+
+                                    <!-- Show Upload Input Only If No File -->
+                                    <input type="file"
+                                        class="form-control"
+                                        id="txtAnnualReport"
+                                        name="annual_report"
+                                        accept=".pdf">
+
+                                    <small class="form-text text-muted">
+                                        Accepted format: PDF (Max size: 5MB)
+                                    </small>
+
+                                    <div class="invalid-feedback" id="error_anualReport"></div>
+                                    <button type="submit" class="btn btn-success" id="submitStep5">Submit</button>
+                                <% } %>
+
+                            </div>
+                        </div>
+                    
+                        <input type="hidden" name="psu_mstr_id" id="psu_mstr_id"
+                            value="<%= yearWiseData ? yearWiseData.id : '' %>">
+                        <div class="d-flex justify-content-between mt-4 m-2">
+                            <button type="button" class="btn btn-secondary" id="prevStep5">Previous</button>
+                            <button type="button" class="btn btn-info" id="previewStep5">Preview Form</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="modal fade" id="previewModal" tabindex="-1" role="dialog" aria-labelledby="previewModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-md" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="previewModalLabel">Preview Year Wise Data</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Preview content will be injected here by JavaScript -->
+        <div id="previewContent">
+             <div class="card mt-4">
+                        <div class="card-header bg-light">
+                            <strong>Review All Sections</strong>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <h6>1. Year Wise Data <button class="btn btn-sm btn-link btn-edit-section" data-step="1">Edit</button></h6>
+                               <table class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 10%;">Sl. No</th>
+                                            <th style="width: 45%;">Field</th>
+                                            <th style="width: 45%;">Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Authorized Share Capital</td>
+                                            <td><%= yearWiseData ? yearWiseData.Auth_Share_Capital : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td>Subscribed Share Capital</td>
+                                            <td><%= yearWiseData ? yearWiseData.Sub_Share_Capital : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td>Paid-up Share Capital</td>
+                                            <td><%= yearWiseData ? yearWiseData.Paid_Share_Capital : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>4</td>
+                                            <td>Govt Contribution</td>
+                                            <td><%= yearWiseData ? yearWiseData.Govt_Contri_Amt : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>5</td>
+                                            <td>Govt Contribution Amount</td>
+                                            <td><%= yearWiseData ? yearWiseData.Govt_Contri_Amt : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>6</td>
+                                            <td>Govt.Contribution in Percent</td>
+                                            <td><%= yearWiseData ? yearWiseData.Govt_Contri_Percent : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>7</td>
+                                            <td>Name of the Share Holders</td>
+                                            <td><%= yearWiseData ? yearWiseData.NameOf_Share_Holder : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>8</td>
+                                            <td>Profit & Loss</td>
+                                            <td><%= yearWiseData ? yearWiseData.Profit_Loss : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>9</td>
+                                            <td>Profit After Tax (PAT)</td>
+                                            <td><%= yearWiseData ? yearWiseData.PAT : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>10</td>
+                                            <td>Dividend Payable</td>
+                                
+                                            <td><%= yearWiseData ? yearWiseData.Dividend_Payable : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>11</td>
+                                            <td>Dividend Paid</td>
+                                
+                                            <td><%= yearWiseData ? yearWiseData.Dividend_Paid : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>12</td>
+                                            <td>Financial Year</td>
+                                
+                                            <td><%= yearWiseData ? yearWiseData.FinYr : '-' %></td>
+                                        </tr>
+                                        
+                                            <td>13</td>
+                                            <td>Challan Receipt</td>
+                                            <td>
+                                                <% if (yearWiseData && yearWiseData.chaln_recipt) { %>
+                                                    <a href="/<%= yearWiseData.chaln_recipt.replace(/^public\//,'') %>" 
+                                                    target="_blank" 
+                                                    class="btn btn-sm btn-info">
+                                                        View PDF
+                                                    </a>
+                                                <% } else { %>
+                                                    -
+                                                <% } %>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="mb-3">
+                                <h6>2. Balance Sheet <button class="btn btn-sm btn-link btn-edit-section" data-step="2">Edit</button></h6>
+                               
+                                <table class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 10%;">Sl. No</th>
+                                            <th style="width: 45%;">Field</th>
+                                            <th style="width: 45%;">Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Total Assets</td>
+                                            <td><%= balanceSheetData ? balanceSheetData.tot_asset : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td>Total Current Assets</td>
+                                            <td><%= balanceSheetData ? balanceSheetData.tot_curr_asset : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td>Total Liabilities</td>
+                                            <td><%= balanceSheetData ? balanceSheetData.tot_liabilities : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>4</td>
+                                            <td>Total Current Liabilities</td>
+                                            <td><%= balanceSheetData ? balanceSheetData.tot_curr_liabilities : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>5</td>
+                                            <td>Total long-term debt</td>
+                                            <td><%= balanceSheetData ? balanceSheetData.tot_longterm_debt : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>6</td>
+                                            <td>Total equity</td>
+                                            <td><%= balanceSheetData ? balanceSheetData.tot_equity : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>7</td>
+                                            <td>Inventory</td>
+                                            <td><%= balanceSheetData ? balanceSheetData.inventory : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>8</td>
+                                            <td>Accounts receivable</td>
+                                            <td><%= balanceSheetData ? balanceSheetData.acc_receivable : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>9</td>
+                                            <td>Accounts Payable</td>
+                                            <td><%= balanceSheetData ? balanceSheetData.acc_payble : '-' %></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="mb-3">
+                                <h6>3. Income Statement <button class="btn btn-sm btn-link btn-edit-section" data-step="3">Edit</button></h6>
+                                
+                                <table class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 10%;">Sl. No</th>
+                                            <th style="width: 45%;">Field</th>
+                                            <th style="width: 45%;">Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Total Revenue</td>
+                                            <td><%= incomeSheetData ? incomeSheetData.tot_revenue : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td>Cost of Goods Sold</td>
+                                            <td><%= incomeSheetData ? incomeSheetData.cost_ofgoods_sold : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td>Operating expenses</td>
+                                            <td><%= incomeSheetData ? incomeSheetData.operating_expenses : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>4</td>
+                                            <td>Total expenses</td>
+                                            <td><%= incomeSheetData ? incomeSheetData.tot_expenses : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>5</td>
+                                            <td>EBITDA</td>
+                                            <td><%= incomeSheetData ? incomeSheetData.ebitda : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>6</td>
+                                            <td>Depreciation & amortization</td>
+                                            <td><%= incomeSheetData ? incomeSheetData.depreciation : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>7</td>
+                                            <td>EBIT (Operating profit)</td>
+                                            <td><%= incomeSheetData ? incomeSheetData.ebit_operating : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>8</td>
+                                            <td>Interest Expenses</td>
+                                            <td><%= incomeSheetData ? incomeSheetData.int_expenses : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>9</td>
+                                            <td>Tax Expenses</td>
+                                            <td><%= incomeSheetData ? incomeSheetData.tax_expenses : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>10</td>
+                                            <td>Any Other Expenses</td>
+                                            <td><%= incomeSheetData ? incomeSheetData.any_other_expenses : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>11</td>
+                                            <td>Net Income</td>
+                                            <td><%= incomeSheetData ? incomeSheetData.net_income : '-' %></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="mb-3">
+                                <h6>4. Govt Relationship <button class="btn btn-sm btn-link btn-edit-section" data-step="4">Edit</button></h6>
+                              
+                                <table class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 10%;">Sl. No</th>
+                                            <th style="width: 45%;">Field</th>
+                                            <th style="width: 45%;">Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Direct Budget Subsidies</td>
+                                            <td><%= govtRelData ? govtRelData.direct_bud_subsidies : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td>Tax and state dues</td>
+                                            <td><%= govtRelData ? govtRelData.tax_and_state_dues : '-' %></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="mb-3">
+                                <h6>5. Annual Report <button class="btn btn-sm btn-link btn-edit-section" data-step="5">Edit</button></h6>
+                                
+                                <table class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 10%;">Sl. No</th>
+                                            <th style="width: 45%;">Field</th>
+                                            <th style="width: 45%;">Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Annual Report</td>
+                                            <td>
+                                                <% if (annualReportData && annualReportData.annual_report) { %>
+                                                    <a href="/<%= annualReportData.annual_report.replace(/^public\//,'') %>" 
+                                                    target="_blank" 
+                                                    class="btn btn-sm btn-info">
+                                                        View PDF
+                                                    </a>
+                                                <% } else { %>
+                                                    -
+                                                <% } %>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- <div class="d-flex justify-content-end">
+                                <button id="btnSendForApproval" class="btn btn-primary">Send for Approval</button>
+                            </div> -->
+                        </div>
+                    </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <% if (yearWiseData && yearWiseData.status !== 1) { %>
+            <button type="button" class="btn btn-success" id="modalSendForApproval">Send for Approval</button>
+        <% } else { %> 
+            <button type="button" class="btn btn-success" disabled>Already Sent for Approval</button>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <style>
+        .stepper {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .step {
+            text-align: center;
+            flex: 1;
+            position: relative;
+        }
+
+        .step .circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #dee2e6;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px auto;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .step.completed .circle {
+            background: #28a745;
+            color: #fff;
+        }
+
+        .step.active .circle {
+            background: #007bff;
+            color: #fff;
+        }
+
+        .step .label {
+            font-size: 0.95rem;
+        }
+
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 18px;
+            right: -58%;
+            width: 100%;
+            height: 4px;
+            background: #dee2e6;
+            z-index: 0;
+        }
+
+        .step.completed:not(:last-child)::after {
+            background: #28a745;
+        }
+    </style>
+    <script>
+        // After step 1 submit, fetch and set psu_mstr_id for next steps
+        document.addEventListener('DOMContentLoaded', function () {
+            var yearForm = document.getElementById('psuFormYearWiseData');
+            if (yearForm) {
+                yearForm.addEventListener('submit', function (e) {
+                    setTimeout(function () {
+                        fetch('/psu/year-wise-form')
+                            .then(res => res.text())
+                            .then(html => {
+                                var parser = new DOMParser();
+                                var doc = parser.parseFromString(html, 'text/html');
+                                var newId = doc.querySelector('#yearWiseId');
+                                if (newId) {
+                                    document.querySelectorAll('input[name="psu_mstr_id"]').forEach(function (el) {
+                                        el.value = newId.value;
+                                    });
+                                }
+                            });
+                    }, 1000);
+                });
+            }
+
+        });
+    </script>

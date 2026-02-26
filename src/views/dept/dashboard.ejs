@@ -1,0 +1,127 @@
+<div class="container mt-4">
+  <div class="row">
+
+    <!-- Pending -->
+    <div class="col-md-4">
+      <div class="card bg-warning text-white text-center shadow card-click" data-type="pending"
+           style="cursor:pointer"
+           onclick="showTable('pending')">
+        <div class="card-body">
+          <h5>Pending</h5>
+          <h2><%= pendingYears.length %></h2>
+        </div>
+      </div>
+    </div>
+
+    <!-- Approved -->
+    <div class="col-md-4">
+      <div class="card bg-success text-white text-center shadow card-click" data-type="approved"
+           style="cursor:pointer"
+           onclick="showTable('approved')">
+        <div class="card-body">
+          <h5>Approved</h5>
+          <h2><%= approvedYears.length %></h2>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rejected -->
+    <div class="col-md-4">
+      <div class="card bg-danger text-white text-center shadow card-click" data-type="rejected"
+           style="cursor:pointer"
+           onclick="showTable('rejected')">
+        <div class="card-body">
+          <h5>Rejected</h5>
+          <h2><%= rejectedYears.length %></h2>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="container mt-4">
+
+  <!-- Pending Table -->
+  <div id="pendingTable" style="display:none;">
+    <h4>Pending Records</h4>
+   <table class="table table-bordered table-striped bg-light">
+    <thead class="table-info">
+        <tr>
+        <th>Sl No</th>
+        <th>Financial Year</th>
+        <th>View</th>
+        <th>Action</th>
+        </tr>
+    </thead>
+    <tbody class="table-info">
+        <% pendingYears.forEach((row, index) => { %>
+        <tr>
+            <td><%= index + 1 %></td>
+
+            <td><%= row.FinYr %></td>
+
+            <!-- View Button -->
+            <td>
+            <button 
+                class="btn btn-sm btn-info view-btn"
+                data-id="<%= row.id %>"
+                data-url="/dept/get-details">
+                View
+            </button>
+            </td>
+
+            <!-- Action Buttons -->
+            <td>
+            <button 
+                class="btn btn-sm btn-success approve-btn"
+                data-id="<%= row.id %>">
+                Approve
+            </button>
+
+            <button 
+                class="btn btn-sm btn-danger reject-btn"
+                data-id="<%= row.id %>">
+                Reject
+            </button>
+            </td>
+
+        </tr>
+        <% }) %>
+    </tbody>
+    </table>
+  </div>
+
+  <!-- Approved Table -->
+  <div id="approvedTable" style="display:none;">
+    <h4>Approved Records</h4>
+    <table class="table table-bordered">
+      <tbody>
+        <% approvedYears.forEach(row => { %>
+          <tr>
+            <td><%= row.FinYr %></td>
+            <td><%= row.status %></td>
+            <td><%= row.Psu_Name %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Rejected Table -->
+  <div id="rejectedTable" style="display:none;">
+    <h4>Rejected Records</h4>
+    <table class="table table-bordered">
+      <tbody>
+        <% rejectedYears.forEach(row => { %>
+          <tr>
+            <td><%= row.FinYr %></td>
+            <td><%= row.status %></td>
+            <td><%= row.Psu_Name %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+</div>
