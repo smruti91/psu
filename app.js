@@ -21,7 +21,12 @@ const app = express();
 //app.use(upload.none());
 
 
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginOpenerPolicy: false,
+    contentSecurityPolicy: false
+  })
+);
 app.use(compression());
 app.use(morgan('dev'));
 app.use(cookieParser());
@@ -83,6 +88,8 @@ app.use((req, res, next) => {
     // Note: if it's a multipart request, we might need a dummy or 
     // a pre-generated token if the middleware was skipped above.
     res.locals.csrfToken = req.csrfToken ? req.csrfToken() : ''; 
+    res.locals.role = req.session?.user?.role || null; // 86
+    res.locals.user = req.session?.user || null;
     next();
 });
 // ✅ Export for routes if needed
@@ -102,12 +109,14 @@ const adminRouter = require('./src/routes/admin');
 const psuRouter = require('./src/routes/psu');
 const authRouter = require('./src/routes/auth');
 const deptRouter = require('./src/routes/dept');
+const financeRouter = require('./src/routes/finance');
 
 // Apply requireAuth to protected routes
 app.use('/', indexRouter);
 app.use('/admin', requireAuth, adminRouter);
 app.use('/psu', requireAuth, psuRouter);
 app.use('/dept', requireAuth, deptRouter);
+app.use('/finance', requireAuth, financeRouter);
 app.use('/auth', authRouter);
 
 
@@ -117,6 +126,6 @@ app.use((req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`✓ Server running: http://localhost:${PORT}`);
 });

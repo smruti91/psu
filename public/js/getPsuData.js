@@ -118,7 +118,7 @@ document.getElementById('SelectDmdNo').addEventListener('click', async function 
     const dmdNo = this.value;
     if (!dmdNo) return;
     // Fetch PSU names for the depended drop down
-    const res = await fetch(`/psu/psu-names?dmdNo=${dmdNo}`);
+    const res = await fetch(`/finance/psu-names?dmdNo=${dmdNo}`);
     const data = await res.json();
     const psuNameSelect = document.getElementById('psuList');
     psuNameSelect.innerHTML = '<option value="">Select PSU Name</option>';

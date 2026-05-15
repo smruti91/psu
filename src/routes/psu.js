@@ -35,44 +35,77 @@ router.post('/send-for-approval', ensureAuth, PsuController.sendForApproval);
 
 
 // Update route for Year Wise Data
-router.post('/year-wise-data-update', 
-  upload.single('chaln_recipt'),  validateYearWiseData, PsuController.updateYearWiseData);
+router.post('/year-wise-data-update',
+  upload.array('chaln_recipt', 10),  validateYearWiseData, PsuController.updateYearWiseData);
 
 router.get('/', ensureAuth, PsuController.dashboard);
 
 // POST route for Year Wise Data form
-router.post('/year-wise-data', 
-  upload.single('chaln_recipt'), 
+router.post('/year-wise-data',
+  upload.array('chaln_recipt', 10),
   validateYearWiseData,
-  csrfProtection, 
+  csrfProtection,
   PsuController.submitYearWiseData);
 
 router.post('/delete-challan-file', async (req, res) => {
     const id = req.body.id;
+    const fileIndex = req.body.fileIndex; // Optional - for deleting specific file from list
     const pool = require('../config/db');
     const selectQuery = `SELECT chaln_recipt FROM tbl_psu_yearwise_mstr WHERE id = ?`;
     const [rows] = await pool.execute(selectQuery, [id]);
     const record = rows && rows.length > 0 ? rows[0] : null;
-    if (record && record.chaln_recipt) {
-         const filePath = path.join(process.cwd(), record.chaln_recipt);
-         console.log('File path to delete:', filePath);
-          fs.unlink(filePath, (err) => {
-            if (err) {
-               res.json({ success: false });
-               console.error('Error deleting file:', err);
-            }
-          });
-          const updateQuery = `UPDATE tbl_psu_yearwise_mstr SET chaln_recipt = NULL WHERE id = ?`;
-          const updateResult = await pool.execute(updateQuery, [id]);
-          if (updateResult[0].affectedRows === 0) {
-             res.json({ success: false });
-          }else{
-             res.json({ success: true });
-          }
 
+    if (!record || !record.chaln_recipt) {
+        return res.json({ success: false, message: 'No file found.' });
     }
 
-   //return res.json({ success: true });
+    const files = record.chaln_recipt.split(',').map(f => f.trim()).filter(f => f);
+
+    // If fileIndex provided, delete specific file from the list
+    if (fileIndex !== undefined && fileIndex !== null) {
+        const idx = parseInt(fileIndex, 10);
+        if (idx >= 0 && idx < files.length) {
+            const fileToDelete = files[idx];
+            const filePath = path.join(process.cwd(), fileToDelete);
+
+            // Delete physical file
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+
+            // Remove from array and update database
+            files.splice(idx, 1);
+            const newFileList = files.join(',');
+            const updateQuery = newFileList
+                ? `UPDATE tbl_psu_yearwise_mstr SET chaln_recipt = ? WHERE id = ?`
+                : `UPDATE tbl_psu_yearwise_mstr SET chaln_recipt = NULL WHERE id = ?`;
+
+            const updateValues = newFileList ? [newFileList, id] : [id];
+            const [updateResult] = await pool.execute(updateQuery, updateValues);
+
+            if (updateResult.affectedRows > 0) {
+                return res.json({ success: true });
+            }
+        }
+        return res.json({ success: false, message: 'Invalid file index.' });
+    }
+
+    // Otherwise, delete all files (original behavior)
+    files.forEach(file => {
+        const filePath = path.join(process.cwd(), file);
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+    });
+
+    const updateQuery = `UPDATE tbl_psu_yearwise_mstr SET chaln_recipt = NULL WHERE id = ?`;
+    const [updateResult] = await pool.execute(updateQuery, [id]);
+
+    if (updateResult.affectedRows > 0) {
+        return res.json({ success: true });
+    }
+
+    return res.json({ success: false });
 });
 router.post('/year-wise-form', ensureAuth, PsuController.getYearWiseForm);
 router.get('/view-data', ensureAuth, PsuController.viewPsuData);
@@ -123,9 +156,6 @@ router.get('/report', async (req, res) => {
 
 router.get('/report/excel', ensureAuth, PsuController.downloadReportExcel);
 router.get('/report/pdf', ensureAuth, PsuController.downloadReportPdf);
-
-router.get('/psu-names', ensureAuth, PsuController.getPsuNames);
-
 
 // Get yearwise data for dropdown selection (AJAX)
 router.get('/yearwise', ensureAuth, async (req, res) => {

@@ -27,7 +27,7 @@ exports.getIncomeStatement = async (req, res) => {
   res.json({IncomeSheetData: {"Total Revenue": IncomeSheetData.tot_revenue, "Cost of goods sold": IncomeSheetData.cost_ofgoods_sold, "Operating Expenses": IncomeSheetData.operating_expenses, "Total Expenses": IncomeSheetData.tot_expenses, "Ebitda": IncomeSheetData.ebitda, "Depriciation & Amortization": IncomeSheetData.depreciation, "Ebit (Operating Profit)": IncomeSheetData.ebit_operating, "Interest Expenses": IncomeSheetData.int_expenses, "Tax Expenses": IncomeSheetData.tax_expenses, "Any Other Expenses": IncomeSheetData.any_other_expenses, "Net Income": IncomeSheetData.net_income}});
 };
 
-// Insert Income Statement data 
+// Insert Income Statement data
 exports.submitIncomeStatement = async (req, res) => {
   console.log('Received Income Statement data:', req.body);
   const {
@@ -44,29 +44,48 @@ exports.submitIncomeStatement = async (req, res) => {
     net_income,
     psu_mstr_id
   } = req.body;
+
+  // Validate psu_mstr_id
+  if (!psu_mstr_id) {
+    return res.status(400).json({ errors: [{ msg: 'Please save Year Wise Data first (Step 1).' }] });
+  }
+
   try {
-    const insertQuery = `INSERT INTO tbl_income_sheet_indicator 
+    // Check if record already exists
+    const [existing] = await pool.execute(
+      'SELECT id FROM tbl_income_sheet_indicator WHERE psu_mstr_id = ?',
+      [psu_mstr_id]
+    );
+
+    if (existing && existing.length > 0) {
+      // Update existing record
+      const updateQuery = `UPDATE tbl_income_sheet_indicator SET
+        tot_revenue=?, cost_ofgoods_sold=?, operating_expenses=?, tot_expenses=?,
+        ebitda=?, depreciation=?, ebit_operating=?, int_expenses=?, tax_expenses=?,
+        any_other_expenses=?, net_income=?, updated_at=NOW()
+        WHERE psu_mstr_id=?`;
+      const updateValues = [
+        tot_revenue, cost_ofgoods_sold, operating_expenses, tot_expenses,
+        ebitda, depreciation, ebit_operating, int_expenses, tax_expenses,
+        any_other_expenses, net_income, psu_mstr_id
+      ];
+      await pool.execute(updateQuery, updateValues);
+      return res.json({ success: true, message: 'Income Statement updated successfully!' });
+    }
+
+    const insertQuery = `INSERT INTO tbl_income_sheet_indicator
       (tot_revenue, cost_ofgoods_sold, operating_expenses, tot_expenses, ebitda, depreciation, ebit_operating, int_expenses, tax_expenses, any_other_expenses, net_income, psu_mstr_id, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`;
     const insertValues = [
-      tot_revenue,
-      cost_ofgoods_sold,
-      operating_expenses,
-      tot_expenses,
-      ebitda,
-      depreciation,
-      ebit_operating,
-      int_expenses,
-      tax_expenses,
-      any_other_expenses,
-      net_income,
-      psu_mstr_id
+      tot_revenue, cost_ofgoods_sold, operating_expenses, tot_expenses,
+      ebitda, depreciation, ebit_operating, int_expenses, tax_expenses,
+      any_other_expenses, net_income, psu_mstr_id
     ];
     const [result] = await pool.execute(insertQuery, insertValues);
     return res.json({ success: true, message: 'Income Statement saved successfully!', id: result.insertId });
   } catch (err) {
     console.error('DB Insert Error (Income Statement):', err);
-    return res.status(500).json({ errors: [{ msg: 'Database error. Please try again.' }] });
+    return res.status(500).json({ errors: [{ msg: 'Database error: ' + err.message }] });
   }
 };
 
@@ -142,8 +161,29 @@ exports.submitGovtRel = async (req, res) => {
   } = req.body;
 
   console.log('Received Govt. Relationship data:', req.body);
+
+  // Validate psu_mstr_id
+  if (!psu_mstr_id) {
+    return res.status(400).json({ errors: [{ msg: 'Please save Year Wise Data first (Step 1).' }] });
+  }
+
   try {
-    const insertQuery = `INSERT INTO tbl_govt_relation 
+    // Check if record already exists
+    const [existing] = await pool.execute(
+      'SELECT id FROM tbl_govt_relation WHERE psu_mstr_id = ?',
+      [psu_mstr_id]
+    );
+
+    if (existing && existing.length > 0) {
+      // Update existing record
+      const updateQuery = `UPDATE tbl_govt_relation SET
+        direct_bud_subsidies=?, tax_and_state_dues=?, updated_at=NOW()
+        WHERE psu_mstr_id=?`;
+      await pool.execute(updateQuery, [direct_bud_subsidies, tax_and_state_dues, psu_mstr_id]);
+      return res.json({ success: true, message: 'Govt. Relationship updated successfully!' });
+    }
+
+    const insertQuery = `INSERT INTO tbl_govt_relation
       (direct_bud_subsidies, tax_and_state_dues, psu_mstr_id, created_at, updated_at)
       VALUES (?, ?, ?, NOW(), NOW())`;
     const insertValues = [
@@ -155,7 +195,7 @@ exports.submitGovtRel = async (req, res) => {
     return res.json({ success: true, message: 'Govt. Relationship saved successfully!', id: result.insertId });
   } catch (err) {
     console.error('DB Insert Error (Govt Rel):', err);
-    return res.status(500).json({ errors: [{ msg: 'Database error. Please try again.' }] });
+    return res.status(500).json({ errors: [{ msg: 'Database error: ' + err.message }] });
   }
 };
 
@@ -447,27 +487,46 @@ exports.submitBalanceSheet = async (req, res) => {
     acc_payble,
     psu_mstr_id
   } = req.body;
+
+  // Validate psu_mstr_id
+  if (!psu_mstr_id) {
+    return res.status(400).json({ errors: [{ msg: 'Please save Year Wise Data first (Step 1).' }] });
+  }
+
   try {
-    const insertQuery = `INSERT INTO tbl_balancesheet_indicator 
+    // Check if record already exists for this psu_mstr_id
+    const [existing] = await pool.execute(
+      'SELECT id FROM tbl_balancesheet_indicator WHERE psu_mstr_id = ?',
+      [psu_mstr_id]
+    );
+
+    if (existing && existing.length > 0) {
+      // Update existing record
+      const updateQuery = `UPDATE tbl_balancesheet_indicator SET
+        tot_asset=?, tot_curr_asset=?, tot_liabilities=?, tot_curr_liabilities=?,
+        tot_longterm_debt=?, tot_equity=?, inventory=?, acc_receivable=?, acc_payble=?, updated_at=NOW()
+        WHERE psu_mstr_id=?`;
+      const updateValues = [
+        tot_asset, tot_curr_asset, tot_liabilities, tot_curr_liabilities,
+        tot_longterm_debt, tot_equity, inventory, acc_receivable, acc_payble, psu_mstr_id
+      ];
+      await pool.execute(updateQuery, updateValues);
+      return res.json({ success: true, message: 'Balance Sheet updated successfully!' });
+    }
+
+    // Insert new record
+    const insertQuery = `INSERT INTO tbl_balancesheet_indicator
       (tot_asset, tot_curr_asset, tot_liabilities, tot_curr_liabilities, tot_longterm_debt, tot_equity, inventory, acc_receivable, acc_payble, psu_mstr_id, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`;
     const insertValues = [
-      tot_asset,
-      tot_curr_asset,
-      tot_liabilities,
-      tot_curr_liabilities,
-      tot_longterm_debt,
-      tot_equity,
-      inventory,
-      acc_receivable,
-      acc_payble,
-      psu_mstr_id
+      tot_asset, tot_curr_asset, tot_liabilities, tot_curr_liabilities,
+      tot_longterm_debt, tot_equity, inventory, acc_receivable, acc_payble, psu_mstr_id
     ];
     const [result] = await pool.execute(insertQuery, insertValues);
     return res.json({ success: true, message: 'Balance Sheet saved successfully!', id: result.insertId });
   } catch (err) {
     console.error('DB Insert Error (Balance Sheet):', err);
-    return res.status(500).json({ errors: [{ msg: 'Database error. Please try again.' }] });
+    return res.status(500).json({ errors: [{ msg: 'Database error: ' + err.message }] });
   }
 };
 
@@ -526,14 +585,16 @@ exports.updateYearWiseData = async (req, res) => {
     });
   }
 
-  // Validate challan receipt file if present
-  if (req.file) {
-    if (req.file.mimetype !== 'application/pdf') {
-      return res.status(400).json({ success: false, message: 'Only PDF files are allowed for Challan Receipt.' });
-    }
-    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-    if (req.file.size > MAX_FILE_SIZE) {
-      return res.status(400).json({ success: false, message: 'Challan Receipt file size should not exceed 5MB.' });
+  // Validate multiple challan receipt files if present
+  if (req.files && req.files.length > 0) {
+    for (const file of req.files) {
+      if (file.mimetype !== 'application/pdf') {
+        return res.status(400).json({ success: false, message: 'Only PDF files are allowed for Challan Receipt.' });
+      }
+      const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+      if (file.size > MAX_FILE_SIZE) {
+        return res.status(400).json({ success: false, message: 'Challan Receipt file size should not exceed 5MB.' });
+      }
     }
   }
 
@@ -547,49 +608,54 @@ exports.updateYearWiseData = async (req, res) => {
     txtGovtContribution,
     txtGovtContributionPercent,
     txtNameofShareHolders,
-    txtProfitLoss,
+    profitLossType,
+    txtProfitLossAmount,
     txtPAT,
     txtDividendPayable,
     txtDividendpaid,
     txtFinYr,
     yearWiseId
   } = req.body;
+
+  // Determine Profit/Loss value based on radio selection
+  const txtProfitLoss = profitLossType === 'profit' ? txtProfitLossAmount : `-${txtProfitLossAmount}`;
   try {
-    // Handle file upload if present
-    let challanReceiptPath = null;
-    if (req.file) {
+    // Handle multiple file uploads if present
+    let newFilePaths = [];
+    if (req.files && req.files.length > 0) {
       const fs = require('fs');
       const path = require('path');
+      const uploadDir = path.join(__dirname, '../../public/uploads/challan-receipts');
 
-      // Get old file path to delete
+      // Create directory if it doesn't exist
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+
+      // Get old file path to append to
       const [oldData] = await pool.execute(
         `SELECT chaln_recipt FROM tbl_psu_yearwise_mstr WHERE id = ?`,
         [yearWiseId]
       );
 
-      const fileName = `${Date.now()}_${req.file.originalname}`;
-      challanReceiptPath = `public/uploads/challan-receipts/${fileName}`;
-      const uploadDir = path.join(__dirname, '../../public/uploads/challan-receipts');
-      
-      // Create directory if it doesn't exist
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
-      
-      // Save new file to filesystem
-      fs.writeFileSync(path.join(uploadDir, fileName), req.file.buffer);
+      // Save each new file
+      req.files.forEach(file => {
+        const fileName = `${Date.now()}_${file.originalname}`;
+        const filePath = `public/uploads/challan-receipts/${fileName}`;
+        fs.writeFileSync(path.join(uploadDir, fileName), file.buffer);
+        newFilePaths.push(filePath);
+      });
 
-      // Delete old file if it exists
+      // Append to existing files if any
       if (oldData && oldData.length > 0 && oldData[0].chaln_recipt) {
-        const oldFilePath = path.join(__dirname, '../../', oldData[0].chaln_recipt);
-        if (fs.existsSync(oldFilePath)) {
-          fs.unlinkSync(oldFilePath);
-        }
+        const existingFiles = oldData[0].chaln_recipt.split(',').map(f => f.trim()).filter(f => f);
+        newFilePaths = existingFiles.concat(newFilePaths);
       }
     }
+    const challanReceiptPath = newFilePaths.length > 0 ? newFilePaths.join(',') : null;
 
     let updateQuery = `UPDATE tbl_psu_yearwise_mstr SET 
-      Auth_Share_Capital=?, Sub_Share_Capital=?, Paid_Share_Capital=?, Govt_Contri_Amt=?, Govt_Contri_Percent=?, NameOf_Share_Holder=?, Profit_Loss=?, PAT=?, Dividend_Payable=?, Dividend_Paid=?, FinYr=?`;
+      Auth_Share_Capital=?, Sub_Share_Capital=?, Paid_Share_Capital=?, Govt_Contri_Amt=?, Govt_Contri_Percent=?, NameOf_Share_Holder=?, profitLossType = ?, Profit_Loss=?, PAT=?, Dividend_Payable=?, Dividend_Paid=?, FinYr=?`;
     
     let updateValues = [
       txtAuthorizedShareCap,
@@ -598,7 +664,8 @@ exports.updateYearWiseData = async (req, res) => {
       txtGovtContribution,
       txtGovtContributionPercent || null,
       txtNameofShareHolders,
-      txtProfitLoss,
+      profitLossType,
+      txtProfitLossAmount,
       txtPAT,
       txtDividendPayable,
       txtDividendpaid,
@@ -686,6 +753,7 @@ exports.getYearWiseForm = async (req, res) => {
     title: 'Year Wise Data Form',
     Psu_Name,
     Fin_Yr,
+    role: req.session?.user?.role, // 688
     yearWiseData,
     balanceSheetData,
     incomeSheetData,
@@ -720,7 +788,7 @@ exports.dashboard = async (req, res) => {
     Psu_Name: req.session.user.Psu_Name,
     role: req.session.user.role,
     Years,
-    yearStatusMap
+    yearStatusMap 
   });
 };
 
@@ -730,6 +798,7 @@ const pool = require('../config/db');
 // Handle Year Wise Data form submission
 exports.submitYearWiseData = async (req, res) => {
   const errors = validationResult(req);
+  
   if (!errors.isEmpty()) {
     if (req.xhr || req.headers.accept.indexOf('json') > -1) {
       return res.status(400).json({ errors: errors.array() });
@@ -742,14 +811,16 @@ exports.submitYearWiseData = async (req, res) => {
     });
   }
 
-  // Validate challan receipt file if present
-  if (req.file) {
-    if (req.file.mimetype !== 'application/pdf') {
-      return res.status(400).json({ success: false, message: 'Only PDF files are allowed for Challan Receipt.' });
-    }
-    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-    if (req.file.size > MAX_FILE_SIZE) {
-      return res.status(400).json({ success: false, message: 'Challan Receipt file size should not exceed 5MB.' });
+  // Validate multiple challan receipt files if present
+  if (req.files && req.files.length > 0) {
+    for (const file of req.files) {
+      if (file.mimetype !== 'application/pdf') {
+        return res.status(400).json({ success: false, message: 'Only PDF files are allowed for Challan Receipt.' });
+      }
+      const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+      if (file.size > MAX_FILE_SIZE) {
+        return res.status(400).json({ success: false, message: 'Challan Receipt file size should not exceed 5MB.' });
+      }
     }
   }
 
@@ -762,6 +833,7 @@ console.log('Session data:', req.session.user);
   if (!DmdNo || !Psu_Name) {
     return res.status(400).json({ errors: [{ msg: 'Session expired. Please login again.' }] });
   }
+ 
 
   // Get form data
   const {
@@ -771,7 +843,8 @@ console.log('Session data:', req.session.user);
     txtGovtContribution,
     txtGovtContributionPercent,
     txtNameofShareHolders,
-    txtProfitLoss,
+    profitLossType,
+    txtProfitLossAmount,
     txtPAT,
     txtDividendPayable,
     txtDividendpaid,
@@ -779,28 +852,34 @@ console.log('Session data:', req.session.user);
     txtGovtContriPercent
   } = req.body;
 
+   // Determine Profit/Loss value based on radio selection
+  const txtProfitLoss = profitLossType === 'profit' ? txtProfitLossAmount : `${txtProfitLossAmount} * -1`;
   try {
-    // Handle file upload if present
-    let challanReceiptPath = null;
-    if (req.file) {
+    // Handle multiple file uploads if present
+    let challanReceiptPaths = [];
+    if (req.files && req.files.length > 0) {
       const fs = require('fs');
       const path = require('path');
-      const fileName = `${Date.now()}_${req.file.originalname}`;
-      challanReceiptPath = `public/uploads/challan-receipts/${fileName}`;
       const uploadDir = path.join(__dirname, '../../public/uploads/challan-receipts');
-      
+
       // Create directory if it doesn't exist
       if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir, { recursive: true });
       }
-      
-      // Save file to filesystem
-      fs.writeFileSync(path.join(uploadDir, fileName), req.file.buffer);
+
+      // Save each file
+      req.files.forEach(file => {
+        const fileName = `${Date.now()}_${file.originalname}`;
+        const filePath = `public/uploads/challan-receipts/${fileName}`;
+        fs.writeFileSync(path.join(uploadDir, fileName), file.buffer);
+        challanReceiptPaths.push(filePath);
+      });
     }
+    const challanReceiptPath = challanReceiptPaths.length > 0 ? challanReceiptPaths.join(',') : null;
 
     const insertQuery = `INSERT INTO tbl_psu_yearwise_mstr 
-      ( user_id, DmdNo, Psu_Name, Auth_Share_Capital, Sub_Share_Capital, Paid_Share_Capital, Govt_Contri_Amt, Govt_Contri_Percent, NameOf_Share_Holder, Profit_Loss, PAT, Dividend_Payable, Dividend_Paid, FinYr, chaln_recipt, Created_Dt, Modifed_Dt)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`;
+      ( user_id, DmdNo, Psu_Name, Auth_Share_Capital, Sub_Share_Capital, Paid_Share_Capital, Govt_Contri_Amt, Govt_Contri_Percent, NameOf_Share_Holder,profit_loss_type, Profit_Loss, PAT, Dividend_Payable, Dividend_Paid, FinYr, chaln_recipt, Created_Dt, Modifed_Dt)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, NOW(), NOW())`;
     const insertValues = [
       userId,
       DmdNo,
@@ -810,8 +889,8 @@ console.log('Session data:', req.session.user);
       txtPaidUpShareCap,
       txtGovtContribution,
       txtGovtContributionPercent || null,
-   
       txtNameofShareHolders,
+      profitLossType,
       txtProfitLoss,
       txtPAT,
       txtDividendPayable,
@@ -819,16 +898,18 @@ console.log('Session data:', req.session.user);
       txtFinYr || null,
       challanReceiptPath
     ];
-    //console.log('Insert Query:', insertQuery);
-   // console.log('Insert Values:', insertValues);
+    console.log('Insert Query:', insertQuery);
+    console.log('Insert Values:', insertValues);
     const [result] = await pool.execute(insertQuery, insertValues);
     // Store the inserted row's id in session for next form use
+    console.log('Insert Result:', result);
     if (result && result.insertId) {
       req.session.psuYearwiseId = result.insertId;
+      return res.json({ success: true, message: 'Form submitted and saved successfully!!!', id: result.insertId });
     }
-    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-      return res.json({ success: true, message: 'Form submitted and saved successfully!' });
-    }
+    // if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+    //   return res.json({ success: true, message: 'Form submitted and saved successfully!!!', id: result.insertId });
+    // }
     // res.render('psu/dashboard', {
     //   layout: 'layouts/dashboard',
     //   title: 'PSU Dashboard',
@@ -871,31 +952,9 @@ exports.viewPsuDataYearwise = async (req, res) => {
   res.render('psu/viewDataYearwise', { 
       layout: 'layouts/dashboard',
       title: 'View PSU Year-wise Data',
+      role: req.session.user.role,
       demands: DemantData
     })
-};
-
-exports.getPsuNames = async (req, res) => {
-  const dmdNo = req.query.dmdNo;
-  let psuNames = [];
-
-  if (!dmdNo) {
-    return res.json({ PsuNames: [] });
-  }
-
-  try {
-    const [rows] = await pool.execute(
-      `SELECT *FROM tbl_psu_name WHERE DmdNo = ?`,
-      [dmdNo]
-    );
-    if (rows && rows.length > 0) {
-      psuNames = rows;
-    }
-    res.json({ PsuNames: psuNames });
-  } catch (err) {
-    console.error('Error fetching PSU names:', err);
-    res.status(500).json({ PsuNames: [] });
-  }
 };
 
 exports.downloadReportExcel = async (req, res) => {

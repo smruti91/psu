@@ -350,8 +350,8 @@ body('captcha')
         case '2':
           res.redirect('/dept');
           break;
-        case '1':
-          res.redirect('/dmd');
+        case '4':
+          res.redirect('/finance');
           break;
         default:
           res.redirect('/psu');

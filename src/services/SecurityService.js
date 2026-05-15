@@ -149,8 +149,8 @@ exports.validateAndUpdateSession = async (sessionId) => {
     const now = new Date();
     const inactiveMinutes = (now - lastActivity) / (1000 * 60);
     
-    // Session inactive for more than 15 minutes - mark as inactive
-    if (inactiveMinutes > 15) {
+    // Session inactive for more than 30 minutes - mark as inactive
+    if (inactiveMinutes > 30) {
       await pool.query(
         "UPDATE active_sessions SET is_active = FALSE WHERE session_id = ?",
         [sessionId]
