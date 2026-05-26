@@ -30,9 +30,9 @@ app.use(
 app.use(compression());
 app.use(morgan('dev'));
 app.use(cookieParser());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Static files (your template assets)
 app.use(express.static(path.join(__dirname, 'public')));

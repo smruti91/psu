@@ -1091,3 +1091,24 @@ exports.downloadReportPdf = async (req, res) => {
 
   doc.end();
 }
+
+exports.profile = async (req, res) => {
+  const psuId = req.session.user.psu_id;
+  let psuProfile = null;
+  try {
+    const [rows] = await pool.execute(
+      `SELECT * FROM tbl_psu_profile WHERE psu_id = ? LIMIT 1`,
+      [psuId]
+    );
+    if (rows && rows.length > 0) {
+      psuProfile = rows[0];
+    }
+  } catch (err) {
+    console.error('Error fetching PSU profile:', err);
+  }
+  res.render('psu/profile', { 
+      layout: 'layouts/dashboard',
+      title: 'PSU Profile' ,
+      psuProfile 
+    });
+};

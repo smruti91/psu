@@ -353,6 +353,9 @@ body('captcha')
         case '4':
           res.redirect('/finance');
           break;
+        case '1':
+          res.redirect('/admin');
+          break;
         default:
           res.redirect('/psu');
           break;

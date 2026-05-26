@@ -1,0 +1,85 @@
+<style>
+    /* Container Styling */
+    .container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #333;
+    }
+
+    h2 {
+        font-size: 1.75rem;
+        color: #1a202c;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 0.5rem;
+    }
+
+    /* Card Layout */
+    .card {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        border: 1px solid #e2e8f0;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+        color: #2d3748;
+        margin-top: 0;
+        margin-bottom: 1.25rem;
+        font-weight: 600;
+    }
+
+    /* Text & Data Formatting */
+    .card-text {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        margin: 0;
+        border-bottom: 1px dashed #edf2f7;
+        font-size: 0.95rem;
+        color: #4a5568;
+    }
+
+    /* Remove the bottom border for the last item */
+    .card-text:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    /* Dynamic Data Highlight */
+    .card-text span {
+        font-weight: 600;
+        color: #2b6cb0; /* Professional blue tint for financial data */
+        background-color: #ebf8ff;
+        padding: 0.25rem 0.75rem;
+        border-radius: 6px;
+    }
+</style>
+<div class="container">
+    <h2>Profile Details </h2>
+    
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">PSU Profile Data</h5>
+                <p class="card-text">Authorized Share Capital: <span id="authorizedShareCap"> <%= psuProfile.authorized_share_cap %> </span></p>
+                <p class="card-text">Subscribed Share Capital: <span id="subscribedShareCap"> <%=psuProfile.subscribed_share_cap %>  </span></p>
+                <p class="card-text">Paid-up Share Capital: <span id="paidupShareCap"></span> <%=psuProfile.paidup_share_cap %></p>       
+            
+            </div>  
+        </div>
+
+</div>

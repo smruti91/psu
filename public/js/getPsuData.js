@@ -90,7 +90,7 @@ function addPsuGridStyle() {
 `;
     document.head.appendChild(psuGridStyle);
 }
-
+document.addEventListener("DOMContentLoaded", function () {
 document.getElementById('generateReportBtn').addEventListener('click', async function () {
     const finYr = document.getElementById('SelectFinYear').value;
     const dmdNo = document.getElementById('SelectDmdNo').value;
@@ -103,19 +103,156 @@ document.getElementById('generateReportBtn').addEventListener('click', async fun
     console.log(data);
     renderReport(data);
 
-    // document.getElementById('excelBtn').onclick = () => {
-    //     window.location.href = `/psu/report/excel?finYr=${finYr}`;
-    // };
-
-    // document.getElementById('pdfBtn').onclick = () => {
-    //     window.location.href = `/psu/report/pdf?finYr=${finYr}`;
-    // };
 
     document.getElementById('downloadBtns').classList.remove('d-none');
 });
+});
+document.getElementById('getProfileData').addEventListener('click', async function () {
+     const finYr = document.getElementById('SelectFinYear').value;
+    const dmdNo = document.getElementById('SelectDmdNo').value;
+    const psuId = document.getElementById('SelectPsu').value;
+
+    const res = await fetch(`/admin/profile-data?finYr=${finYr}&dmdNo=${dmdNo}&psuId=${psuId}`);
+    const data = await res.json();
+      const columns = [
+        { header: 'PSU Name', key: 'Psu_Name', width: '150px' },
+        { header: 'Authorized Capital', key: 'authorized_share_cap' },
+        { header: 'Subscribed Capital', key: 'subscribed_share_cap' },
+        { header: 'Paid-up Capital', key: 'paidup_share_cap' },
+        { header: 'Financial Year', key: 'fin_year' },
+      ];
+     renderDynamicTable([data], columns, 'profileDataDiv', { tableClass: 'table table-bordered mt-3', theadClass: 'table-dark' });
+    console.log(data);
+   // renderReport(data);
+});
+document.getElementById('profileDataForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const csrfToken =
+      this.querySelector(
+        'input[name="_csrf"]'
+      ).value;
+
+const payload = {
+       _csrf: csrfToken,
+      txtAuthorizedShareCap:
+        document.getElementById('txtAuthorizedShareCap').value,
+
+      txtSubscribedShareCap:
+        document.getElementById('txtSubscribedShareCap').value,
+
+      txtPaidupShareCap:
+        document.getElementById('txtPaidupShareCap').value,
+
+      selFinYr:
+        document.getElementById('SelectFinYear').value,
+
+      selDmdNo:
+        document.getElementById('SelectDmdNo').value,
+    psuId:
+        document.getElementById('SelectPsu').value
+    };
+
+     const res = await fetch('/admin/save-profile-data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    });
+    const result = await res.json();
+    console.log(result);
+        if (result.success) {   
+        alert('Profile data saved successfully!');
+        this.reset();
+        document.getElementById('profileDataDiv').innerHTML = '';
+    } else {
+        alert('Failed to save profile data. Please try again.');
+    }
+});
+ document.getElementById('addProfileData').addEventListener('click', async function () {
+    let modal = new bootstrap.Modal(document.getElementById('profileDataModal'));
+    modal.show();
+}
+);
+/**
+ * Renders a dynamic, reusable HTML table from an array of objects.
+ * 
+ * @param {Array<Object>} data - The dataset to render.
+ * @param {Array<Object>} columns - Configuration for the columns.
+ * @param {string} targetId - The ID of the container element.
+ * @param {Object} [options] - Optional configurations.
+ * @param {string} [options.tableClass="table table-bordered mt-3"] - CSS classes for the table.
+ * @param {string} [options.theadClass="table-dark"] - CSS classes for the table header.
+ * @param {string} [options.emptyMessage="No data found for the selected criteria."] - Message to show when data is empty.
+ * @param {string} [options.emptyClass="alert alert-warning mt-3"] - CSS classes for the empty message container.
+ */
+function renderDynamicTable(data, columns, targetId, options = {}) {
+    const container = document.getElementById(targetId);
+    if (!container) {
+        console.error(`Target container with ID "${targetId}" not found.`);
+        return;
+    }
+
+    // Default configuration options
+    const defaults = {
+        tableClass: 'table table-bordered mt-3',
+        theadClass: 'table-dark',
+        emptyMessage: 'No data found for the selected criteria.',
+        emptyClass: 'alert alert-warning mt-3'
+    };
+    const settings = { ...defaults, ...options };
+
+    // Handle empty or missing data
+    if (!data || data.length === 0) {
+        container.innerHTML = `<div class="${settings.emptyClass}">${settings.emptyMessage}</div>`;
+        return;
+    }
+
+    // Build Table Header
+    let html = `<table class="${settings.tableClass}">
+        <thead class="${settings.theadClass}">
+            <tr>
+                <th>Sl.No</th>`;
+    
+    columns.forEach(col => {
+        const styleAttr = col.width ? ` style="width: ${col.width};"` : '';
+        html += `<th${styleAttr}>${col.header}</th>`;
+    });
+    
+    html += `</tr>
+        </thead>
+        <tbody>`;
+
+    // Build Table Body
+    data.forEach((row, i) => {
+        html += `<tr>
+            <td>${i + 1}</td>`;
+        
+        columns.forEach(col => {
+            let cellValue = '';
+            
+            if (typeof col.render === 'function') {
+                // If a custom render function is provided, use it
+                cellValue = col.render(row, i);
+            } else if (col.key) {
+                // Otherwise, get the value directly by key
+                const val = row[col.key];
+                cellValue = (val !== undefined && val !== null) ? val : '';
+            }
+            
+            html += `<td>${cellValue}</td>`;
+        });
+        
+        html += `</tr>`;
+    });
+
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+}
 
 document.getElementById('SelectDmdNo').addEventListener('click', async function () {
     const dmdNo = this.value;
+    console.log(`Selected DmdNo: ${dmdNo}`);
     if (!dmdNo) return;
     // Fetch PSU names for the depended drop down
     const res = await fetch(`/finance/psu-names?dmdNo=${dmdNo}`);

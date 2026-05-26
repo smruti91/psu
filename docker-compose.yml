@@ -7,7 +7,7 @@ services:
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
-    command: npx nodemon app.js
+    command:  npx nodemon --legacy-watch app.js
     restart: always
     depends_on:
       - mysql

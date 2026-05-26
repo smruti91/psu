@@ -17,11 +17,17 @@
             </a>
           </li>
           <li class="nav-item">
+            <a class="nav-link" href="/psu/profile">
+              <i class="typcn typcn-mortar-board menu-icon"></i>
+              <span class="menu-title">Profile </span>
+            </a>
+          </li>
+          <!-- <li class="nav-item">
             <a class="nav-link" href="/psu/view-data-yearwise">
               <i class="typcn typcn-mortar-board menu-icon"></i>
               <span class="menu-title">PSUs Data year wise </span>
             </a>
-          </li>
+          </li> -->
           <% } %>
 
            <% if (role == 2) { %>
@@ -43,6 +49,21 @@
           </li>
          
           <% } %>
-          
+          <% if (role == 1) { %>
+          <li class="nav-item">
+            <a class="nav-link" href="/admin">
+              <i class="typcn typcn-device-desktop menu-icon"></i>
+              <span class="menu-title">Dashboard</span> 
+             
+            </a>
+          </li>
+         <li class="nav-item">
+            <a class="nav-link" href="/admin/psu-profile">
+              <i class="typcn typcn-device-desktop menu-icon"></i>
+              <span class="menu-title">Psu Profile</span> 
+             
+            </a>
+          </li>
+          <% } %>
         </ul>
       </nav>
