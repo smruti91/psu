@@ -55,7 +55,7 @@
                             <div class="col-sm-9">
                                 <input type="text" class="form-control" id="txtAuthorizedShareCap"
                                     name="txtAuthorizedShareCap" placeholder="Authorized Share Capital"
-                                    value="<%= yearWiseData ? yearWiseData.Auth_Share_Capital : '' %>">
+                                    value="<%= psuProfileData ? psuProfileData.authorized_share_cap : '' %>" readonly>
                                 <div class="invalid-feedback" id="error_txtAuthorizedShareCap"></div>
                             </div>
                         </div>
@@ -65,7 +65,7 @@
                             <div class="col-sm-9">
                                 <input type="text" class="form-control" id="txtSubShareCap" name="txtSubShareCap"
                                     placeholder="Subscribed Share Capital"
-                                    value="<%= yearWiseData ? yearWiseData.Sub_Share_Capital : '' %>">
+                                    value="<%= psuProfileData ? psuProfileData.subscribed_share_cap : '' %>" readonly>
                                 <div class="invalid-feedback" id="error_txtSubShareCap"></div>
                             </div>
                         </div>
@@ -75,7 +75,7 @@
                             <div class="col-sm-9">
                                 <input type="text" class="form-control" id="txtPaidUpShareCap" name="txtPaidUpShareCap"
                                     placeholder="Paid-up Share Capital"
-                                    value="<%= yearWiseData ? yearWiseData.Paid_Share_Capital : '' %>">
+                                    value="<%= psuProfileData ? psuProfileData.paidup_share_cap : '' %>" readonly>
                                 <div class="invalid-feedback" id="error_txtPaidUpShareCap"></div>
                             </div>
                         </div>

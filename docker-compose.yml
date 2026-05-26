@@ -7,7 +7,7 @@ services:
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
-    command:  npx nodemon --legacy-watch app.js
+    command: npx nodemon --legacy-watch --polling-interval 1000 app.js
     restart: always
     depends_on:
       - mysql
@@ -16,6 +16,7 @@ services:
       - DB_USER=root
       - DB_PASSWORD=root
       - DB_NAME=psu_db
+      - CHOKIDAR_USEPOLLING=true
 
   mysql:
     image: mysql:8.0

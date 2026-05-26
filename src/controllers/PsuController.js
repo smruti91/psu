@@ -705,6 +705,7 @@ exports.getYearWiseForm = async (req, res) => {
   const Psu_Name = req.session.user.Psu_Name;
   const DmdNo = req.session.user.dmdNo;
   const userId = req.session.user.id;
+  const psu_id = req.session.user.psu_id;
   let yearWiseData = null;
   let balanceSheetData = null;
   let incomeSheetData = null;
@@ -718,6 +719,13 @@ exports.getYearWiseForm = async (req, res) => {
     );
     if (rows && rows.length > 0) {
       yearWiseData = rows[0];
+    }
+    const [profileRows] = await pool.execute(
+      `SELECT * FROM tbl_psu_profile WHERE psu_id = ? LIMIT 1`,
+      [psu_id]
+    );
+    if (profileRows && profileRows.length > 0) {
+      psuProfileData = profileRows[0];
     }
     // Balance Sheet
     if (yearWiseData && yearWiseData.id) {
@@ -758,7 +766,8 @@ exports.getYearWiseForm = async (req, res) => {
     balanceSheetData,
     incomeSheetData,
     govtRelData,
-    annualReportData
+    annualReportData,
+    psuProfileData
   });
 };
 

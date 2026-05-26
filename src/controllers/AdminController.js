@@ -64,11 +64,11 @@ exports.submitPsuProfileData = async (req, res) => {
     txtAuthorizedShareCap,
     txtSubscribedShareCap,
     txtPaidupShareCap,
-    selFinYr,
-    dmdNo,
+    selFinYr= null,
+    selDmdNo,
     psuId
   } = req.body; 
-   
+   console.log('Received PSU profile data:', req.body);
   try {
     const insertQuery = `INSERT INTO tbl_psu_profile 
       (psu_id, dmd_no, authorized_share_cap, subscribed_share_cap, paidup_share_cap, fin_year)
@@ -76,7 +76,7 @@ exports.submitPsuProfileData = async (req, res) => {
 
     await pool.execute(insertQuery, [
       psuId,
-      dmdNo,
+      selDmdNo,
       txtAuthorizedShareCap,
       txtSubscribedShareCap,
       txtPaidupShareCap,
