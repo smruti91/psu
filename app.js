@@ -50,7 +50,7 @@ app.use(session({
   cookie: {
     httpOnly: true,       // prevents JS access
     secure: false,        // true if HTTPS
-    maxAge: 15 * 60 * 1000 // 15 minutes - enforced by sessionValidator middleware
+    maxAge: 24 * 60 * 1000 // 15 minutes - enforced by sessionValidator middleware
   }
 }));
 
@@ -110,6 +110,7 @@ const psuRouter = require('./src/routes/psu');
 const authRouter = require('./src/routes/auth');
 const deptRouter = require('./src/routes/dept');
 const financeRouter = require('./src/routes/finance');
+const secRouter = require('./src/routes/sec');
 
 // Apply requireAuth to protected routes
 app.use('/', indexRouter);
@@ -118,6 +119,7 @@ app.use('/psu', requireAuth, psuRouter);
 app.use('/dept', requireAuth, deptRouter);
 app.use('/finance', requireAuth, financeRouter);
 app.use('/auth', authRouter);
+app.use('/sec',requireAuth,secRouter);
 
 
 // 404

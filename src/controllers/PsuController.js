@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const pool = require('../config/db');
 exports.setUserLocals = (req, res, next) => {
   if (req.session && req.session.user) {
     res.locals.user = req.session.user;
@@ -7,6 +8,121 @@ exports.setUserLocals = (req, res, next) => {
     res.locals.user = null;
   }
   next();
+};
+
+// --- PSU Profile Data ---
+exports.submitPsuProfile = async (req, res) => {
+  const {
+    dmd_no,
+    psu_id,
+    Auth_Share_Capital,
+    Sub_Share_Capital,
+    Paid_Share_Capital,
+    Govt_Contri_Amt,
+    Govt_Contri_Percent,
+    NameOf_Share_Holder,
+    fin_year,
+    status = 1
+  } = req.body;
+
+  try {
+    let rocDocumentPath = null;
+
+    // Handle File Upload for roc_document
+    console.log(req.files);
+    
+    if (req.files && req.files.length > 0) {
+      const rocFile = req.files.find(f => f.fieldname === 'roc' || f.fieldname === 'roc_document');
+      if (rocFile) {
+        const fileName = `${Date.now()}_${rocFile.originalname}`;
+        const filePath = `public/uploads/roc-document/${fileName}`;
+        const uploadDir = path.join(__dirname, '../../public/uploads/roc-document');
+
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+        }
+
+        fs.writeFileSync(path.join(uploadDir, fileName), rocFile.buffer);
+        rocDocumentPath = filePath;
+      }
+    }
+
+    // Ensure no undefined values are passed to the database
+    const sanitizedBody = {
+      dmd_no: dmd_no ?? null,
+      psu_id: psu_id ?? null,
+      Auth_Share_Capital: Auth_Share_Capital ?? null,
+      Sub_Share_Capital: Sub_Share_Capital ?? null,
+      Paid_Share_Capital: Paid_Share_Capital ?? null,
+      Govt_Contri_Amt: Govt_Contri_Amt ?? null,
+      Govt_Contri_Percent: Govt_Contri_Percent ?? null,
+      NameOf_Share_Holder: NameOf_Share_Holder ?? null,
+      fin_year: fin_year ?? null,
+      status: status ?? 1
+    };
+
+    // Check if record already exists for this psu_id and fin_year to decide between Update or Insert
+    const [existing] = await pool.execute(
+      'SELECT id FROM tbl_psu_profile WHERE psu_id = ? AND fin_year = ?',
+      [sanitizedBody.psu_id, sanitizedBody.fin_year]
+    );
+
+    if (existing && existing.length > 0) {
+      // Update existing record
+      const updateQuery = `UPDATE tbl_psu_profile SET 
+        dmd_no=?, Auth_Share_Capital=?, Sub_Share_Capital=?, Paid_Share_Capital=?, 
+        Govt_Contri_Amt=?, Govt_Contri_Percent=?, NameOf_Share_Holder=?, status=?, roc_document=?, updated_at=NOW() 
+        WHERE id=?`;
+      const updateValues = [
+        sanitizedBody.dmd_no, sanitizedBody.Auth_Share_Capital, sanitizedBody.Sub_Share_Capital, sanitizedBody.Paid_Share_Capital, 
+        sanitizedBody.Govt_Contri_Amt, sanitizedBody.Govt_Contri_Percent, sanitizedBody.NameOf_Share_Holder, sanitizedBody.status, rocDocumentPath, existing[0].id
+      ];
+      await pool.execute(updateQuery, updateValues);
+      return res.json({ success: true, message: 'PSU Profile updated successfully!' });
+    }
+
+    // Insert new record
+    const insertQuery = `INSERT INTO tbl_psu_profile 
+      (dmd_no, psu_id, Auth_Share_Capital, Sub_Share_Capital, Paid_Share_Capital, Govt_Contri_Amt, Govt_Contri_Percent, NameOf_Share_Holder, fin_year, status, roc_document, created_at, updated_at) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`;
+    const insertValues = [
+      sanitizedBody.dmd_no, sanitizedBody.psu_id, sanitizedBody.Auth_Share_Capital, sanitizedBody.Sub_Share_Capital, sanitizedBody.Paid_Share_Capital, 
+      sanitizedBody.Govt_Contri_Amt, sanitizedBody.Govt_Contri_Percent, sanitizedBody.NameOf_Share_Holder, sanitizedBody.fin_year, sanitizedBody.status, rocDocumentPath
+    ];
+    const [result] = await pool.execute(insertQuery, insertValues);
+    return res.json({ success: true, message: 'PSU Profile saved successfully!', id: result.insertId });
+  } catch (err) {
+    console.error('DB Error (PSU Profile):', err);
+    return res.status(500).json({ success: false, errors: [{ msg: 'Database error: ' + err.message }] });
+  }
+};
+exports.approvePsuProfile = async (req, res) => {
+    try {
+
+        const { psuprofile_id } = req.body;
+
+     
+
+        await pool.execute(
+            `UPDATE tbl_psu_profile
+             SET status = ?
+             WHERE id = ?`,
+            [2, psuprofile_id]
+        );
+
+        res.json({
+            success: true,
+            message: 'Sent for approval'
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
 };
 // --- Income Statement (Step 3) ---
 // Fetch Income Statement data for a given psu_mstr_id
@@ -700,18 +816,23 @@ exports.updateYearWiseData = async (req, res) => {
 };
 // Fetch year-wise data for a given year and PSU
 exports.getYearWiseForm = async (req, res) => {
-  //console.log('Request body for year-wise form:', req.body);
+  console.log('Request body for year-wise form:', req.session);
   const Fin_Yr = req.body.finYr;
   const Psu_Name = req.session.user.Psu_Name;
   const DmdNo = req.session.user.dmdNo;
   const userId = req.session.user.id;
+  const psuId = req.session.user.psu_id ?? null;
   let yearWiseData = null;
   let balanceSheetData = null;
   let incomeSheetData = null;
   let govtRelData = null;
+  let profitLossData = null;
   let annualReportData;
+  let profileData = null;
+
   try {
     // Year Wise
+   
     const [rows] = await pool.execute(
       `SELECT * FROM tbl_psu_yearwise_mstr WHERE user_id = ? AND DmdNo = ? AND Psu_Name = ? AND FinYr = ? LIMIT 1`,
       [userId, DmdNo, Psu_Name, Fin_Yr]
@@ -732,6 +853,12 @@ exports.getYearWiseForm = async (req, res) => {
         [yearWiseData.id]
       );
       if (incRows && incRows.length > 0) incomeSheetData = incRows[0];
+       // Profit loss
+      const [prRows] = await pool.execute(
+        `SELECT * FROM tbl_psu_profit_loss WHERE psu_mstr_id = ? LIMIT 1`,
+        [yearWiseData.id]
+      );
+      if (prRows && prRows.length > 0) profitLossData = prRows[0];
       // Govt Rel
       const [govtRows] = await pool.execute(
         `SELECT * FROM tbl_govt_relation WHERE psu_mstr_id = ? LIMIT 1`,
@@ -745,6 +872,17 @@ exports.getYearWiseForm = async (req, res) => {
       );
       if (annRows && annRows.length > 0) annualReportData = annRows[0];
     }
+
+     const [profile] = await pool.execute(
+      `SELECT * FROM tbl_psu_profile  WHERE psu_id = ? and status = ? `,
+      [psuId, 8]
+    );
+    console.log(psuId, 8);
+
+  
+    if (profile && profile.length > 0) {
+        profileData = profile[0];
+    }
   } catch (err) {
     console.error('Error fetching year-wise data:', err);
   }
@@ -757,8 +895,10 @@ exports.getYearWiseForm = async (req, res) => {
     yearWiseData,
     balanceSheetData,
     incomeSheetData,
+    profitLossData,
     govtRelData,
-    annualReportData
+    annualReportData,
+    profileData
   });
 };
 
@@ -793,10 +933,11 @@ exports.dashboard = async (req, res) => {
 };
 
 
-const pool = require('../config/db');
+
 
 // Handle Year Wise Data form submission
 exports.submitYearWiseData = async (req, res) => {
+  console.log('Session data:', req);
   const errors = validationResult(req);
   
   if (!errors.isEmpty()) {
@@ -812,19 +953,19 @@ exports.submitYearWiseData = async (req, res) => {
   }
 
   // Validate multiple challan receipt files if present
-  if (req.files && req.files.length > 0) {
-    for (const file of req.files) {
-      if (file.mimetype !== 'application/pdf') {
-        return res.status(400).json({ success: false, message: 'Only PDF files are allowed for Challan Receipt.' });
-      }
-      const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-      if (file.size > MAX_FILE_SIZE) {
-        return res.status(400).json({ success: false, message: 'Challan Receipt file size should not exceed 5MB.' });
-      }
-    }
-  }
+  // if (req.files && req.files.length > 0) {
+  //   for (const file of req.files) {
+  //     if (file.mimetype !== 'application/pdf') {
+  //       return res.status(400).json({ success: false, message: 'Only PDF files are allowed for Challan Receipt.' });
+  //     }
+  //     const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+  //     if (file.size > MAX_FILE_SIZE) {
+  //       return res.status(400).json({ success: false, message: 'Challan Receipt file size should not exceed 5MB.' });
+  //     }
+  //   }
+  // }
 
-console.log('Session data:', req.session.user);
+
   // Get DmdNo and Psu_Name from session
   const DmdNo = req.session.user.dmdNo;
   const Psu_Name = req.session.user.Psu_Name;
@@ -843,46 +984,49 @@ console.log('Session data:', req.session.user);
     txtGovtContribution,
     txtGovtContributionPercent,
     txtNameofShareHolders,
-    profitLossType,
-    txtProfitLossAmount,
-    txtPAT,
-    txtDividendPayable,
-    txtDividendpaid,
-    txtFinYr,
-    txtGovtContriPercent
+    profile_id,
+    // profitLossType,
+    // txtProfitLossAmount,
+    // txtPAT,
+    // txtDividendPayable,
+    // txtDividendpaid,
+     txtFinYr,
+    // txtGovtContriPercent
   } = req.body;
 
    // Determine Profit/Loss value based on radio selection
-  const txtProfitLoss = profitLossType === 'profit' ? txtProfitLossAmount : `${txtProfitLossAmount} * -1`;
+  //const txtProfitLoss = profitLossType === 'profit' ? txtProfitLossAmount : `${txtProfitLossAmount} * -1`;
   try {
     // Handle multiple file uploads if present
-    let challanReceiptPaths = [];
-    if (req.files && req.files.length > 0) {
-      const fs = require('fs');
-      const path = require('path');
-      const uploadDir = path.join(__dirname, '../../public/uploads/challan-receipts');
+    // let challanReceiptPaths = [];
+    // if (req.files && req.files.length > 0) {
+    //   const fs = require('fs');
+    //   const path = require('path');
+    //   const uploadDir = path.join(__dirname, '../../public/uploads/challan-receipts');
 
-      // Create directory if it doesn't exist
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
+    //   // Create directory if it doesn't exist
+    //   if (!fs.existsSync(uploadDir)) {
+    //     fs.mkdirSync(uploadDir, { recursive: true });
+    //   }
 
-      // Save each file
-      req.files.forEach(file => {
-        const fileName = `${Date.now()}_${file.originalname}`;
-        const filePath = `public/uploads/challan-receipts/${fileName}`;
-        fs.writeFileSync(path.join(uploadDir, fileName), file.buffer);
-        challanReceiptPaths.push(filePath);
-      });
-    }
-    const challanReceiptPath = challanReceiptPaths.length > 0 ? challanReceiptPaths.join(',') : null;
+    //   // Save each file
+    //   req.files.forEach(file => {
+    //     const fileName = `${Date.now()}_${file.originalname}`;
+    //     const filePath = `public/uploads/challan-receipts/${fileName}`;
+    //     fs.writeFileSync(path.join(uploadDir, fileName), file.buffer);
+    //     challanReceiptPaths.push(filePath);
+    //   });
+    // }
+    // const challanReceiptPath = challanReceiptPaths.length > 0 ? challanReceiptPaths.join(',') : null;
 
     const insertQuery = `INSERT INTO tbl_psu_yearwise_mstr 
-      ( user_id, DmdNo, Psu_Name, Auth_Share_Capital, Sub_Share_Capital, Paid_Share_Capital, Govt_Contri_Amt, Govt_Contri_Percent, NameOf_Share_Holder,profit_loss_type, Profit_Loss, PAT, Dividend_Payable, Dividend_Paid, FinYr, chaln_recipt, Created_Dt, Modifed_Dt)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, NOW(), NOW())`;
+      ( user_id, DmdNo,profile_id, Psu_Name, Auth_Share_Capital, Sub_Share_Capital, Paid_Share_Capital, Govt_Contri_Amt, 
+       Govt_Contri_Percent, NameOf_Share_Holder, FinYr, Created_Dt, Modifed_Dt)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, NOW(), NOW())`;
     const insertValues = [
       userId,
       DmdNo,
+      profile_id,
       Psu_Name,
       txtAuthorizedShareCap,
       txtSubShareCap,
@@ -890,13 +1034,13 @@ console.log('Session data:', req.session.user);
       txtGovtContribution,
       txtGovtContributionPercent || null,
       txtNameofShareHolders,
-      profitLossType,
-      txtProfitLoss,
-      txtPAT,
-      txtDividendPayable,
-      txtDividendpaid,
-      txtFinYr || null,
-      challanReceiptPath
+      // profitLossType,
+      // txtProfitLoss,
+      // txtPAT,
+      // txtDividendPayable,
+      // txtDividendpaid,
+       txtFinYr || null,
+      // challanReceiptPath
     ];
     console.log('Insert Query:', insertQuery);
     console.log('Insert Values:', insertValues);
@@ -926,6 +1070,91 @@ console.log('Session data:', req.session.user);
       formErrors: [{ msg: 'Database error. Please try again.' }],
       formData: req.body
     });
+  }
+};
+exports.submitPrfitLoss = async (req, res) => {
+  console.log('profit loss data',req.body)
+  const {
+    profitLossType,
+    txtProfitLossAmount,
+    txtPAT,
+    txtDividendPayable,
+    txtDividendpaid,
+    yearWiseId
+  } = req.body;
+
+  if (!yearWiseId) {
+    return res.status(400).json({ success: false, message: 'Missing psu_mstr_id. Please complete previous steps.' });
+  }
+
+   // Validate multiple challan receipt files if present
+  if (req.files && req.files.length > 0) {
+    for (const file of req.files) {
+      if (file.mimetype !== 'application/pdf') {
+        return res.status(400).json({ success: false, message: 'Only PDF files are allowed for Challan Receipt.' });
+      }
+      const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+      if (file.size > MAX_FILE_SIZE) {
+        return res.status(400).json({ success: false, message: 'Challan Receipt file size should not exceed 5MB.' });
+      }
+    }
+  }
+  try {
+
+       let challanReceiptPaths = [];
+       if (req.files && req.files.length > 0) {
+        const fs = require('fs');
+        const path = require('path');
+        const uploadDir = path.join(__dirname, '../../public/uploads/challan-receipts');
+
+        // Create directory if it doesn't exist
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+        }
+
+      // Save each file
+      req.files.forEach(file => {
+        const fileName = `${Date.now()}_${file.originalname}`;
+        const filePath = `public/uploads/challan-receipts/${fileName}`;
+        fs.writeFileSync(path.join(uploadDir, fileName), file.buffer);
+        challanReceiptPaths.push(filePath);
+      });
+    }
+    const challanReceiptPath = challanReceiptPaths.length > 0 ? challanReceiptPaths.join(',') : null;
+
+    // Calculate actual Profit/Loss value based on type
+    const profitLossValue = profitLossType === 'profit' ? parseFloat(txtProfitLossAmount) : -parseFloat(txtProfitLossAmount);
+
+    // Check if record already exists for this yearWiseId
+    const [existing] = await pool.execute(
+      'SELECT id FROM tbl_psu_profit_loss WHERE psu_mstr_id = ?',
+      [yearWiseId]
+    );
+
+    if (existing && existing.length > 0) {
+      const updateQuery = `UPDATE tbl_psu_profit_loss SET 
+        profit_loss_type=?, Profit_Loss=?, PAT=?, Dividend_Payable=?, Dividend_Paid=?,chaln_recipt=?, updated_at=NOW() 
+        WHERE id=?`;
+      const updateValues = [
+        profitLossType, profitLossValue, txtPAT, txtDividendPayable, txtDividendpaid,challanReceiptPath, existing[0].id
+      ];
+      await pool.execute(updateQuery, updateValues);
+      return res.json({ success: true, message: 'Profit & Loss data updated successfully!' });
+    }
+
+    // Insert new record
+    const insertQuery = `INSERT INTO tbl_psu_profit_loss 
+      (profit_loss_type, Profit_Loss, PAT, Dividend_Payable, Dividend_Paid, psu_mstr_id,chaln_recipt, created_at, updated_at) 
+      VALUES (?, ?, ?, ?, ?, ?,?, NOW(), NOW())`;
+    const insertValues = [
+      profitLossType, profitLossValue, txtPAT, txtDividendPayable, txtDividendpaid, yearWiseId, challanReceiptPath
+    ];
+    const [result] = await pool.execute(insertQuery, insertValues);
+    console.log(result);
+    return res.json({ success: true, message: 'Profit & Loss data saved successfully!', id: result.insertId });
+  } catch (err) {
+    console.error('DB Error (Profit & Loss):', err);
+    return res.status(500).json({ success: false, errors: [{ msg: 'Database error: ' + err.message }] });
   }
 };
 
@@ -1094,6 +1323,7 @@ exports.downloadReportPdf = async (req, res) => {
 
 exports.profile = async (req, res) => {
   const psuId = req.session.user.psu_id;
+  const dmdNo = req.session.user.dmdNo;
   let psuProfile = null;
   try {
     const [rows] = await pool.execute(
@@ -1109,6 +1339,10 @@ exports.profile = async (req, res) => {
   res.render('psu/profile', { 
       layout: 'layouts/dashboard',
       title: 'PSU Profile' ,
-      psuProfile 
+      scripts: ['psuProfile'],
+      psuProfile,
+      psuId,
+      dmdNo
     });
 };
+

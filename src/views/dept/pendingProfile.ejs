@@ -1,0 +1,172 @@
+<div class="container-fluid py-4">
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <h3 class="mb-1">PSU Profile Approvals</h3>
+                            <p class="text-muted mb-0">
+                                Review and approve PSU profile submissions
+                            </p>
+                        </div>
+
+                        <div>
+                            <span class="badge bg-warning fs-6 px-3 py-2">
+                                Pending : <%= approvals.length %>
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+
+            <table class="table table-hover align-middle" id="approvalTable">
+
+                <thead>
+                    <tr>
+                        <th>Sl No</th>
+                        <th>PSU Name</th>
+                        <th>Submitted On</th>
+                        <th>Status</th>
+                        <th width="250">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <% approvals.forEach((item, i) => { %>
+
+                    <tr>
+                        <td>
+                            <strong><%= i+ 1 %></strong>
+                        </td>
+                        <td>
+                            <strong><%= item.Psu_Name %></strong>
+                        </td>
+
+                        <td>
+                            <% 
+                                const d = new Date(item.created_at);
+                                let formattedDate = '';
+                                if (!isNaN(d.getTime())) {
+                                    const dd = String(d.getDate()).padStart(2, '0');
+                                    const mm = String(d.getMonth() + 1).padStart(2, '0');
+                                    const yy = String(d.getFullYear()).slice(-2);
+                                    formattedDate = `${dd}-${mm}-20${yy}`;
+                                } else {
+                                    formattedDate = item.created_at || '';
+                                }
+                            %>
+                            <%= formattedDate %>
+                        </td>
+
+                        <td>
+
+                            <span class="badge bg-warning text-dark">
+                                Pending Review
+                            </span>
+
+                        </td>
+
+                        <td>
+
+                            <button
+                                type="button"
+                                class="btn btn-outline-primary btn-sm"
+                                data-toggle="modal"
+                                data-target="#viewModal-<%= item.id %>">
+                                <i class="fa fa-eye"></i> View
+                            </button>
+
+                            <!-- Modal -->
+                            <div class="modal fade" id="viewModal-<%= item.id %>" tabindex="-1" aria-labelledby="viewModalLabel-<%= item.id %>" aria-hidden="true">
+                                <div class="modal-dialog modal-md modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="viewModalLabel-<%= item.id %>"><%= item.Psu_Name %></h5>
+                                            <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <!-- Replace or extend the fields below with the specific item properties you want to show -->
+                                             <div class="card mt-4">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">PSU Profile Data</h5>
+                                                    <p class="card-text">Authorized Share Capital: <span id="authorizedShareCap">
+                                                            <%= item.Auth_Share_Capital %>
+                                                        </span></p>
+                                                    <p class="card-text">Subscribed Share Capital: <span id="subscribedShareCap">
+                                                            <%=item.Sub_Share_Capital %>
+                                                        </span></p>
+                                                    <p class="card-text">Paid-up Share Capital: <span id="paidupShareCap">
+                                                        <%=item.Paid_Share_Capital %></span>
+                                                    </p>
+                                                    <p class="card-text">Govt. Contribution in Amount: <span id="paidupShareCap">
+                                                        <%=item.Govt_Contri_Amt %></span>
+                                                    </p>
+                                                    <p class="card-text">Govt. Contribution in Percent: <span id="paidupShareCap">
+                                                                                                
+                                                        <%=item.Govt_Contri_Percent %></span>
+                                                    </p>
+                                                    <p class="card-text">Name of the Share Holders: <span id="paidupShareCap">
+                                                                                                
+                                                        <%=item.NameOf_Share_Holder %></span>
+                                                    </p>
+                                                    <p class="card-text">ROC Document: <span id="rocDocument">
+                                                                                                
+                                                        <a  href="/<%= item.roc_document.replace(/^public\//,'') %>" target="_blank" >View</a>
+                                                    </p>
+                                                  
+                                                </div>
+                                            </div>
+                                            <!-- Example: show all fields as JSON for quick inspection -->
+                                            <hr />
+                                            
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button
+                                class="btn btn-success btn-sm approveBtn"
+                                data-id="<%= item.id %>">
+
+                                <i class="fa fa-check"></i> Approve
+
+                            </button>
+
+                            <button
+                                class="btn btn-danger btn-sm rejectBtn"
+                                data-id="<%= item.id %>">
+
+                                <i class="fa fa-times"></i> Reject
+
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                    <% }) %>
+
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+
+</div>
+

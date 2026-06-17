@@ -356,6 +356,9 @@ body('captcha')
         case '1':
           res.redirect('/admin');
           break;
+        case '5':
+          res.redirect('/sec');
+          break;
         default:
           res.redirect('/psu');
           break;

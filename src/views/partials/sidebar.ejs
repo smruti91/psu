@@ -30,18 +30,63 @@
           </li> -->
           <% } %>
 
-           <% if (role == 2) { %>
+          <% if (role == 2) { %>
+
+<li class="nav-item">
+    <a class="nav-link" href="/dept">
+        <i class="typcn typcn-device-desktop menu-icon"></i>
+        <span class="menu-title">Dashboard</span>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link" data-toggle="collapse" href="#psuProfileMenu"
+        aria-expanded="false" aria-controls="psuProfileMenu">
+        <i class="typcn typcn-folder menu-icon"></i>
+        <span class="menu-title">PSU Profile</span>
+        <i class="menu-arrow"></i>
+    </a>
+
+    <div class="collapse" id="psuProfileMenu">
+        <ul class="nav flex-column sub-menu">
+
+            <li class="nav-item">
+                <a class="nav-link" href="/dept/pending-profile">
+                    Pending For Approval
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="/dept/approved-profile">
+                    Approved
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="/dept/rejected-profile">
+                    Rejected
+                </a>
+            </li>
+
+        </ul>
+    </div>
+</li>
+
+<% } %>
+          <% if (role == 4) { %>
           <li class="nav-item">
-            <a class="nav-link" href="/dept">
+            <a class="nav-link" href="/finance">
               <i class="typcn typcn-device-desktop menu-icon"></i>
               <span class="menu-title">Dashboard</span> 
              
             </a>
           </li>
+         
           <% } %>
-          <% if (role == 4) { %>
+
+          <% if (role == 5) { %>
           <li class="nav-item">
-            <a class="nav-link" href="/finance">
+            <a class="nav-link" href="/sec">
               <i class="typcn typcn-device-desktop menu-icon"></i>
               <span class="menu-title">Dashboard</span> 
              

@@ -3,14 +3,17 @@
 <% const incomeSheetData = data.incomeSheet[0]; %>
 <% const govtRelData = data.govtRelation[0]; %>
 <% const annualReportData = data.annualReport[0]; %>
+<% const profitLoss = data.profitLoss[0]; %>
 <div class="mb-3">
-<h6>1. Year Wise Data </h6>
+
+<h6>1. Profile Details </h6>
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
             <th style="width: 10%;">Sl. No</th>
-            <th style="width: 45%;">Field</th>
-            <th style="width: 45%;">Value</th>
+            <th style="width: 35%;">Field</th>
+            <th style="width: 35%;">Value</th>
+            <th style="width: 20%;">Action</th>
         </tr>
     </thead>
     <tbody>
@@ -63,38 +66,9 @@
                 <%= yearWiseData ? yearWiseData.NameOf_Share_Holder : '-' %>
             </td>
         </tr>
+        
         <tr>
             <td>8</td>
-            <td>Profit & Loss</td>
-            <td>
-                <%= yearWiseData ? yearWiseData.Profit_Loss : '-' %>
-            </td>
-        </tr>
-        <tr>
-            <td>9</td>
-            <td>Profit After Tax (PAT)</td>
-            <td>
-                <%= yearWiseData ? yearWiseData.PAT : '-' %>
-            </td>
-        </tr>
-        <tr>
-            <td>10</td>
-            <td>Dividend Payable</td>
-
-            <td>
-                <%= yearWiseData ? yearWiseData.Dividend_Payable : '-' %>
-            </td>
-        </tr>
-        <tr>
-            <td>11</td>
-            <td>Dividend Paid</td>
-
-            <td>
-                <%= yearWiseData ? yearWiseData.Dividend_Paid : '-' %>
-            </td>
-        </tr>
-        <tr>
-            <td>12</td>
             <td>Financial Year</td>
 
             <td>
@@ -102,11 +76,533 @@
             </td>
         </tr>
 
-        <td>13</td>
+        
+        </tr>
+    </tbody>
+</table>
+</div>
+
+<div class="mb-3">
+    <h6>2. Income Statement</h6>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th style="width: 10%;">Sl. No</th>
+                <th style="width: 35%;">Field</th>
+                <th style="width: 35%;">Value</th>
+                <th style="width: 20%;">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>Total Revenue</td>
+                <td>
+                    <!-- <%= incomeSheetData ? incomeSheetData.tot_revenue : '-' %> -->
+                    <span class="editable-value">
+                        <%= incomeSheetData ? incomeSheetData.tot_revenue : '-' %>
+                    </span>
+
+                   
+                </td>
+                <td>
+                    <button
+                        class="btn btn-sm btn-primary edit-field"
+                        data-table="tbl_income_sheet_indicator"
+                        data-id="<%= incomeSheetData.id %>"
+                        data-psumstrid="<%= yearWiseData.id %>"
+                        data-field="tot_revenue"
+                        data-value="<%= incomeSheetData.tot_revenue %>"
+                        data-label = "Total Revenue">
+                        <i class="typcn typcn-edit"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Cost of Goods Sold</td>
+                <td>
+                    <!-- <%= incomeSheetData ? incomeSheetData.cost_ofgoods_sold : '-' %> -->
+                     <span class="editable-value">
+                        <%= incomeSheetData ? incomeSheetData.cost_ofgoods_sold : '-' %>
+                    </span>
+
+                    
+                </td>
+                <td>
+                    <button
+                        class="btn btn-sm btn-primary edit-field"
+                        data-table="tbl_income_sheet_indicator"
+                        data-id="<%= incomeSheetData.id %>"
+                        data-psumstrid="<%= yearWiseData.id %>"
+                        data-field="cost_ofgoods_sold"
+                        data-value="<%= incomeSheetData.cost_ofgoods_sold %>"
+                        data-label = "Cost of Goods Sold">
+                        <i class="typcn typcn-edit"></i>
+                    </button>
+                </td>
+                
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>Operating expenses</td>
+                <td>
+                    <%= incomeSheetData ? incomeSheetData.operating_expenses : '-' %>
+                </td>
+                <td>
+                    <button
+                        class="btn btn-sm btn-primary edit-field"
+                        data-table="tbl_income_sheet_indicator"
+                        data-id="<%= incomeSheetData.id %>"
+                        data-psumstrid="<%= yearWiseData.id %>"
+                        data-field="operating_expenses"
+                        data-value="<%= incomeSheetData.operating_expenses %>"
+                        data-label = "Operating expenses">
+                         <i class="typcn typcn-edit"></i>
+                    </button>   
+                </td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>Total expenses</td>
+                <td>
+                    <%= incomeSheetData ? incomeSheetData.tot_expenses : '-' %>
+                </td>
+                <td>
+                    <button
+                        class="btn btn-sm btn-primary edit-field"
+                        data-table="tbl_income_sheet_indicator"
+                        data-id="<%= incomeSheetData.id %>"
+                        data-psumstrid="<%= yearWiseData.id %>"
+                        data-field="tot_expenses"
+                        data-value="<%= incomeSheetData.tot_expenses %>"
+                        data-label = "Total expenses">
+                         <i class="typcn typcn-edit"></i>
+                    </button>   
+                </td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>EBITDA</td>
+                <td>
+                    <%= incomeSheetData ? incomeSheetData.ebitda : '-' %>
+                </td>
+                <td>
+                    <button
+                        class="btn btn-sm btn-primary edit-field"
+                        data-table="tbl_income_sheet_indicator"
+                        data-id="<%= incomeSheetData.id %>"
+                        data-psumstrid="<%= yearWiseData.id %>"
+                        data-field="ebitda"
+                        data-value="<%= incomeSheetData.ebitda %>"
+                        data-label = "EBITDA">
+                         <i class="typcn typcn-edit"></i>
+                    </button>   
+                </td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td>Depreciation & amortization</td>
+                <td>
+                    <%= incomeSheetData ? incomeSheetData.depreciation : '-' %>
+                </td>
+                <td>
+                    <button
+                        class="btn btn-sm btn-primary edit-field"
+                        data-table="tbl_income_sheet_indicator"
+                        data-id="<%= incomeSheetData.id %>"
+                        data-psumstrid="<%= yearWiseData.id %>"
+                        data-field="depreciation"
+                        data-value="<%= incomeSheetData.depreciation %>"
+                        data-label = "Depreciation & amortization">
+                         <i class="typcn typcn-edit"></i>
+                    </button>   
+                </td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td>EBIT (Operating profit)</td>
+                <td>
+                    <%= incomeSheetData ? incomeSheetData.ebit_operating : '-' %>
+                </td>
+                <td>
+                    <button
+                        class="btn btn-sm btn-primary edit-field"
+                        data-table="tbl_income_sheet_indicator"
+                        data-id="<%= incomeSheetData.id %>"
+                        data-psumstrid="<%= yearWiseData.id %>"
+                        data-field="ebit_operating"
+                        data-value="<%= incomeSheetData.ebit_operating %>"
+                        data-label = "EBIT (Operating profit)">
+                         <i class="typcn typcn-edit"></i>
+                    </button>   
+                </td>
+            </tr>
+            <tr>
+                <td>8</td>
+                <td>Interest Expenses</td>
+                <td>
+                    <%= incomeSheetData ? incomeSheetData.int_expenses : '-' %>
+                </td>
+                <td>
+                    <button
+                        class="btn btn-sm btn-primary edit-field"
+                        data-table="tbl_income_sheet_indicator"
+                        data-id="<%= incomeSheetData.id %>"
+                        data-psumstrid="<%= yearWiseData.id %>"
+                        data-field="int_expenses"
+                        data-value="<%= incomeSheetData.int_expenses %>"
+                        data-label = "Interest Expenses">
+                         <i class="typcn typcn-edit"></i>
+                    </button>   
+                </td>
+            </tr>
+            <tr>
+                <td>9</td>
+                <td>Tax Expenses</td>
+                <td>
+                    <%= incomeSheetData ? incomeSheetData.tax_expenses : '-' %>
+                </td>
+                <td>
+                    <button
+                        class="btn btn-sm btn-primary edit-field"
+                        data-table="tbl_income_sheet_indicator"
+                        data-id="<%= incomeSheetData.id %>"
+                        data-psumstrid="<%= yearWiseData.id %>"
+                        data-field="tax_expenses"
+                        data-value="<%= incomeSheetData.tax_expenses %>"
+                        data-label = "Tax Expenses">
+                         <i class="typcn typcn-edit"></i>
+                    </button>   
+                </td>
+            </tr>
+            <tr>
+                <td>10</td>
+                <td>Any Other Expenses</td>
+                <td>
+                    <%= incomeSheetData ? incomeSheetData.any_other_expenses : '-' %>
+                </td>
+                <td>
+                    <button
+                        class="btn btn-sm btn-primary edit-field"
+                        data-table="tbl_income_sheet_indicator"
+                        data-id="<%= incomeSheetData.id %>"
+                        data-psumstrid="<%= yearWiseData.id %>"
+                        data-field="any_other_expenses"
+                        data-value="<%= incomeSheetData.any_other_expenses %>"
+                        data-label = "Any Other Expenses">
+                         <i class="typcn typcn-edit"></i>
+                    </button>   
+                </td>
+            </tr>
+            <tr>
+                <td>11</td>
+                <td>Net Income</td>
+                <td>
+                    <%= incomeSheetData ? incomeSheetData.net_income : '-' %>
+                </td>
+                <td>
+                    <button
+                        class="btn btn-sm btn-primary edit-field"
+                        data-table="tbl_income_sheet_indicator"
+                        data-id="<%= incomeSheetData.id %>"
+                        data-psumstrid="<%= yearWiseData.id %>"
+                        data-field="net_income"
+                        data-value="<%= incomeSheetData.net_income %>"
+                        data-label = "Net Income">
+                         <i class="typcn typcn-edit"></i>
+                    </button>   
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="mb-3">
+    <h6>3. Balance Sheet </h6>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th style="width: 10%;">Sl. No</th>
+                <th style="width: 35%;">Field</th>
+                <th style="width: 35%;">Value</th>
+                <th style="width: 20%;">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>Total Assets</td>
+                <td>
+                    <%= balanceSheetData ? balanceSheetData.tot_asset : '-' %>
+                </td>
+                <td>
+                    <button
+                        class="btn btn-sm btn-primary edit-field"
+                        data-table="tbl_balancesheet_indicator"
+                        data-id="<%= balanceSheetData.id %>"
+                        data-psumstrid="<%= yearWiseData.id %>"
+                        data-field="tot_asset"
+                        data-value="<%= balanceSheetData.tot_asset %>"
+                        data-label = "Total Assets">
+                         <i class="typcn typcn-edit"></i>
+                    </button>   
+                </td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Total Current Assets</td>
+                <td>
+                    <%= balanceSheetData ? balanceSheetData.tot_curr_asset : '-' %>
+                </td>
+                <td>
+                    <button
+                        class="btn btn-sm btn-primary edit-field"
+                        data-table="tbl_balancesheet_indicator"
+                        data-id="<%= balanceSheetData.id %>"
+                        data-psumstrid="<%= yearWiseData.id %>"
+                        data-field="tot_curr_asset"
+                        data-value="<%= balanceSheetData.tot_curr_asset %>"
+                        data-label = "Total Assets">
+                         <i class="typcn typcn-edit"></i>
+                    </button>   
+                </td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>Total Liabilities</td>
+                <td>
+                    <%= balanceSheetData ? balanceSheetData.tot_liabilities : '-' %>
+                </td>
+                <td>
+                    <button
+                        class="btn btn-sm btn-primary edit-field"
+                        data-table="tbl_balancesheet_indicator"
+                        data-id="<%= balanceSheetData.id %>"
+                        data-psumstrid="<%= yearWiseData.id %>"
+                        data-field="tot_liabilities"
+                        data-value="<%= balanceSheetData.tot_liabilities %>"
+                        data-label = "Total Liabilities">
+                         <i class="typcn typcn-edit"></i>
+                    </button>   
+                </td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>Total Current Liabilities</td>
+                <td>
+                    <%= balanceSheetData ? balanceSheetData.tot_curr_liabilities : '-' %>
+                </td>
+                <td>
+                    <button
+                        class="btn btn-sm btn-primary edit-field"
+                        data-table="tbl_balancesheet_indicator"
+                        data-id="<%= balanceSheetData.id %>"
+                        data-psumstrid="<%= yearWiseData.id %>"
+                        data-field="tot_curr_liabilities"
+                        data-value="<%= balanceSheetData.tot_curr_liabilities %>"
+                        data-label = "Total Current Liabilities">
+                         <i class="typcn typcn-edit"></i>
+                    </button>   
+                </td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>Total long-term debt</td>
+                <td>
+                    <%= balanceSheetData ? balanceSheetData.tot_longterm_debt : '-' %>
+                </td>
+                <td>
+                    <button
+                        class="btn btn-sm btn-primary edit-field"
+                        data-table="tbl_balancesheet_indicator"
+                        data-id="<%= balanceSheetData.id %>"
+                        data-psumstrid="<%= yearWiseData.id %>"
+                        data-field="tot_longterm_debt"
+                        data-value="<%= balanceSheetData.tot_longterm_debt %>"
+                        data-label = "Total long-term debt">
+                         <i class="typcn typcn-edit"></i>
+                    </button>   
+                </td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td>Total equity</td>
+                <td>
+                    <%= balanceSheetData ? balanceSheetData.tot_equity : '-' %>
+                </td>
+                <td>
+                    <button
+                        class="btn btn-sm btn-primary edit-field"
+                        data-table="tbl_balancesheet_indicator"
+                        data-id="<%= balanceSheetData.id %>"
+                        data-psumstrid="<%= yearWiseData.id %>"
+                        data-field="tot_equity"
+                        data-value="<%= balanceSheetData.tot_equity %>"
+                        data-label = "Total equity">
+                         <i class="typcn typcn-edit"></i>
+                    </button>   
+                </td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td>Inventory</td>
+                <td>
+                    <%= balanceSheetData ? balanceSheetData.inventory : '-' %>
+                </td>
+                <td>
+                    <button
+                        class="btn btn-sm btn-primary edit-field"
+                        data-table="tbl_balancesheet_indicator"
+                        data-id="<%= balanceSheetData.id %>"
+                        data-psumstrid="<%= yearWiseData.id %>"
+                        data-field="inventory"
+                        data-value="<%= balanceSheetData.inventory %>"
+                        data-label = "Inventory">
+                         <i class="typcn typcn-edit"></i>
+                    </button>   
+                </td>
+            </tr>
+            <tr>
+                <td>8</td>
+                <td>Accounts receivable</td>
+                <td>
+                    <%= balanceSheetData ? balanceSheetData.acc_receivable : '-' %>
+                </td>
+                <td>
+                    <button
+                        class="btn btn-sm btn-primary edit-field"
+                        data-table="tbl_balancesheet_indicator"
+                        data-id="<%= balanceSheetData.id %>"
+                        data-psumstrid="<%= yearWiseData.id %>"
+                        data-field="acc_receivable"
+                        data-value="<%= balanceSheetData.acc_receivable %>"
+                        data-label = "Accounts receivable">
+                         <i class="typcn typcn-edit"></i>
+                    </button>   
+                </td>
+            </tr>
+            <tr>
+                <td>9</td>
+                <td>Accounts Payable</td>
+                <td>
+                    <%= balanceSheetData ? balanceSheetData.acc_payble : '-' %>
+                </td>
+                <td>
+                    <button
+                        class="btn btn-sm btn-primary edit-field"
+                        data-table="tbl_balancesheet_indicator"
+                        data-id="<%= balanceSheetData.id %>"
+                        data-psumstrid="<%= yearWiseData.id %>"
+                        data-field="acc_payble"
+                        data-value="<%= balanceSheetData.acc_payble %>"
+                        data-label = "Accounts Payable">
+                         <i class="typcn typcn-edit"></i>
+                    </button>   
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<h6>4. Profit Loss </h6>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th style="width: 10%;">Sl. No</th>
+            <th style="width: 35%;">Field</th>
+            <th style="width: 35%;">Value</th>
+            <th style="width: 20%;">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr>
+            <td>1</td>
+            <td>Profit & Loss</td>
+            <td>
+                <%= profitLoss ? profitLoss.Profit_Loss : '-' %>
+            </td>
+            <td>
+                    <button
+                        class="btn btn-sm btn-primary edit-field"
+                        data-table="tbl_psu_profit_loss"
+                        data-id="<%= profitLoss.id %>"
+                        data-psumstrid="<%= yearWiseData.id %>"
+                        data-field="Profit_Loss"
+                        data-value="<%= profitLoss.Profit_Loss %>"
+                        data-label = "Profit & Loss">
+                         <i class="typcn typcn-edit"></i>
+                    </button>   
+                </td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>Profit After Tax (PAT)</td>
+            <td>
+                <%= profitLoss ? profitLoss.PAT : '-' %>
+            </td>
+            <td>
+                <button
+                    class="btn btn-sm btn-primary edit-field"
+                    data-table="tbl_psu_profit_loss"
+                    data-id="<%= profitLoss.id %>"
+                    data-psumstrid="<%= yearWiseData.id %>"
+                    data-field="PAT"
+                    data-value="<%= profitLoss.PAT %>"
+                    data-label = "Profit After Tax (PAT)">
+                        <i class="typcn typcn-edit"></i>
+                </button>   
+            </td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>Dividend Payable</td>
+
+            <td>
+                <%= profitLoss ? profitLoss.Dividend_Payable : '-' %>
+            </td>
+            <td>
+                <button
+                    class="btn btn-sm btn-primary edit-field"
+                    data-table="tbl_psu_profit_loss"
+                    data-id="<%= profitLoss.id %>"
+                    data-psumstrid="<%= yearWiseData.id %>"
+                    data-field="Dividend_Payable"
+                    data-value="<%= profitLoss.Dividend_Payable %>"
+                    data-label = "Dividend Payable">
+                        <i class="typcn typcn-edit"></i>
+                </button>   
+            </td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>Dividend Paid</td>
+
+            <td>
+                <%= profitLoss ? profitLoss.Dividend_Paid : '-' %>
+            </td>
+            <td>
+                <button
+                    class="btn btn-sm btn-primary edit-field"
+                    data-table="tbl_psu_profit_loss"
+                    data-id="<%= profitLoss.id %>"
+                    data-psumstrid="<%= yearWiseData.id %>"
+                    data-field="Dividend_Paid"
+                    data-value="<%= profitLoss.Dividend_Paid %>"
+                    data-label = "Dividend Paid">
+                        <i class="typcn typcn-edit"></i>
+                </button>   
+            </td>
+        </tr>
+        
+
+        <td>6</td>
         <td>Challan Receipt</td>
         <td>
-            <% if (yearWiseData && yearWiseData.chaln_recipt) { %>
-                <a href="/<%= yearWiseData.chaln_recipt.replace(/^public\//,'') %>" target="_blank"
+            <% if (profitLoss && profitLoss.chaln_recipt) { %>
+                <a href="/<%= profitLoss.chaln_recipt.replace(/^public\//,'') %>" target="_blank"
                     class="btn btn-sm btn-info">
                     View PDF
                 </a>
@@ -117,186 +613,16 @@
         </tr>
     </tbody>
 </table>
-</div>
 <div class="mb-3">
-    <h6>2. Balance Sheet </h6>
+    <h6>5. Govt Relationship</h6>
 
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
                 <th style="width: 10%;">Sl. No</th>
-                <th style="width: 45%;">Field</th>
-                <th style="width: 45%;">Value</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>1</td>
-                <td>Total Assets</td>
-                <td>
-                    <%= balanceSheetData ? balanceSheetData.tot_asset : '-' %>
-                </td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td>Total Current Assets</td>
-                <td>
-                    <%= balanceSheetData ? balanceSheetData.tot_curr_asset : '-' %>
-                </td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td>Total Liabilities</td>
-                <td>
-                    <%= balanceSheetData ? balanceSheetData.tot_liabilities : '-' %>
-                </td>
-            </tr>
-            <tr>
-                <td>4</td>
-                <td>Total Current Liabilities</td>
-                <td>
-                    <%= balanceSheetData ? balanceSheetData.tot_curr_liabilities : '-' %>
-                </td>
-            </tr>
-            <tr>
-                <td>5</td>
-                <td>Total long-term debt</td>
-                <td>
-                    <%= balanceSheetData ? balanceSheetData.tot_longterm_debt : '-' %>
-                </td>
-            </tr>
-            <tr>
-                <td>6</td>
-                <td>Total equity</td>
-                <td>
-                    <%= balanceSheetData ? balanceSheetData.tot_equity : '-' %>
-                </td>
-            </tr>
-            <tr>
-                <td>7</td>
-                <td>Inventory</td>
-                <td>
-                    <%= balanceSheetData ? balanceSheetData.inventory : '-' %>
-                </td>
-            </tr>
-            <tr>
-                <td>8</td>
-                <td>Accounts receivable</td>
-                <td>
-                    <%= balanceSheetData ? balanceSheetData.acc_receivable : '-' %>
-                </td>
-            </tr>
-            <tr>
-                <td>9</td>
-                <td>Accounts Payable</td>
-                <td>
-                    <%= balanceSheetData ? balanceSheetData.acc_payble : '-' %>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-<div class="mb-3">
-    <h6>3. Income Statement</h6>
-
-    <table class="table table-bordered table-striped">
-        <thead>
-            <tr>
-                <th style="width: 10%;">Sl. No</th>
-                <th style="width: 45%;">Field</th>
-                <th style="width: 45%;">Value</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>1</td>
-                <td>Total Revenue</td>
-                <td>
-                    <%= incomeSheetData ? incomeSheetData.tot_revenue : '-' %>
-                </td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td>Cost of Goods Sold</td>
-                <td>
-                    <%= incomeSheetData ? incomeSheetData.cost_ofgoods_sold : '-' %>
-                </td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td>Operating expenses</td>
-                <td>
-                    <%= incomeSheetData ? incomeSheetData.operating_expenses : '-' %>
-                </td>
-            </tr>
-            <tr>
-                <td>4</td>
-                <td>Total expenses</td>
-                <td>
-                    <%= incomeSheetData ? incomeSheetData.tot_expenses : '-' %>
-                </td>
-            </tr>
-            <tr>
-                <td>5</td>
-                <td>EBITDA</td>
-                <td>
-                    <%= incomeSheetData ? incomeSheetData.ebitda : '-' %>
-                </td>
-            </tr>
-            <tr>
-                <td>6</td>
-                <td>Depreciation & amortization</td>
-                <td>
-                    <%= incomeSheetData ? incomeSheetData.depreciation : '-' %>
-                </td>
-            </tr>
-            <tr>
-                <td>7</td>
-                <td>EBIT (Operating profit)</td>
-                <td>
-                    <%= incomeSheetData ? incomeSheetData.ebit_operating : '-' %>
-                </td>
-            </tr>
-            <tr>
-                <td>8</td>
-                <td>Interest Expenses</td>
-                <td>
-                    <%= incomeSheetData ? incomeSheetData.int_expenses : '-' %>
-                </td>
-            </tr>
-            <tr>
-                <td>9</td>
-                <td>Tax Expenses</td>
-                <td>
-                    <%= incomeSheetData ? incomeSheetData.tax_expenses : '-' %>
-                </td>
-            </tr>
-            <tr>
-                <td>10</td>
-                <td>Any Other Expenses</td>
-                <td>
-                    <%= incomeSheetData ? incomeSheetData.any_other_expenses : '-' %>
-                </td>
-            </tr>
-            <tr>
-                <td>11</td>
-                <td>Net Income</td>
-                <td>
-                    <%= incomeSheetData ? incomeSheetData.net_income : '-' %>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-<div class="mb-3">
-    <h6>4. Govt Relationship</h6>
-
-    <table class="table table-bordered table-striped">
-        <thead>
-            <tr>
-                <th style="width: 10%;">Sl. No</th>
-                <th style="width: 45%;">Field</th>
-                <th style="width: 45%;">Value</th>
+                <th style="width: 35%;">Field</th>
+                <th style="width: 35%;">Value</th>
+                <th style="width: 20%;">Action</th>
             </tr>
         </thead>
         <tbody>
@@ -306,6 +632,18 @@
                 <td>
                     <%= govtRelData ? govtRelData.direct_bud_subsidies : '-' %>
                 </td>
+                <td>
+                    <button
+                        class="btn btn-sm btn-primary edit-field"
+                        data-table="tbl_govt_relation"
+                        data-id="<%= govtRelData.id %>"
+                        data-psumstrid="<%= yearWiseData.id %>"
+                        data-field="direct_bud_subsidies"
+                        data-value="<%= govtRelData.direct_bud_subsidies %>"
+                        data-label = "Direct Budget Subsidies">
+                            <i class="typcn typcn-edit"></i>
+                    </button>   
+                </td>
             </tr>
             <tr>
                 <td>2</td>
@@ -313,19 +651,32 @@
                 <td>
                     <%= govtRelData ? govtRelData.tax_and_state_dues : '-' %>
                 </td>
+                <td>
+                    <button
+                        class="btn btn-sm btn-primary edit-field"
+                        data-table="tbl_govt_relation"
+                        data-id="<%= govtRelData.id %>"
+                        data-psumstrid="<%= yearWiseData.id %>"
+                        data-field="tax_and_state_dues"
+                        data-value="<%= govtRelData.tax_and_state_dues %>"
+                        data-label = "Tax and state dues">
+                            <i class="typcn typcn-edit"></i>
+                    </button>   
+                </td>
             </tr>
         </tbody>
     </table>
 </div>
 <div class="mb-3">
-    <h6>5. Annual Report </h6>
+    <h6>6. Annual Report </h6>
 
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
                 <th style="width: 10%;">Sl. No</th>
-                <th style="width: 45%;">Field</th>
-                <th style="width: 45%;">Value</th>
+                <th style="width: 35%;">Field</th>
+                <th style="width: 35%;">Value</th>
+                <th style="width: 20%;">Action</th>
             </tr>
         </thead>
         <tbody>
@@ -345,3 +696,32 @@
             </tr>
         </tbody>
     </table>
+
+    <div class="modal fade" id="editModal">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background-color: #e9b979;">
+            <div class="modal-header">
+                <h5>Edit Field</h5>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="tableName">
+                <input type="hidden" id="recordId">
+                <input type="hidden" id="fieldName">
+                <input type="hidden" id="psuMstrId">
+                <label for="newValue" id="fieldLabel"></label>
+                <input
+                    type="text"
+                    id="newValue"
+                    class="form-control">
+            </div>
+
+            <div class="modal-footer">
+                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button class="btn btn-success" id="btnSaveChange">
+                    Update
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
