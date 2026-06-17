@@ -2,6 +2,7 @@ const router = require('express').Router();
 const PsuController = require('../controllers/PsuController');
 const { ensureAuth, ensureAdmin } = require('../middlewares/auth');
 const { validateYearWiseData } = require('../middlewares/psuValidation');
+const { validatePsuProfile } = require('../middlewares/psuProfileValidation');
 const { upload } = require('../../app');
 const csrf = require('csurf');
 const csrfProtection = csrf();
@@ -26,6 +27,10 @@ router.get('/govt-rel', ensureAuth, PsuController.getGovtRel);
 router.post('/govt-rel', ensureAuth,upload.none(), PsuController.submitGovtRel);
 router.post('/govt-rel-update', ensureAuth,upload.none(), PsuController.updateGovtRel);
 
+// --- PSU Profile ---
+router.post('/psu-profile', ensureAuth, upload.any(), validatePsuProfile, PsuController.submitPsuProfile);
+router.post('/profile-approval', ensureAuth, PsuController.approvePsuProfile);
+
 // --- Annual Report Upload (Step 5) ---
 router.get('/annual-report', ensureAuth, PsuController.getAnnualReport);
 router.post('/annual-report', ensureAuth, upload.single('annual_report'),csrfProtection, PsuController.submitAnnualReport);
@@ -33,7 +38,8 @@ router.post('/annual-report-update', ensureAuth, upload.single('annual_report'),
 router.post('/annual-report-delete', ensureAuth, PsuController.deleteAnnualReport);
 router.post('/send-for-approval', ensureAuth, PsuController.sendForApproval);
 
-
+// profit loss 
+router.post('/profit-loss', ensureAuth, upload.array('chaln_recipt', 10),csrfProtection, PsuController.submitPrfitLoss);
 // Update route for Year Wise Data
 router.post('/year-wise-data-update',
   upload.array('chaln_recipt', 10),  validateYearWiseData, PsuController.updateYearWiseData);
@@ -42,8 +48,7 @@ router.get('/', ensureAuth, PsuController.dashboard);
 
 // POST route for Year Wise Data form
 router.post('/year-wise-data',
-  upload.array('chaln_recipt', 10),
-  validateYearWiseData,
+  upload.none(), 
   csrfProtection,
   PsuController.submitYearWiseData);
 

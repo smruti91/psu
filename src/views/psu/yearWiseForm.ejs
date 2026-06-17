@@ -1,5 +1,16 @@
 <!-- Stepper UI (hidden by default) -->
+<<<<<<< HEAD
  <h4 class="text-center text-info" > Data For Year Of <%= Fin_Yr %> </h4>
+=======
+ <h4 class="text-center text-info" >Add Data For Year Of <%= Fin_Yr %> </h4>
+<% if (!profileData) { %>
+    <div class="alert alert-warning text-center" role="alert">
+        Your profile is incomplete. Please complete your profile before adding year-wise data.
+    </div>
+    
+<% } %>
+  
+>>>>>>> 96b018661662fb3750d3492976c8aa451f49789b
 <div id="stepperContainer">
     <div class="container mt-4" style="background: #325c87;
     color: #fff;
@@ -16,24 +27,28 @@
                     </div>
                     <div class="step" id="step-indicator-2">
                         <div class="circle">2</div>
-                        <div class="label">Balance Sheet</div>
+                        <div class="label">Income Statement</div>
                     </div>
                     <div class="step" id="step-indicator-3">
                         <div class="circle">3</div>
-                        <div class="label">Income Statement</div>
+                        <div class="label">Balance Sheet</div>
                     </div>
                     <div class="step" id="step-indicator-4">
                         <div class="circle">4</div>
-                        <div class="label">Govt. Relationship</div>
+                        <div class="label">Profit & Loss</div>
                     </div>
                     <div class="step" id="step-indicator-5">
                         <div class="circle">5</div>
+                        <div class="label">Govt. Relationship</div>
+                    </div>
+                    <div class="step" id="step-indicator-6">
+                        <div class="circle">6</div>
                         <div class="label">Annual Report</div>
                     </div>
                 </div>
                 
                 <div id="step-content-1" class="step-content">
-                    <form class="forms-sample" id="psuFormYearWiseData" method="POST" enctype="multipart/form-data">
+                    <form class="forms-sample" id="psuFormYearWiseData" method="POST">
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                         <div id="psuFormYearWiseDataErrors" class="alert alert-danger" style="display:none;"></div>
                         <div id="psuFormYearWiseDataSuccess" class="alert alert-success" style="display:none;"></div>
@@ -55,7 +70,11 @@
                             <div class="col-sm-9">
                                 <input type="text" class="form-control" id="txtAuthorizedShareCap"
                                     name="txtAuthorizedShareCap" placeholder="Authorized Share Capital"
+<<<<<<< HEAD
                                     value="<%= psuProfileData ? psuProfileData.authorized_share_cap : '' %>" readonly>
+=======
+                                    value="<%= profileData ? profileData.Auth_Share_Capital : '' %>" readonly>
+>>>>>>> 96b018661662fb3750d3492976c8aa451f49789b
                                 <div class="invalid-feedback" id="error_txtAuthorizedShareCap"></div>
                             </div>
                         </div>
@@ -65,7 +84,11 @@
                             <div class="col-sm-9">
                                 <input type="text" class="form-control" id="txtSubShareCap" name="txtSubShareCap"
                                     placeholder="Subscribed Share Capital"
+<<<<<<< HEAD
                                     value="<%= psuProfileData ? psuProfileData.subscribed_share_cap : '' %>" readonly>
+=======
+                                    value="<%= profileData ? profileData.Sub_Share_Capital : '' %>" readonly>
+>>>>>>> 96b018661662fb3750d3492976c8aa451f49789b
                                 <div class="invalid-feedback" id="error_txtSubShareCap"></div>
                             </div>
                         </div>
@@ -75,7 +98,11 @@
                             <div class="col-sm-9">
                                 <input type="text" class="form-control" id="txtPaidUpShareCap" name="txtPaidUpShareCap"
                                     placeholder="Paid-up Share Capital"
+<<<<<<< HEAD
                                     value="<%= psuProfileData ? psuProfileData.paidup_share_cap : '' %>" readonly>
+=======
+                                    value="<%= profileData ? profileData.Paid_Share_Capital : '' %>" readonly>
+>>>>>>> 96b018661662fb3750d3492976c8aa451f49789b
                                 <div class="invalid-feedback" id="error_txtPaidUpShareCap"></div>
                             </div>
                         </div>
@@ -85,7 +112,7 @@
                             <div class="col-sm-9">
                                 <input type="text" class="form-control" id="txtGovtContribution"
                                     name="txtGovtContribution" placeholder="Govt. Contribution"
-                                    value="<%= yearWiseData ? yearWiseData.Govt_Contri_Amt : '' %>">
+                                    value="<%= profileData ? profileData.Govt_Contri_Amt : '' %>" readonly>
                                 <div class="invalid-feedback" id="error_txtGovtContribution"></div>
                             </div>
                         </div>
@@ -95,7 +122,7 @@
                             <div class="col-sm-9">
                                 <input type="text" class="form-control" id="txtGovtContributionPercent"
                                     name="txtGovtContributionPercent" placeholder="Govt. Contribution In Percent"
-                                    value="<%= yearWiseData ? yearWiseData.Govt_Contri_Percent : '' %>">
+                                    value="<%= profileData ? profileData.Govt_Contri_Percent : '' %>" readonly>
                                 <div class="invalid-feedback" id="error_txtGovtContributionPercent"></div>
                             </div>
                         </div>
@@ -105,129 +132,16 @@
                             <div class="col-sm-9">
                                 <input type="text" class="form-control" id="txtNameofShareHolders"
                                     name="txtNameofShareHolders" placeholder="Name of the Share Holders"
-                                    value="<%= yearWiseData ? yearWiseData.NameOf_Share_Holder : '' %>">
+                                    value="<%= profileData ? profileData.NameOf_Share_Holder : '' %>" readonly>
                                 <div class="invalid-feedback" id="error_txtNameofShareHolders"></div>
                             </div>
                         </div>
-                        <div class="form-group row">
-                            <label class="col-sm-3 col-form-label">Profit &
-                                Loss</label>
-                            <div class="col-sm-9">
-                                <!-- Radio buttons for Profit/Loss selection -->
-                                <div class="mb-2 row">
-                                    <div class="form-check form-check-inline d-flex align-items-center">
-                                        <input class="form-check-input" type="radio" name="profitLossType" id="profitType" value="profit"
-                                            <%= (!yearWiseData || yearWiseData.profit_loss_type === 'profit' ) ? 'checked' : '' %>>
-                                        <label class="form-check-label" for="profitType">Profit</label>
-                                    </div>
-                                    <div class="form-check form-check-inline d-flex align-items-center">
-                                        <input class="form-check-input" type="radio" name="profitLossType" id="lossType" value="loss"
-                                            <%= (yearWiseData && yearWiseData.profit_loss_type === 'loss') ? 'checked' : '' %>>
-                                        <label class="form-check-label" for="lossType">Loss</label>
-                                    </div>
-                                </div>
-                                <input type="text" class="form-control" id="txtProfitLossAmount" name="txtProfitLossAmount"
-                                    placeholder="Enter Amount"
-                                    value="<%= yearWiseData && yearWiseData.Profit_Loss ? yearWiseData.Profit_Loss : '' %>">
-                                <div class="invalid-feedback" id="error_txtProfitLossAmount"></div>
-                               
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="exampleInputConfirmPassword2" class="col-sm-3 col-form-label">Profit After
-                                Tax (PAT)</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" id="txtPAT" name="txtPAT"
-                                    placeholder="Profit After Tax (PAT)"
-                                    value="<%= yearWiseData ? yearWiseData.PAT : '' %>">
-                                <div class="invalid-feedback" id="error_txtPAT"></div>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="exampleInputConfirmPassword2" class="col-sm-3 col-form-label">Dividend
-                                Payable</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" id="txtDividendPayable"
-                                    name="txtDividendPayable" placeholder="Dividend Payable"
-                                    value="<%= yearWiseData ? yearWiseData.Dividend_Payable : '' %>">
-                                <div class="invalid-feedback" id="error_txtDividendPayable"></div>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="exampleInputConfirmPassword2" class="col-sm-3 col-form-label">Dividend
-                                Paid</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" id="txtDividendpaid" name="txtDividendpaid"
-                                    value="<%= yearWiseData ? yearWiseData.Dividend_Paid : '' %>"
-                                    placeholder="Dividend Paid">
-                                <div class="invalid-feedback" id="error_txtDividendpaid"></div>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="challanReceipt" class="col-sm-3 col-form-label">
-                                Challan Receipt
-                            </label>
-
-                            <div class="col-sm-9">
-
-                                <% if (yearWiseData && yearWiseData.chaln_recipt) { %>
-
-                                    <!-- Show existing files -->
-                                    <div class="mt-2" id="existingFiles">
-                                        <%
-                                        var files = yearWiseData.chaln_recipt.split(',');
-                                        files.forEach(function(file, index) {
-                                            if(file && file.trim()) {
-                                        %>
-                                            <div class="d-flex align-items-center mb-2 existing-file-item">
-                                                <a href="/<%= file.trim().replace(/^public\//,'') %>"
-                                                target="_blank"
-                                                class="btn btn-sm btn-info mr-2">
-                                                View File <%= index + 1 %>
-                                                </a>
-                                                <button type="button"
-                                                        class="btn btn-sm btn-danger delete-file-btn"
-                                                        data-id="<%= yearWiseData.id %>"
-                                                        data-file-index="<%= index %>">
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        <%
-                                            }
-                                        });
-                                        %>
-                                    </div>
-
-                                <% } %>
-
-                                <!-- Container for new file uploads -->
-                                <div id="challanFilesContainer">
-                                    <div class="file-input-row d-flex align-items-center mb-2">
-                                        <input type="file"
-                                            class="form-control"
-                                            name="chaln_recipt"
-                                            accept=".pdf">
-                                        <button type="button" class="btn btn-danger btn-sm ml-2 remove-file-btn" title="Remove">✕</button>
-                                    </div>
-                                </div>
-
-                                <!-- Add More Button -->
-                                <button type="button" class="btn btn-success btn-sm mt-2" id="addChallanFileBtn">
-                                    + Add More
-                                </button>
-
-                                <small class="form-text text-muted d-block">
-                                    Accepted format: PDF (Max size: 5MB each)
-                                </small>
-
-                                <div class="invalid-feedback" id="error_chaln_recipt"></div>
-
-                            </div>
-                        </div>
-
+                     
                         <div class="d-flex justify-content-end mt-4 py-5">
                             <input type="hidden" name="txtFinYr" id="txtFinYr"
                                 value="<%= typeof Fin_Yr !== 'undefined' ? Fin_Yr : '' %>">
+                             <input type="hidden" name="profile_id" id="profile_id"
+                                value="<%= profileData.id %>">
                             <% if (yearWiseData) { %>
                                 <% if (yearWiseData.status === 0) { %>
                                 <input type="hidden" name="yearWiseId" id="yearWiseId" value="<%= yearWiseData.id %>">
@@ -244,113 +158,9 @@
                         </div>
                     </form>
 
-                 
                 </div>
                 <div id="step-content-2" class="step-content" style="display:none;">
-                    <!-- Step 2: Balance Sheet Indicator -->
-                    <form class="forms-sample" id="psuFormBalanceSheet">
-                        <div id="psuFormBalanceSheetErrors" class="alert alert-danger" style="display:none;"></div>
-                        <div id="psuFormBalanceSheetSuccess" class="alert alert-success" style="display:none;"></div>
-                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                        <div class="form-group row">
-                            <label class="col-sm-3 col-form-label">Total Assets</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" id="txtTotalAssets" name="tot_asset"
-                                    placeholder="Total Assets"
-                                    value="<%= balanceSheetData ? balanceSheetData.tot_asset || '' : '' %>">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-3 col-form-label">Total Current Assets</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" id="txtCurrentAssets" name="tot_curr_asset"
-                                    placeholder="Total Current Assets"
-                                    value="<%= balanceSheetData ? balanceSheetData.tot_curr_asset || '' : '' %>">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-3 col-form-label">Total Liabilities</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" id="txtTotLiabilities" name="tot_liabilities"
-                                    placeholder="Total Liabilities"
-                                    value="<%= balanceSheetData ? balanceSheetData.tot_liabilities || '' : '' %>">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-3 col-form-label">Total Current Liabilities</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" id="txtTotCurrLiabilities"
-                                    name="tot_curr_liabilities" placeholder="Total Current Liabilities"
-                                    value="<%= balanceSheetData ? balanceSheetData.tot_curr_liabilities || '' : '' %>">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-3 col-form-label">Total long-term debt</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" id="txtTotalLongTermDebt"
-                                    name="tot_longterm_debt" placeholder="Total long-term debt"
-                                    value="<%= balanceSheetData ? balanceSheetData.tot_longterm_debt || '' : '' %>">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-3 col-form-label">Total equity</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" id="txtTotalequity" name="tot_equity"
-                                    placeholder="Total equity"
-                                    value="<%= balanceSheetData ? balanceSheetData.tot_equity || '' : '' %>">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-3 col-form-label">Inventory</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" id="txtInvetory" name="inventory"
-                                    placeholder="Inventory"
-                                    value="<%= balanceSheetData ? balanceSheetData.inventory || '' : '' %>">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-3 col-form-label">Accounts receivable</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" id="txtAccountsReceivable" name="acc_receivable"
-                                    placeholder="Accounts receivable"
-                                    value="<%= balanceSheetData ? balanceSheetData.acc_receivable || '' : '' %>">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-3 col-form-label">Accounts Payable</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" id="txtAccountsPayable" name="acc_payble"
-                                    placeholder="Accounts Payable"
-                                    value="<%= balanceSheetData ? balanceSheetData.acc_payble || '' : '' %>">
-                            </div>
-                        </div>
-                        <input type="hidden" name="psu_mstr_id" id="psu_mstr_id"
-                            value="<%= yearWiseData ? yearWiseData.id : '' %>">
-                        <div class="d-flex justify-content-between mt-4 py-4">
-                            <button type="button" class="btn btn-secondary" id="prevStep2">Previous</button>
-
-                        <div>
-                            <% if (balanceSheetData) { %>
-                                <% if (yearWiseData.status === 0) { %>
-                               <input type="hidden" name="balanceSheetId" id="balanceSheetId"
-                                    value="<%= balanceSheetData.id %>">
-                                <button type="submit" class="btn btn-warning" id="updateStep2">Update</button>
-                                <% }%>
-
-                                <% } else { %>
-                                    <button type="submit" class="btn btn-info" id="submitStep2">Save</button>
-                                    <% } %>
-                                    <button type="button" class="btn btn-primary" id="nextStep2">Next</button>
-                        </div>
-                        </div>
-                        <!-- Edit button container - shown after form submit -->
-                        <div id="editButtonContainerStep2" class="mt-3" style="display:none;">
-                            <button type="button" class="btn btn-warning" id="btnEditStep2">Edit</button>
-                        </div>
-                    </form>
-                </div>
-                <div id="step-content-3" class="step-content" style="display:none;">
-                    <!-- Step 3: Income Statement Indicator -->
+                     <!-- Step 2: Income Statement Indicator -->
                     <form class="forms-sample" id="psuFormIncomeStatement">
                         <div id="psuFormIncomeStatementErrors" class="alert alert-danger" style="display:none;"></div>
                         <div id="psuFormIncomeStatementSuccess" class="alert alert-success" style="display:none;"></div>
@@ -446,29 +256,276 @@
                         <input type="hidden" name="psu_mstr_id" id="psu_mstr_id"
                             value="<%= yearWiseData ? yearWiseData.id : '' %>">
                         <div class="d-flex justify-content-between mt-4">
-                            <button type="button" class="btn btn-secondary" id="prevStep3">Previous</button>
+                            <button type="button" class="btn btn-secondary" id="prevStep2">Previous</button>
                              <div>
                             <% if (incomeSheetData) { %>
                                 <% if (yearWiseData.status === 0) { %>
                                     <input type="hidden" name="incomeSheetId" id="incomeSheetId"
                                         value="<%= incomeSheetData.id %>">
-                                    <button type="submit" class="btn btn-warning" id="updateStep3">Update</button>
+                                    <button type="submit" class="btn btn-warning" id="updateStep2">Update</button>
+                                <% }%>
+
+                                <% } else { %>
+                                    <button type="submit" class="btn btn-info" id="submitStep2">Save</button>
+                                    <% } %>
+                                     <button type="button" class="btn btn-primary" id="nextStep2">Next</button>
+                            </div>
+                            <!-- Edit button container - shown after form submit -->
+                            <div id="editButtonContainerStep3" class="mt-3" style="display:none;">
+                                <button type="button" class="btn btn-warning" id="btnEditStep2">Edit</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div id="step-content-3" class="step-content" style="display:none;">
+                    <!-- Step 3: Balance Sheet Indicator -->
+                     <form class="forms-sample" id="psuFormBalanceSheet">
+                        <div id="psuFormBalanceSheetErrors" class="alert alert-danger" style="display:none;"></div>
+                        <div id="psuFormBalanceSheetSuccess" class="alert alert-success" style="display:none;"></div>
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Total Assets</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtTotalAssets" name="tot_asset"
+                                    placeholder="Total Assets"
+                                    value="<%= balanceSheetData ? balanceSheetData.tot_asset || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Total Current Assets</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtCurrentAssets" name="tot_curr_asset"
+                                    placeholder="Total Current Assets"
+                                    value="<%= balanceSheetData ? balanceSheetData.tot_curr_asset || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Total Liabilities</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtTotLiabilities" name="tot_liabilities"
+                                    placeholder="Total Liabilities"
+                                    value="<%= balanceSheetData ? balanceSheetData.tot_liabilities || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Total Current Liabilities</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtTotCurrLiabilities"
+                                    name="tot_curr_liabilities" placeholder="Total Current Liabilities"
+                                    value="<%= balanceSheetData ? balanceSheetData.tot_curr_liabilities || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Total long-term debt</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtTotalLongTermDebt"
+                                    name="tot_longterm_debt" placeholder="Total long-term debt"
+                                    value="<%= balanceSheetData ? balanceSheetData.tot_longterm_debt || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Total equity</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtTotalequity" name="tot_equity"
+                                    placeholder="Total equity"
+                                    value="<%= balanceSheetData ? balanceSheetData.tot_equity || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Inventory</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtInvetory" name="inventory"
+                                    placeholder="Inventory"
+                                    value="<%= balanceSheetData ? balanceSheetData.inventory || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Accounts receivable</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtAccountsReceivable" name="acc_receivable"
+                                    placeholder="Accounts receivable"
+                                    value="<%= balanceSheetData ? balanceSheetData.acc_receivable || '' : '' %>">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Accounts Payable</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtAccountsPayable" name="acc_payble"
+                                    placeholder="Accounts Payable"
+                                    value="<%= balanceSheetData ? balanceSheetData.acc_payble || '' : '' %>">
+                            </div>
+                        </div>
+                        <input type="hidden" name="psu_mstr_id" id="psu_mstr_id"
+                            value="<%= yearWiseData ? yearWiseData.id : '' %>">
+                        <div class="d-flex justify-content-between mt-4 py-4">
+                            <button type="button" class="btn btn-secondary" id="prevStep3">Previous</button>
+
+                        <div>
+                            <% if (balanceSheetData) { %>
+                                <% if (yearWiseData.status === 0) { %>
+                               <input type="hidden" name="balanceSheetId" id="balanceSheetId"
+                                    value="<%= balanceSheetData.id %>">
+                                <button type="submit" class="btn btn-warning" id="updateStep3">Update</button>
                                 <% }%>
 
                                 <% } else { %>
                                     <button type="submit" class="btn btn-info" id="submitStep3">Save</button>
                                     <% } %>
-                                     <button type="button" class="btn btn-primary" id="nextStep3">Next</button>
-                            </div>
-                            <!-- Edit button container - shown after form submit -->
-                            <div id="editButtonContainerStep3" class="mt-3" style="display:none;">
-                                <button type="button" class="btn btn-warning" id="btnEditStep3">Edit</button>
-                            </div>
+                                    <button type="button" class="btn btn-primary" id="nextStep3">Next</button>
+                        </div>
+                        </div>
+                        <!-- Edit button container - shown after form submit -->
+                        <div id="editButtonContainerStep2" class="mt-3" style="display:none;">
+                            <button type="button" class="btn btn-warning" id="btnEditStep3">Edit</button>
                         </div>
                     </form>
                 </div>
                 <div id="step-content-4" class="step-content" style="display:none;">
-                    <!-- Step 4: Govt. Relationship -->
+                    <!-- Step 4: Profit and Loss -->
+                     <form class="forms-sample" id="psuFormProfitLoss" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <div id="psuFormProfitLossErrors" class="alert alert-danger" style="display:none;"></div>
+                        <div id="psuFormProfitLossSuccess" class="alert alert-success" style="display:none;"></div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Profit &
+                                Loss</label>
+                            <div class="col-sm-9">
+                                <!-- Radio buttons for Profit/Loss selection -->
+                                <div class="mb-2 row">
+                                    <div class="form-check form-check-inline d-flex align-items-center">
+                                        <input class="form-check-input" type="radio" name="profitLossType" id="profitType" value="profit"
+                                            <%= (!profitLossData || profitLossData.profit_loss_type === 'profit' ) ? 'checked' : '' %>>
+                                        <label class="form-check-label" for="profitType">Profit</label>
+                                    </div>
+                                    <div class="form-check form-check-inline d-flex align-items-center">
+                                        <input class="form-check-input" type="radio" name="profitLossType" id="lossType" value="loss"
+                                            <%= (profitLossData && profitLossData.profit_loss_type === 'loss') ? 'checked' : '' %>>
+                                        <label class="form-check-label" for="lossType">Loss</label>
+                                    </div>
+                                </div>
+                                <input type="text" class="form-control" id="txtProfitLossAmount" name="txtProfitLossAmount"
+                                    placeholder="Enter Amount"
+                                    value="<%= profitLossData && profitLossData.Profit_Loss ? profitLossData.Profit_Loss : '' %>">
+                                <div class="invalid-feedback" id="error_txtProfitLossAmount"></div>
+                               
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="exampleInputConfirmPassword2" class="col-sm-3 col-form-label">Profit After
+                                Tax (PAT)</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtPAT" name="txtPAT"
+                                    placeholder="Profit After Tax (PAT)"
+                                    value="<%= profitLossData ? profitLossData.PAT : '' %>">
+                                <div class="invalid-feedback" id="error_txtPAT"></div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="exampleInputConfirmPassword2" class="col-sm-3 col-form-label">Dividend
+                                Payable</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtDividendPayable"
+                                    name="txtDividendPayable" placeholder="Dividend Payable"
+                                    value="<%= profitLossData ? profitLossData.Dividend_Payable : '' %>" readonly>
+                                <div class="invalid-feedback" id="error_txtDividendPayable"></div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="exampleInputConfirmPassword2" class="col-sm-3 col-form-label">Dividend
+                                Paid</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="txtDividendpaid" name="txtDividendpaid"
+                                    value="<%= profitLossData ? profitLossData.Dividend_Paid : '' %>"
+                                    placeholder="Dividend Paid">
+                                <div class="invalid-feedback" id="error_txtDividendpaid"></div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="challanReceipt" class="col-sm-3 col-form-label">
+                                Challan Receipt
+                            </label>
+
+                            <div class="col-sm-9">
+
+                                <% if (profitLossData && profitLossData.chaln_recipt) { %>
+
+                                    <!-- Show existing files -->
+                                    <div class="mt-2" id="existingFiles">
+                                        <%
+                                        var files = profitLossData.chaln_recipt.split(',');
+                                        files.forEach(function(file, index) {
+                                            if(file && file.trim()) {
+                                        %>
+                                            <div class="d-flex align-items-center mb-2 existing-file-item">
+                                                <a href="/<%= file.trim().replace(/^public\//,'') %>"
+                                                target="_blank"
+                                                class="btn btn-sm btn-info mr-2">
+                                                View File <%= index + 1 %>
+                                                </a>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-danger delete-file-btn"
+                                                        data-id="<%= yearWiseData.id %>"
+                                                        data-file-index="<%= index %>">
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        <%
+                                            }
+                                        });
+                                        %>
+                                    </div>
+
+                                <% } %>
+
+                                <!-- Container for new file uploads -->
+                                <div id="challanFilesContainer">
+                                    <div class="file-input-row d-flex align-items-center mb-2">
+                                        <input type="file"
+                                            class="form-control"
+                                            name="chaln_recipt"
+                                            accept=".pdf">
+                                        <button type="button" class="btn btn-danger btn-sm ml-2 remove-file-btn" title="Remove">✕</button>
+                                    </div>
+                                </div>
+
+                                <!-- Add More Button -->
+                                <button type="button" class="btn btn-success btn-sm mt-2" id="addChallanFileBtn">
+                                    + Add More
+                                </button>
+
+                                <small class="form-text text-muted d-block">
+                                    Accepted format: PDF (Max size: 5MB each)
+                                </small>
+
+                                <div class="invalid-feedback" id="error_chaln_recipt"></div>
+
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-4 py-5">
+                            
+                            <input type="hidden" name="yearWiseId" id="yearWiseId"  value="<%= yearWiseData ? yearWiseData.id : '' %>">
+                                 <button type="button" class="btn btn-secondary" id="prevStep4">Previous</button>
+                            <% if (profitLossData) { %>
+                                <% if (yearWiseData.status === 0) { %>
+                                
+                                <button type="submit" class="btn btn-warning mr-2 btn-update-step4" data-step="1">Update</button>
+                                <% }%>
+                                <% } else { %>
+                                    <button type="submit" class="btn btn-info mr-2 btn-save-step4" data-step="1">Save</button>
+                                    <% } %>
+                                        <button type="button" class="btn btn-primary" id="nextStep4">Next</button>
+                        </div>
+                        <!-- Edit button container - shown after form submit -->
+                        <div id="editButtonContainerStep1" class="mt-3" style="display:none;">
+                            <button type="button" class="btn btn-warning" id="btnEditStep4">Edit</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="step-content-5" class="step-content" style="display:none;">
+                    <!-- Step 5: Govt. Relationship -->
                     <form class="forms-sample" id="psuFormGovtRel">
                         <div id="psuFormGovtRelErrors" class="alert alert-danger" style="display:none;"></div>
                         <div id="psuFormGovtRelSuccess" class="alert alert-success" style="display:none;"></div>
@@ -496,23 +553,23 @@
                             <% if (govtRelData) { %>
                                  <% if (yearWiseData.status === 0) { %>
                                      <input type="hidden" name="govtRelId" id="govtRelId" value="<%= govtRelData.id %>">
-                                     <button type="submit" class="btn btn-warning" id="updateStep4">Update</button>
+                                     <button type="submit" class="btn btn-warning" id="updateStep5">Update</button>
                                 <% }%>
 
                                 <% } else { %>
-                                    <button type="submit" class="btn btn-success" id="submitStep4">Submit</button>
+                                    <button type="submit" class="btn btn-success" id="submitStep5">Save</button>
                                     <% } %>
-                                 <button type="button" class="btn btn-primary" id="nextStep4">Next</button>
+                                 <button type="button" class="btn btn-primary" id="nextStep5">Next</button>
                         </div>
                         <!-- Edit button container - shown after form submit -->
                         <div id="editButtonContainerStep4" class="mt-3" style="display:none;">
-                            <button type="button" class="btn btn-warning" id="btnEditStep4">Edit</button>
+                            <button type="button" class="btn btn-warning" id="btnEditStep5">Edit</button>
                         </div>
                     </form>
                 </div>
 
-                <div id="step-content-5" class="step-content" style="display:none;">
-                    <!-- Step 5: Annual Report Upload -->
+                <div id="step-content-6" class="step-content" style="display:none;">
+                    <!-- Step 6: Annual Report Upload -->
                     <form class="forms-sample" id="psuFormAnnualReportUpload" enctype="multipart/form-data">
                         <div id="psuFormUploadErrors" class="alert alert-danger" style="display:none;"></div>
                         <div id="psuFormUploadSuccess" class="alert alert-success" style="display:none;"></div>
@@ -564,7 +621,7 @@
                                     </small>
 
                                     <div class="invalid-feedback" id="error_anualReport"></div>
-                                    <button type="submit" class="btn btn-success" id="submitStep5">Submit</button>
+                                    <button type="submit" class="btn btn-success" id="submitStep6">Submit</button>
                                 <% } %>
 
                             </div>
@@ -573,8 +630,8 @@
                         <input type="hidden" name="psu_mstr_id" id="psu_mstr_id"
                             value="<%= yearWiseData ? yearWiseData.id : '' %>">
                         <div class="d-flex justify-content-between mt-4 m-2">
-                            <button type="button" class="btn btn-secondary" id="prevStep5">Previous</button>
-                            <button type="button" class="btn btn-info" id="previewStep5">Preview Form</button>
+                            <button type="button" class="btn btn-secondary" id="prevStep6">Previous</button>
+                            <button type="button" class="btn btn-info" id="previewStep6">Preview Form</button>
                         </div>
                     </form>
                 </div>
@@ -645,54 +702,82 @@
                                             <td>Name of the Share Holders</td>
                                             <td><%= yearWiseData ? yearWiseData.NameOf_Share_Holder : '-' %></td>
                                         </tr>
+                                        
+                                    </tbody>
+                                </table>
+                            </div>
+                             <div class="mb-3">
+                                <h6>2. Income Statement <button class="btn btn-sm btn-link btn-edit-section" data-step="3">Edit</button></h6>
+                                
+                                <table class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 10%;">Sl. No</th>
+                                            <th style="width: 45%;">Field</th>
+                                            <th style="width: 45%;">Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Total Revenue</td>
+                                            <td><%= incomeSheetData ? incomeSheetData.tot_revenue : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td>Cost of Goods Sold</td>
+                                            <td><%= incomeSheetData ? incomeSheetData.cost_ofgoods_sold : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td>Operating expenses</td>
+                                            <td><%= incomeSheetData ? incomeSheetData.operating_expenses : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>4</td>
+                                            <td>Total expenses</td>
+                                            <td><%= incomeSheetData ? incomeSheetData.tot_expenses : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>5</td>
+                                            <td>EBITDA</td>
+                                            <td><%= incomeSheetData ? incomeSheetData.ebitda : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>6</td>
+                                            <td>Depreciation & amortization</td>
+                                            <td><%= incomeSheetData ? incomeSheetData.depreciation : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>7</td>
+                                            <td>EBIT (Operating profit)</td>
+                                            <td><%= incomeSheetData ? incomeSheetData.ebit_operating : '-' %></td>
+                                        </tr>
                                         <tr>
                                             <td>8</td>
-                                            <td>Profit & Loss</td>
-                                            <td><%= yearWiseData ? yearWiseData.Profit_Loss : '-' %></td>
+                                            <td>Interest Expenses</td>
+                                            <td><%= incomeSheetData ? incomeSheetData.int_expenses : '-' %></td>
                                         </tr>
                                         <tr>
                                             <td>9</td>
-                                            <td>Profit After Tax (PAT)</td>
-                                            <td><%= yearWiseData ? yearWiseData.PAT : '-' %></td>
+                                            <td>Tax Expenses</td>
+                                            <td><%= incomeSheetData ? incomeSheetData.tax_expenses : '-' %></td>
                                         </tr>
                                         <tr>
                                             <td>10</td>
-                                            <td>Dividend Payable</td>
-                                
-                                            <td><%= yearWiseData ? yearWiseData.Dividend_Payable : '-' %></td>
+                                            <td>Any Other Expenses</td>
+                                            <td><%= incomeSheetData ? incomeSheetData.any_other_expenses : '-' %></td>
                                         </tr>
                                         <tr>
                                             <td>11</td>
-                                            <td>Dividend Paid</td>
-                                
-                                            <td><%= yearWiseData ? yearWiseData.Dividend_Paid : '-' %></td>
-                                        </tr>
-                                        <tr>
-                                            <td>12</td>
-                                            <td>Financial Year</td>
-                                
-                                            <td><%= yearWiseData ? yearWiseData.FinYr : '-' %></td>
-                                        </tr>
-                                        
-                                            <td>13</td>
-                                            <td>Challan Receipt</td>
-                                            <td>
-                                                <% if (yearWiseData && yearWiseData.chaln_recipt) { %>
-                                                    <a href="/<%= yearWiseData.chaln_recipt.replace(/^public\//,'') %>" 
-                                                    target="_blank" 
-                                                    class="btn btn-sm btn-info">
-                                                        View PDF
-                                                    </a>
-                                                <% } else { %>
-                                                    -
-                                                <% } %>
-                                            </td>
+                                            <td>Net Income</td>
+                                            <td><%= incomeSheetData ? incomeSheetData.net_income : '-' %></td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                             <div class="mb-3">
-                                <h6>2. Balance Sheet <button class="btn btn-sm btn-link btn-edit-section" data-step="2">Edit</button></h6>
+                                <h6>3. Balance Sheet <button class="btn btn-sm btn-link btn-edit-section" data-step="2">Edit</button></h6>
                                
                                 <table class="table table-bordered table-striped">
                                     <thead>
@@ -821,8 +906,66 @@
                                     </tbody>
                                 </table>
                             </div>
+                             <div class="mb-3">
+                                <h6>4. Profit Loss <button class="btn btn-sm btn-link btn-edit-section" data-step="4">Edit</button></h6>
+                                
+                                <table class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 10%;">Sl. No</th>
+                                            <th style="width: 45%;">Field</th>
+                                            <th style="width: 45%;">Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                     <tr>
+                                            <td>1</td>
+                                            <td>Profit & Loss</td>
+                                            <td><%= profitLossData ? profitLossData.Profit_Loss : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td>Profit After Tax (PAT)</td>
+                                            <td><%= profitLossData ? profitLossData.PAT : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td>Dividend Payable</td>
+                                
+                                            <td><%= profitLossData ? profitLossData.Dividend_Payable : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>4</td>
+                                            <td>Dividend Paid</td>
+                                
+                                            <td><%= profitLossData ? profitLossData.Dividend_Paid : '-' %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>5</td>
+                                            <td>Financial Year</td>
+                                
+                                            <td><%= profitLossData ? profitLossData.FinYr : '-' %></td>
+                                        </tr>
+                                        
+                                            <td>6</td>
+                                            <td>Challan Receipt</td>
+                                            <td>
+                                                <% if (profitLossData && profitLossData.chaln_recipt) { %>
+                                                    <a href="/<%= profitLossData.chaln_recipt.replace(/^public\//,'') %>" 
+                                                    target="_blank" 
+                                                    class="btn btn-sm btn-info">
+                                                        View PDF
+                                                    </a>
+                                                <% } else { %>
+                                                    -
+                                                <% } %>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                             <div class="mb-3">
-                                <h6>4. Govt Relationship <button class="btn btn-sm btn-link btn-edit-section" data-step="4">Edit</button></h6>
+                                <h6>5. Govt Relationship <button class="btn btn-sm btn-link btn-edit-section" data-step="5">Edit</button></h6>
                               
                                 <table class="table table-bordered table-striped">
                                     <thead>
@@ -847,7 +990,7 @@
                                 </table>
                             </div>
                             <div class="mb-3">
-                                <h6>5. Annual Report <button class="btn btn-sm btn-link btn-edit-section" data-step="5">Edit</button></h6>
+                                <h6>6. Annual Report <button class="btn btn-sm btn-link btn-edit-section" data-step="6">Edit</button></h6>
                                 
                                 <table class="table table-bordered table-striped">
                                     <thead>

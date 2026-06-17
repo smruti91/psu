@@ -9,7 +9,7 @@ function hideFormButton(form, selector) {
     var btn = form.querySelector(selector);
     if (btn) btn.style.display = 'none';
 }
-
+const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 // --- Step 1: Year Wise Data ---
 document.addEventListener('DOMContentLoaded', function () {
   var form = document.getElementById('psuFormYearWiseData');
@@ -19,8 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var fieldIds = [
       'txtNameofPSU', 'txtAuthorizedShareCap', 'txtSubShareCap', 'txtPaidUpShareCap',
-      'txtGovtContribution', 'txtNameofShareHolders', 'txtProfitLossAmount', 'txtPAT',
-      'txtDividendPayable', 'txtDividendpaid'
+      'txtGovtContribution', 'txtNameofShareHolders'
     ];
     
     fieldIds.forEach(function (id) {
@@ -50,23 +49,19 @@ document.addEventListener('DOMContentLoaded', function () {
     if (isEmpty('txtPaidUpShareCap') || !isNumber('txtPaidUpShareCap')) setFieldError('txtPaidUpShareCap', 'Paid-up Share Capital must be a number.');
     if (isEmpty('txtGovtContribution') || !isNumber('txtGovtContribution')) setFieldError('txtGovtContribution', 'Govt. Contribution must be a number.');
     if (isEmpty('txtNameofShareHolders')) setFieldError('txtNameofShareHolders', 'Name of the Share Holders is required.');
-    // Validate Profit/Loss based on radio selection
-    //var profitLossType = form.querySelector('input[name="profitLossType"]:checked');
     
-    if (isEmpty('txtPAT') || !isNumber('txtPAT')) setFieldError('txtPAT', 'Profit After Tax (PAT) must be a number.');
-    if (isEmpty('txtDividendPayable') || !isNumber('txtDividendPayable')) setFieldError('txtDividendPayable', 'Dividend Payable must be a number.');
-    if (isEmpty('txtDividendpaid') || !isNumber('txtDividendpaid')) setFieldError('txtDividendpaid', 'Dividend Paid must be a number.');
     if (hasError) return;
 
     var formData = new FormData(form);
     var isUpdate = formData.get('yearWiseId');
     var url = isUpdate ? '/psu/year-wise-data-update' : '/psu/year-wise-data';
-    //console.log('Submitting form to URL:', url, 'with data:', Object.fromEntries(formData.entries()));
+    console.log('Submitting form to URL:', url, 'with data:', Object.fromEntries(formData.entries()));
+    console.log(url);
     fetch(url, {
       method: 'POST',
       body: formData,
       credentials: 'same-origin',
-      headers: { 'Accept': 'application/json' }
+      headers: { 'Accept': 'application/json',  'CSRF-Token': csrfToken }
     })
     .then(function(res) { return res.json(); })
     .then(function(data) {
@@ -84,6 +79,11 @@ document.addEventListener('DOMContentLoaded', function () {
       } else if (data.success) {
         successDiv.innerHTML = data.message;
         successDiv.style.display = 'block';
+        Swal.fire({
+        title: "Success!",
+        text: data.message,
+        icon: "success"
+      });
         hideFormButton(form, '.btn-save-step1, .btn-update-step1');
         var nextBtn = document.getElementById('nextStep1');
         if (nextBtn) nextBtn.style.display = 'inline-block';
@@ -218,6 +218,11 @@ document.addEventListener('DOMContentLoaded', function () {
         if (data.success) {
           successDiv.innerHTML = data.message;
           successDiv.style.display = 'block';
+          Swal.fire({
+            title: "Success!",
+            text: data.message,
+            icon: "success"
+          });
           hideFormButton(form2, '#submitStep2, #updateStep2');
           var nextBtn = document.getElementById('nextStep2');
           if (nextBtn) nextBtn.style.display = 'inline-block';
@@ -282,6 +287,11 @@ document.addEventListener('DOMContentLoaded', function () {
         if (data.success) {
           successDiv.innerHTML = data.message;
           successDiv.style.display = 'block';
+          Swal.fire({
+            title: "Success!",
+            text: data.message,
+            icon: "success"
+          });
           hideFormButton(form3, '#submitStep3, #updateStep3');
           var nextBtn = document.getElementById('nextStep3');
           if (nextBtn) nextBtn.style.display = 'inline-block';
@@ -311,25 +321,87 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 
-// --- Step 4: Govt. Relationship ---
+// --- Step 4: Profit & Loss ---
 document.addEventListener('DOMContentLoaded', function () {
-  var form4 = document.getElementById('psuFormGovtRel');
-  if (!form4) return;
-  form4.addEventListener('submit', function (e) {
+  var formPL = document.getElementById('psuFormProfitLoss');
+  if (!formPL) return;
+  formPL.addEventListener('submit', function (e) {
     e.preventDefault();
-    var fieldIds = ['txtDirBudgetSub', 'txtTaxAndStateDues'];
+    var fieldIds = ['txtProfitLossAmount', 'txtPAT', 'txtDividendPayable', 'txtDividendpaid'];
     fieldIds.forEach(function (id) {
-      var field = form4.querySelector('#' + id);
+      var field = formPL.querySelector('#' + id);
       if (field) field.classList.remove('is-invalid');
     });
     var hasError = false;
-    function isNum(id) { return /^\d+(\.\d+)?$/.test(form4.querySelector('#' + id).value.trim()); }
-    function isEmp(id) { return !form4.querySelector('#' + id).value.trim(); }
-    fieldIds.forEach(function (id) { if (isEmp(id) || !isNum(id)) { form4.querySelector('#' + id).classList.add('is-invalid'); hasError = true; } });
+    function isNum(id) { return /^\d+(\.\d+)?$/.test(formPL.querySelector('#' + id).value.trim()); }
+    function isEmp(id) { return !formPL.querySelector('#' + id).value.trim(); }
+    fieldIds.forEach(function (id) { if (isEmp(id) || !isNum(id)) { formPL.querySelector('#' + id).classList.add('is-invalid'); hasError = true; } });
     if (hasError) return;
 
-    var formData = new FormData(form4);
-    var isUpdate = form4.querySelector('#govtRelId');
+    var formData = new FormData(formPL);
+    
+    // Check if record exists for this psu_mstr_id to decide URL
+    // Since we don't have a specific ID for P&L in the form yet, we'll use a generic submit route
+    // that handles Upsert (Insert or Update) in the controller.
+    var url = '/psu/profit-loss'; 
+    
+    var successDiv = document.getElementById('psuFormProfitLossSuccess');
+    var errorDiv = document.getElementById('psuFormProfitLossErrors');
+    if (successDiv) successDiv.style.display = 'none';
+    if (errorDiv) errorDiv.style.display = 'none';
+
+    fetch(url, { method: 'POST', body: formData, credentials: 'same-origin', headers: { 'Accept': 'application/json', 'CSRF-Token': csrfToken } })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        console.log(data);
+        if (data.success) {
+          if (successDiv) {
+            successDiv.innerHTML = data.message;
+            successDiv.style.display = 'block';
+            Swal.fire({
+            title: "Success!",
+            text: data.message,
+            icon: "success"
+          });
+          }
+          // Logic to show next step or edit button
+          var nextBtn = document.getElementById('nextStep4'); // Adjust based on your stepper
+          if (nextBtn) nextBtn.style.display = 'inline-block';
+        } else if (data.errors) {
+          if (errorDiv) {
+            errorDiv.innerHTML = data.errors.map(function(e) { return e.msg; }).join('<br>');
+            errorDiv.style.display = 'block';
+          }
+        }
+      })
+      .catch(function(err) {
+        console.error('Error:', err);
+        if (errorDiv) {
+          errorDiv.innerHTML = 'Network error. Please check your connection.';
+          errorDiv.style.display = 'block';
+        }
+      });
+  });
+});
+// --- Step 5: Govt. Relationship ---
+document.addEventListener('DOMContentLoaded', function () {
+  var form5 = document.getElementById('psuFormGovtRel');
+  if (!form5) return;
+  form5.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var fieldIds = ['txtDirBudgetSub', 'txtTaxAndStateDues'];
+    fieldIds.forEach(function (id) {
+      var field = form5.querySelector('#' + id);
+      if (field) field.classList.remove('is-invalid');
+    });
+    var hasError = false;
+    function isNum(id) { return /^\d+(\.\d+)?$/.test(form5.querySelector('#' + id).value.trim()); }
+    function isEmp(id) { return !form5.querySelector('#' + id).value.trim(); }
+    fieldIds.forEach(function (id) { if (isEmp(id) || !isNum(id)) { form5.querySelector('#' + id).classList.add('is-invalid'); hasError = true; } });
+    if (hasError) return;
+
+    var formData = new FormData(form5);
+    var isUpdate = form5.querySelector('#govtRelId');
     var url = isUpdate ? '/psu/govt-rel-update' : '/psu/govt-rel';
     var successDiv = document.getElementById('psuFormGovtRelSuccess');
     var errorDiv = document.getElementById('psuFormGovtRelErrors');
@@ -342,7 +414,12 @@ document.addEventListener('DOMContentLoaded', function () {
         if (data.success) {
           successDiv.innerHTML = data.message;
           successDiv.style.display = 'block';
-          hideFormButton(form4, '#submitStep4, #updateStep4');
+          Swal.fire({
+            title: "Success!",
+            text: data.message,
+            icon: "success"
+          });
+          hideFormButton(form5, '#submitStep5, #updateStep5');
           var nextBtn = document.getElementById('nextStep4');
           if (nextBtn) nextBtn.style.display = 'inline-block';
           showEditButton('editButtonContainerStep4');
@@ -364,19 +441,18 @@ document.addEventListener('DOMContentLoaded', function () {
   var editBtn4 = document.getElementById('btnEditStep4');
   if (editBtn4) {
     editBtn4.addEventListener('click', function() {
-      var btn = form4.querySelector('#submitStep4, #updateStep4');
+      var btn = form5.querySelector('#submitStep4, #updateStep4');
       if (btn) { btn.style.display = 'inline-block'; btn.disabled = false; }
       this.style.display = 'none';
     });
   }
 });
-
-// --- Step 5: Annual Report Upload ---
+// --- Step 6: Annual Report Upload ---
 document.addEventListener('DOMContentLoaded', function () {
-  var form5 = document.getElementById('psuFormAnnualReportUpload');
-  if (!form5) return;
+  var form6 = document.getElementById('psuFormAnnualReportUpload');
+  if (!form6) return;
 
-  form5.addEventListener('submit', function (e) {
+  form6.addEventListener('submit', function (e) {
     e.preventDefault();
     var errorDiv = document.getElementById('psuFormUploadErrors');
     var successDiv = document.getElementById('psuFormUploadSuccess');
@@ -402,7 +478,7 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    var formData = new FormData(form5);
+    var formData = new FormData(form6);
     var isUpdate = formData.get('annualReportId');
     var url = isUpdate ? '/psu/annual-report-update' : '/psu/annual-report';
 
@@ -416,7 +492,12 @@ document.addEventListener('DOMContentLoaded', function () {
         if (data.success) {
           successDiv.innerHTML = data.message;
           successDiv.style.display = 'block';
-          var submitBtn = form5.querySelector('#submitStep5');
+          Swal.fire({
+            title: "Success!",
+            text: data.message,
+            icon: "success"
+          });
+          var submitBtn = form6.querySelector('#submitStep5');
           if (submitBtn) submitBtn.style.display = 'none';
         } else {
           errorDiv.innerHTML = data.message || 'Error uploading Annual Report.';
@@ -452,7 +533,7 @@ document.addEventListener('DOMContentLoaded', function () {
 // --- Preview Modal and Send for Approval ---
 document.addEventListener('DOMContentLoaded', function () {
   // Preview modal
-  document.getElementById('previewStep5')?.addEventListener('click', function () {
+  document.getElementById('previewStep6')?.addEventListener('click', function () {
     var modal = new bootstrap.Modal(document.getElementById('previewModal'));
     modal.show();
   });
@@ -467,15 +548,47 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Edit section from preview
   document.querySelectorAll('.btn-edit-section').forEach(function(btn) {
+    //console.log(bootstrap);
     btn.addEventListener('click', function() {
       var step = parseInt(this.getAttribute('data-step'), 10) || 1;
-      var modal = bootstrap.Modal.getInstance(document.getElementById('previewModal'));
-      if (modal) modal.hide();
-      if (window.gotoStep) window.gotoStep(step);
+        const modal = document.getElementById('previewModal');
+
+    modal.classList.remove('show');
+    modal.style.display = 'none';
+    document.body.classList.remove('modal-open');
+
+    document.querySelectorAll('.modal-backdrop')
+      .forEach(el => el.remove());
+      if (window.gotoStep) window.gotoStep(`${step}`-1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   });
+  document.getElementById('txtPAT').addEventListener('input', function () {
 
+    const pat = parseFloat(this.value) || 0;
+    const dividend = (pat * 30) / 100;
+
+    document.getElementById('txtDividendPayable').value = dividend.toFixed(2);
+
+});
+document.addEventListener('DOMContentLoaded', function () {
+
+    const txtPAT = document.getElementById('txtPAT');
+    const txtDividendPayable = document.getElementById('txtDividendPayable');
+
+    function calculateDividend() {
+        let pat = parseFloat(txtPAT.value) || 0;
+
+        let dividend = (pat * 30) / 100;
+
+        txtDividendPayable.value = dividend.toFixed(2);
+    }
+
+    txtPAT.addEventListener('input', calculateDividend);
+
+    // Calculate on page load if PAT already has a value
+    calculateDividend();
+});
   // Send for approval handler
   function handleSendForApproval() {
     var csrfToken = document.querySelector('[name="csrf-token"]')?.getAttribute('content');
@@ -505,10 +618,38 @@ document.addEventListener('DOMContentLoaded', function () {
   if (modalSendBtn) modalSendBtn.addEventListener('click', handleSendForApproval);
 });
 
+document.addEventListener("click", async function (e) {
+
+  if (e.target.classList.contains("view-transation")) {
+
+    const id = e.target.dataset.id;
+    const modalElement = document.getElementById("dynamicViewModal");
+    const modalContent = document.getElementById("modalContent");
+
+    if (!modalElement) return;
+
+    const modal = new bootstrap.Modal(modalElement);
+
+    modalContent.innerHTML = "Loading...";
+
+    try {
+      const response = await fetch(`/dept/transaction-history/${id}`);
+      const html = await response.text();
+
+      modalContent.innerHTML = html;
+      modal.show();
+
+    } catch (err) {
+      modalContent.innerHTML = "Error loading data";
+      modal.show();
+    }
+  }
+});
+
 // --- Step Navigation (IIFE to avoid global conflicts) ---
 (function () {
   var currentStep = 1;
-  var totalSteps = 5;
+  var totalSteps = 6;
 
   function showStep(step) {
     for (var i = 1; i <= totalSteps; i++) {
@@ -535,9 +676,11 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('nextStep2')?.addEventListener('click', function() { showStep(++currentStep); });
   document.getElementById('nextStep3')?.addEventListener('click', function() { showStep(++currentStep); });
   document.getElementById('nextStep4')?.addEventListener('click', function() { showStep(++currentStep); });
+  document.getElementById('nextStep5')?.addEventListener('click', function() { showStep(++currentStep); });
 
   document.getElementById('prevStep2')?.addEventListener('click', function() { showStep(--currentStep); });
   document.getElementById('prevStep3')?.addEventListener('click', function() { showStep(--currentStep); });
   document.getElementById('prevStep4')?.addEventListener('click', function() { showStep(--currentStep); });
   document.getElementById('prevStep5')?.addEventListener('click', function() { showStep(--currentStep); });
+  document.getElementById('prevStep6')?.addEventListener('click', function() { showStep(--currentStep); });
 })();

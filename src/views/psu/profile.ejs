@@ -16,70 +16,177 @@
         padding-bottom: 0.5rem;
     }
 
-    /* Card Layout */
-    .card {
-        background: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        border: 1px solid #e2e8f0;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    }
-
-    .card-body {
-        padding: 1.5rem;
-    }
-
-    .card-title {
-        font-size: 1.25rem;
-        color: #2d3748;
-        margin-top: 0;
-        margin-bottom: 1.25rem;
-        font-weight: 600;
-    }
-
-    /* Text & Data Formatting */
-    .card-text {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.75rem 0;
-        margin: 0;
-        border-bottom: 1px dashed #edf2f7;
-        font-size: 0.95rem;
-        color: #4a5568;
-    }
-
-    /* Remove the bottom border for the last item */
-    .card-text:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
-    }
-
-    /* Dynamic Data Highlight */
-    .card-text span {
-        font-weight: 600;
-        color: #2b6cb0; /* Professional blue tint for financial data */
-        background-color: #ebf8ff;
-        padding: 0.25rem 0.75rem;
-        border-radius: 6px;
-    }
+    
 </style>
 <div class="container">
     <h2>Profile Details </h2>
-    
+   
+    <% if (psuProfile) { %>
+
         <div class="card mt-4">
             <div class="card-body">
                 <h5 class="card-title">PSU Profile Data</h5>
+<<<<<<< HEAD
                 <p class="card-text">Authorized Share Capital: <span id="authorizedShareCap"> <%= psuProfile.authorized_share_cap %> </span></p>
                 <p class="card-text">Subscribed Share Capital: <span id="subscribedShareCap"> <%=psuProfile.subscribed_share_cap %>  </span></p>
                 <p class="card-text">Paid-up Share Capital: <span id="paidupShareCap"> <%=psuProfile.paidup_share_cap %></span></p>       
             
             </div>  
         </div>
+=======
+                <p class="card-text">Authorized Share Capital: <span id="authorizedShareCap">
+                        <%= psuProfile.Auth_Share_Capital %>
+                    </span></p>
+                <p class="card-text">Subscribed Share Capital: <span id="subscribedShareCap">
+                        <%=psuProfile.Sub_Share_Capital %>
+                    </span></p>
+                <p class="card-text">Paid-up Share Capital: <span id="paidupShareCap">
+                    <%=psuProfile.Paid_Share_Capital %></span>
+                </p>
+                 <p class="card-text">Govt. Contribution in Amount: <span id="paidupShareCap">
+                    <%=psuProfile.Govt_Contri_Amt %></span>
+                </p>
+                 <p class="card-text">Govt. Contribution in Percent: <span id="paidupShareCap">
+                                                            
+                    <%=psuProfile.Govt_Contri_Percent %></span>
+                </p>
+                 <p class="card-text">Name of the Share Holders: <span id="paidupShareCap">
+                                                            
+                    <%=psuProfile.NameOf_Share_Holder %></span>
+                </p>
+                <p class="card-text">ROC Document: <span id="rocDocument">
+                                                            
+                    <a  href="/<%= psuProfile.roc_document.replace(/^public\//,'') %>" target="_blank" >View</a>
+                </p>
+                <p class="card-text"> <span id="">
+                    <% if(psuProfile.status == 1){ %>
+                    <button
+                        class="btn btn-success"
+                        id="sendApprovalBtn"
+                        data-id="<%= psuProfile.id %>">
+                        Send For Approval
+                    </button>
+>>>>>>> 96b018661662fb3750d3492976c8aa451f49789b
 
+                      <% }else { %>
+                        show status
+                      <% } %>  
+                </p>
+            </div>
+        </div>
+        <% } else { %>
+
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">No Profile Data Available</h5>
+                    <p class="card-text">There is currently no profile data for this PSU. Please add the profile data to
+                        view it here.</p>
+                    <button class="btn btn-success w-80 mb-3" id="addProfileData">Add</button>
+                   
+                </div>
+            </div>
+            <% } %>
+                <div class="modal fade" id="profileDataModal" tabindex="-1" role="dialog"
+                    aria-labelledby="previewModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-md" role="document">
+                        <div class="modal-content" style="width:160%">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="previewModalLabel">Add PSU Profile Data</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                               
+                                <!-- Preview content will be injected here by JavaScript -->
+                                <div id="previewContent">
+                                    <div class="card mt-4">
+
+                                        <div class="card-body">
+                                            <form class="forms-sample" id="profileDataForm">
+                                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                                                <div class="form-group row">
+                                                    <label for="txtAuthorizedShareCap"
+                                                        class="col-sm-3 col-form-label">Authorized Share Capital</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control"
+                                                            id="txtAuthorizedShareCap" name="Auth_Share_Capital"
+                                                            placeholder="Authorized Share Capital" value="">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="txtSubscribedShareCap"
+                                                        class="col-sm-3 col-form-label">Subscribed Share Capital</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control"
+                                                            id="txtSubscribedShareCap" name="Sub_Share_Capital"
+                                                            placeholder="Subscribed Share Capital" value="">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="txtPaidupShareCap"
+                                                        class="col-sm-3 col-form-label">Paid-up Share Capital</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control" id="txtPaidupShareCap"
+                                                            name="Paid_Share_Capital" placeholder="Paid-up Share Capital"
+                                                            value="">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row">
+                                                        <label for="exampleInputConfirmPassword2" class="col-sm-3 col-form-label">Govt.
+                                                            Contribution in Amount</label>
+                                                        <div class="col-sm-9">
+                                                            <input type="text" class="form-control" id="txtGovtContribution"
+                                                                name="Govt_Contri_Amt" placeholder="Govt. Contribution"
+                                                                value="">
+                                                            <div class="invalid-feedback" id="error_txtGovtContribution"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <label for="exampleInputConfirmPassword2" class="col-sm-3 col-form-label">Govt.
+                                                            Contribution in Percent</label>
+                                                        <div class="col-sm-9">
+                                                            <input type="text" class="form-control" id="txtGovtContributionPercent"
+                                                                name="Govt_Contri_Percent" placeholder="Govt. Contribution In Percent"
+                                                                value="">
+                                                            <div class="invalid-feedback" id="error_txtGovtContributionPercent"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <label for="exampleInputConfirmPassword2" class="col-sm-3 col-form-label">Name of the
+                                                            Share Holders</label>
+                                                        <div class="col-sm-9">
+                                                            <input type="text" class="form-control" id="txtNameofShareHolders"
+                                                                name="NameOf_Share_Holder" placeholder="Name of the Share Holders"
+                                                                value="">
+                                                            <div class="invalid-feedback" id="error_txtNameofShareHolders"></div>
+                                                        </div>
+                                                    </div>
+                                                 
+                                                    <div class="form-group row">
+                                                        <label for="roc_document" class="col-sm-3 col-form-label">
+                                                            Additional Roc Document
+                                                        </label>
+                                                        <div class="col-sm-9">
+                                                            <input type="file" class="form-control" id="roc_document" 
+                                                                name="roc_document" accept=".pdf">
+                                                        </div>
+                                                    </div>
+                                                    <input type="hidden" name="psu_id" value="<%= psuId %>" >
+                                                     <input type="hidden" name="dmd_no" value="<%= dmdNo %>" >
+                                                <button type="submit" class="btn btn-primary">Submit</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 </div>

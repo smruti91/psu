@@ -73,6 +73,7 @@
 
   <!-- base:js -->
   <script src="/vendors/js/vendor.bundle.base.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <!-- endinject -->
   <!-- Plugin js for this page-->
   <script src="/vendors/chart.js/Chart.min.js"></script>
@@ -87,8 +88,11 @@
   <!-- Custom js for this page-->
   <script src="/js/dashboard.js"></script>
   <script src="/js/common.js"></script>
-  <script src="/js/getDeptData.js"></script>
-  <script src="/js/getPsuData.js"></script>
+  <% if (typeof scripts !== 'undefined' && scripts) { %>
+    <% scripts.forEach(function(script) { %>
+      <script src="/js/<%= script %>.js"></script>
+    <% }); %>
+  <% } %>
   <!-- End custom js for this page-->
 </body>
 

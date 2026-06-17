@@ -74,7 +74,7 @@ exports.isAccountLocked = async (username) => {
 // Lock account for 15 minutes
 exports.lockAccount = async (username) => {
   try {
-    const lockUntil = new Date(Date.now() + 15 * 60 * 1000);
+    const lockUntil = new Date(Date.now() + 60 * 60 * 1000);
     await pool.query(
       "UPDATE tbl_user SET locked_until = ?, failed_login_attempts = failed_login_attempts + 1 WHERE user_name = ?",
       [lockUntil, username]

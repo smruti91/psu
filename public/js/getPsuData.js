@@ -107,24 +107,7 @@ document.getElementById('generateReportBtn').addEventListener('click', async fun
     document.getElementById('downloadBtns').classList.remove('d-none');
 });
 });
-document.getElementById('getProfileData').addEventListener('click', async function () {
-     const finYr = document.getElementById('SelectFinYear').value;
-    const dmdNo = document.getElementById('SelectDmdNo').value;
-    const psuId = document.getElementById('SelectPsu').value;
 
-    const res = await fetch(`/admin/profile-data?finYr=${finYr}&dmdNo=${dmdNo}&psuId=${psuId}`);
-    const data = await res.json();
-      const columns = [
-        { header: 'PSU Name', key: 'Psu_Name', width: '150px' },
-        { header: 'Authorized Capital', key: 'authorized_share_cap' },
-        { header: 'Subscribed Capital', key: 'subscribed_share_cap' },
-        { header: 'Paid-up Capital', key: 'paidup_share_cap' },
-        { header: 'Financial Year', key: 'fin_year' },
-      ];
-     renderDynamicTable([data], columns, 'profileDataDiv', { tableClass: 'table table-bordered mt-3', theadClass: 'table-dark' });
-    console.log(data);
-   // renderReport(data);
-});
 document.getElementById('profileDataForm').addEventListener('submit', async function (e) {
     e.preventDefault();
     const csrfToken =
