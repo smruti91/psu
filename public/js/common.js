@@ -3,7 +3,10 @@ function showEditButton(containerId) {
     var container = document.getElementById(containerId);
     if (container) container.style.display = 'block';
 }
-
+function hideMsgDivs(errorDiv, successDiv) {
+  if (errorDiv) errorDiv.style.display = 'none';
+  if (successDiv) successDiv.style.display = 'none';
+}
 // Helper: Hide form button after successful save
 function hideFormButton(form, selector) {
     var btn = form.querySelector(selector);
@@ -76,6 +79,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if (field) field.classList.add('is-invalid');
           }
         });
+        
+        
       } else if (data.success) {
         successDiv.innerHTML = data.message;
         successDiv.style.display = 'block';
@@ -88,6 +93,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var nextBtn = document.getElementById('nextStep1');
         if (nextBtn) nextBtn.style.display = 'inline-block';
         showEditButton('editButtonContainerStep1');
+        setTimeout(function() { hideMsgDivs(errorDiv, successDiv); }, 5000);
         if (data.id) {
           // Update all hidden psu_mstr_id fields using name attribute (avoid duplicate id issues)
           var psuInputs = document.querySelectorAll('input[name="psu_mstr_id"]');
@@ -234,6 +240,7 @@ document.addEventListener('DOMContentLoaded', function () {
           errorDiv.innerHTML = data.message;
           errorDiv.style.display = 'block';
         }
+        setTimeout(function() { hideMsgDivs(errorDiv, successDiv); }, 5000);
       })
       .catch(function(err) {
         console.error('Error:', err);
@@ -303,6 +310,7 @@ document.addEventListener('DOMContentLoaded', function () {
           errorDiv.innerHTML = data.message;
           errorDiv.style.display = 'block';
         }
+        setTimeout(function() { hideMsgDivs(errorDiv, successDiv); }, 5000);
       })
       .catch(function(err) {
         console.error('Error:', err);
@@ -373,6 +381,7 @@ document.addEventListener('DOMContentLoaded', function () {
             errorDiv.style.display = 'block';
           }
         }
+        setTimeout(function() { hideMsgDivs(errorDiv, successDiv); }, 5000);
       })
       .catch(function(err) {
         console.error('Error:', err);
@@ -430,6 +439,7 @@ document.addEventListener('DOMContentLoaded', function () {
           errorDiv.innerHTML = data.message;
           errorDiv.style.display = 'block';
         }
+        setTimeout(function() { hideMsgDivs(errorDiv, successDiv); }, 5000);
       })
       .catch(function(err) {
         console.error('Error:', err);
@@ -503,6 +513,8 @@ document.addEventListener('DOMContentLoaded', function () {
           errorDiv.innerHTML = data.message || 'Error uploading Annual Report.';
           errorDiv.style.display = 'block';
         }
+
+        setTimeout(function() { hideMsgDivs(errorDiv, successDiv); }, 5000);
       })
       .catch(function(err) {
         console.error('Error:', err);
@@ -652,6 +664,7 @@ document.addEventListener("click", async function (e) {
   var totalSteps = 6;
 
   function showStep(step) {
+
     for (var i = 1; i <= totalSteps; i++) {
       var content = document.getElementById('step-content-' + i);
       if (content) content.style.display = (i === step) ? 'block' : 'none';

@@ -7,7 +7,7 @@
 
    let statusText = "Pending";
    let badgeClass = "bg-secondary";
-
+   letstatusText = "Pending Approval<br>at Secretary";
    if (yearStatusMap[year] !== undefined) {
       switch (yearStatusMap[year]) {
          case 0:
@@ -15,16 +15,24 @@
             badgeClass = "bg-warning";
             break;
          case 1:
-            statusText = "Pending Approval";
+            statusText = "Pending Approval at FA";
             badgeClass = "bg-primary";
             break;
          case 2:
-            statusText = "Approved";
-            badgeClass = "bg-success";
+            statusText = "Rejected by FA";
+            badgeClass = "bg-danger"; 
             break;
          case 3:
-            statusText = "Rejected";
+            statusText = "Pending Approval <br>at Secretary";
+            badgeClass = "bg-primary";
+            break;
+         case 4:
+            statusText = "Rejected by Secretary";
             badgeClass = "bg-danger";
+            break;
+         case 5:
+            statusText = "Approved";
+            badgeClass = "bg-success";
             break;
       }
    }
@@ -51,7 +59,7 @@
   <!-- STATUS BADGE -->
   <div class="text-center mt-2">
      <span class="badge <%= badgeClass %> text-light m-2">
-        <%= statusText %>
+        <%- statusText %>
      </span>
   </div>
 </div>

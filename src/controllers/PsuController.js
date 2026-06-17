@@ -821,11 +821,7 @@ exports.getYearWiseForm = async (req, res) => {
   const Psu_Name = req.session.user.Psu_Name;
   const DmdNo = req.session.user.dmdNo;
   const userId = req.session.user.id;
-<<<<<<< HEAD
-  const psu_id = req.session.user.psu_id;
-=======
   const psuId = req.session.user.psu_id ?? null;
->>>>>>> 96b018661662fb3750d3492976c8aa451f49789b
   let yearWiseData = null;
   let balanceSheetData = null;
   let incomeSheetData = null;
@@ -844,13 +840,13 @@ exports.getYearWiseForm = async (req, res) => {
     if (rows && rows.length > 0) {
       yearWiseData = rows[0];
     }
-    const [profileRows] = await pool.execute(
-      `SELECT * FROM tbl_psu_profile WHERE psu_id = ? LIMIT 1`,
-      [psu_id]
-    );
-    if (profileRows && profileRows.length > 0) {
-      psuProfileData = profileRows[0];
-    }
+    // const [profileRows] = await pool.execute(
+    //   `SELECT * FROM tbl_psu_profile WHERE psu_id = ? LIMIT 1`,
+    //   [psu_id]
+    // );
+    // if (profileRows && profileRows.length > 0) {
+    //   psuProfileData = profileRows[0];
+    // }
     // Balance Sheet
     if (yearWiseData && yearWiseData.id) {
       const [bsRows] = await pool.execute(
@@ -894,6 +890,7 @@ exports.getYearWiseForm = async (req, res) => {
     if (profile && profile.length > 0) {
         profileData = profile[0];
     }
+    console.log(profileData);
   } catch (err) {
     console.error('Error fetching year-wise data:', err);
   }
@@ -909,11 +906,7 @@ exports.getYearWiseForm = async (req, res) => {
     profitLossData,
     govtRelData,
     annualReportData,
-<<<<<<< HEAD
-    psuProfileData
-=======
     profileData
->>>>>>> 96b018661662fb3750d3492976c8aa451f49789b
   });
 };
 

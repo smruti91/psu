@@ -3,7 +3,7 @@
 2-> pending at fa 
 3-> Reject by fa 
 4-> pending at sec
-5-> reject by sec
+5-> reject by sec 
 6->pending at finance 
 7-> reject by financ
 8-> Approved
