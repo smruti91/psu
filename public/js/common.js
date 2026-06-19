@@ -229,7 +229,7 @@ document.addEventListener('DOMContentLoaded', function () {
             text: data.message,
             icon: "success"
           });
-          hideFormButton(form2, '#submitStep2, #updateStep2');
+          hideFormButton(form2, '#submitStep3, #updateStep3');
           var nextBtn = document.getElementById('nextStep2');
           if (nextBtn) nextBtn.style.display = 'inline-block';
           showEditButton('editButtonContainerStep2');
@@ -299,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function () {
             text: data.message,
             icon: "success"
           });
-          hideFormButton(form3, '#submitStep3, #updateStep3');
+          hideFormButton(form3, '#submitStep2, #updateStep2');
           var nextBtn = document.getElementById('nextStep3');
           if (nextBtn) nextBtn.style.display = 'inline-block';
           showEditButton('editButtonContainerStep3');
@@ -373,8 +373,11 @@ document.addEventListener('DOMContentLoaded', function () {
           });
           }
           // Logic to show next step or edit button
+           hideFormButton(formPL, '.btn-save-step4, .btn-update-step4');
           var nextBtn = document.getElementById('nextStep4'); // Adjust based on your stepper
           if (nextBtn) nextBtn.style.display = 'inline-block';
+
+           showEditButton('editButtonContainerStep4');
         } else if (data.errors) {
           if (errorDiv) {
             errorDiv.innerHTML = data.errors.map(function(e) { return e.msg; }).join('<br>');
@@ -431,7 +434,7 @@ document.addEventListener('DOMContentLoaded', function () {
           hideFormButton(form5, '#submitStep5, #updateStep5');
           var nextBtn = document.getElementById('nextStep4');
           if (nextBtn) nextBtn.style.display = 'inline-block';
-          showEditButton('editButtonContainerStep4');
+          showEditButton('editButtonContainerStep5');
         } else if (data.errors) {
           errorDiv.innerHTML = data.errors.map(function(e) { return e.msg; }).join('<br>');
           errorDiv.style.display = 'block';
@@ -507,8 +510,12 @@ document.addEventListener('DOMContentLoaded', function () {
             text: data.message,
             icon: "success"
           });
-          var submitBtn = form6.querySelector('#submitStep5');
+          var submitBtn = form6.querySelector('#submitStep6');
           if (submitBtn) submitBtn.style.display = 'none';
+
+           localStorage.setItem('activeStep', '6');
+
+          location.reload();
         } else {
           errorDiv.innerHTML = data.message || 'Error uploading Annual Report.';
           errorDiv.style.display = 'block';
@@ -522,6 +529,32 @@ document.addEventListener('DOMContentLoaded', function () {
         errorDiv.style.display = 'block';
       });
   });
+
+  document.addEventListener('DOMContentLoaded', function () {
+
+    const activeStep = localStorage.getItem('activeStep');
+
+    if (activeStep === '6') {
+
+        document.querySelectorAll('.step-content').forEach(step => {
+            step.style.display = 'none';
+        });
+
+        document.getElementById('step-content-6').style.display = 'block';
+
+        // Optional: activate step indicator/tab
+        document.querySelectorAll('.step-item').forEach(item => {
+            item.classList.remove('active');
+        });
+
+        const step6Indicator = document.querySelector('[data-step="6"]');
+        if (step6Indicator) {
+            step6Indicator.classList.add('active');
+        }
+
+        localStorage.removeItem('activeStep');
+    }
+});
 
   // Delete annual report
   document.querySelectorAll('.delete-annual-report-btn').forEach(function(button) {
@@ -559,7 +592,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // Edit section from preview
-  document.querySelectorAll('.btn-edit-section').forEach(function(btn) {
+  document.querySelectorAll('.btn-edit-section').forEach(function(btn) { 
     //console.log(bootstrap);
     btn.addEventListener('click', function() {
       var step = parseInt(this.getAttribute('data-step'), 10) || 1;
@@ -575,14 +608,19 @@ document.addEventListener('DOMContentLoaded', function () {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   });
-  document.getElementById('txtPAT').addEventListener('input', function () {
+   
+  const txtPat = document.getElementById('txtPAT');
+  if(txtPat){
+    txtPat.addEventListener('input', function () {
 
-    const pat = parseFloat(this.value) || 0;
-    const dividend = (pat * 30) / 100;
+        const pat = parseFloat(this.value) || 0;
+        const dividend = (pat * 30) / 100;
 
-    document.getElementById('txtDividendPayable').value = dividend.toFixed(2);
+        document.getElementById('txtDividendPayable').value = dividend.toFixed(2);
 
-});
+    });
+  }
+
 document.addEventListener('DOMContentLoaded', function () {
 
     const txtPAT = document.getElementById('txtPAT');

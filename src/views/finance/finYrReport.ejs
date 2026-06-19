@@ -1,3 +1,19 @@
+<style>
+
+.table thead th{
+    vertical-align: middle;
+}
+
+.table td,
+.table th{
+    white-space: nowrap;
+}
+
+.table-responsive{
+    overflow-x:auto;
+}
+
+</style>
 <div class="">
     <h3>PSU Financial Report</h3>
     <hr>
@@ -6,8 +22,8 @@
             <label for="SelectDmdNo">Select Department</label>
             <select id="SelectDmdNo" class="form-control mb-3">
                 <option value="">-- ALL --</option>
-                <% DemantData.forEach(function(demand) { %>
-                    <option value="<%= demand.DmdNo %>"><%= demand.DmdNo %> - <%= demand.DeptName %></option>
+                <% DemandData.forEach(function(demand) { %>
+                    <option value="<%= demand.DmdNo %>"> <%= demand.DeptName %></option>
                 <% }); %>
             </select>
         </div>
@@ -18,19 +34,12 @@
                 <div id="psuList"></div>
             </select>
         </div>
-        <div class="col-md-3">
-            <label for="SelectFinYear">Financial Year</label>
-            <select id="SelectFinYear" class="form-control mb-3">
-                <option value="">-- Select Financial Year --</option>
-                <option value="2020-21">2020-21</option>
-                <option value="2021-22">2021-22</option>
-                <option value="2022-23">2022-23</option>
-                <option value="2023-24">2023-24</option>
-                <option value="2024-25">2024-25</option>
-            </select>
-        </div>
+       
         <div class="col-md-3 d-flex align-items-end">
-            <button class="btn btn-primary w-80 mb-3" id="generateReportBtn">Generate Report</button>
+            <button class="btn btn-primary w-80 mb-3" id="generateFinReportBtn">Generate Report</button>
+             <button class="btn btn-success mb-3 d-none" id="exportReportExcelBtn">
+            Export Excel
+            </button>
         </div>
     </div>
 
@@ -39,6 +48,7 @@
 
     <div class="mt-3 d-none" id="downloadBtns">
       <button id="downloadExcel" class="btn btn-success">Download Excel</button>
-      
+      <button id="downloadPdf" class="btn btn-danger">Download PDF</button>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>

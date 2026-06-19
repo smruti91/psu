@@ -91,21 +91,22 @@ function addPsuGridStyle() {
     document.head.appendChild(psuGridStyle);
 }
 document.addEventListener("DOMContentLoaded", function () {
-document.getElementById('generateReportBtn').addEventListener('click', async function () {
-    const finYr = document.getElementById('SelectFinYear').value;
-    const dmdNo = document.getElementById('SelectDmdNo').value;
-    const psuId = document.getElementById('SelectPsu').value;
+    document.getElementById('generateReportBtn').addEventListener('click', async function () {
+        console.log(123);
+        const finYr = document.getElementById('SelectFinYear').value;
+        const dmdNo = document.getElementById('SelectDmdNo').value;
+        const psuId = document.getElementById('SelectPsu').value;
 
-   // if (!finYr) return;
+    // if (!finYr) return;
 
-    const res = await fetch(`/psu/report?finYr=${finYr}&dmdNo=${dmdNo}&psuId=${psuId}`);
-    const data = await res.json();
-    console.log(data);
-    renderReport(data);
+        const res = await fetch(`/psu/report?finYr=${finYr}&dmdNo=${dmdNo}&psuId=${psuId}`);
+        const data = await res.json();
+        console.log(data);
+        renderReport(data);
 
 
-    document.getElementById('downloadBtns').classList.remove('d-none');
-});
+        document.getElementById('downloadBtns').classList.remove('d-none');
+    });
 });
 
 document.getElementById('profileDataForm').addEventListener('submit', async function (e) {

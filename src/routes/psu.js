@@ -117,51 +117,7 @@ router.get('/view-data', ensureAuth, PsuController.viewPsuData);
 router.get('/view-data-yearwise', ensureAuth, PsuController.viewPsuDataYearwise);
 router.get('/profile', ensureAuth, PsuController.profile);
 
-router.get('/report', async (req, res) => {
-    const { finYr, dmdNo, psuId } = req.query;
-   
-    let reportData = [];
-    const pool = require('../config/db');
-    //fetch data based on finYr, dmdNo, psuId if provided 
-    let query = `SELECT 
-                  p.Psu_Name,
-                  m.Auth_Share_Capital,
-                  m.Paid_Share_Capital,
-                  m.Govt_Contri_Amt,
-                  m.PAT,
-                  m.Dividend_Payable,
-                  m.Dividend_Paid,
-                  m.FinYr
-                FROM tbl_psu_yearwise_mstr AS m
-                JOIN tbl_user AS u ON m.user_id = u.id
-                JOIN tbl_psu_name AS p ON u.psu_id = p.id
-                WHERE 1 = 1`;
-    const params = []; 
-    if (finYr) {
-      query += ' AND m.FinYr = ?';
-      params.push(finYr);
-    }
-    if (dmdNo) {
-      query += ' AND m.DmdNo = ?';
-      params.push(dmdNo);
-    }
-    if (psuId) {
-      query += ' AND p.id = ?';
-      params.push(psuId);
-    }
-    const [rows] = await pool.execute(query, params);
-    // console.log('SQL:', query);
-    // console.log('PARAMS:', params);
-    // console.log('Fetched Rows:', rows);
-    if (rows && rows.length > 0) {
-      reportData = rows;
-    }
-  
-    res.json(reportData);
-});
 
-router.get('/report/excel', ensureAuth, PsuController.downloadReportExcel);
-router.get('/report/pdf', ensureAuth, PsuController.downloadReportPdf);
 
 // Get yearwise data for dropdown selection (AJAX)
 router.get('/yearwise', ensureAuth, async (req, res) => {

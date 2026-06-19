@@ -81,7 +81,38 @@
              
             </a>
           </li>
-         
+           <li class="nav-item">
+              <a class="nav-link" data-toggle="collapse" href="#psuReporteMenu"
+                  aria-expanded="false" aria-controls="psuReporteMenu">
+                  <i class="typcn typcn-folder menu-icon"></i>
+                  <span class="menu-title">Report</span>
+                  <i class="menu-arrow"></i>
+              </a>
+
+              <div class="collapse" id="psuReporteMenu">
+                  <ul class="nav flex-column sub-menu">
+
+                      <li class="nav-item">
+                          <a class="nav-link" href="/finance/finYr-report">
+                              Financial Year
+                          </a>
+                      </li>
+<!-- 
+                      <li class="nav-item">
+                          <a class="nav-link" href="#">
+                              Approved
+                          </a>
+                      </li>
+
+                      <li class="nav-item">
+                          <a class="nav-link" href="#">
+                              Rejected
+                          </a>
+                      </li> -->
+
+                  </ul>
+              </div>
+          </li>
           <% } %>
 
           <% if (role == 5) { %>
@@ -92,6 +123,8 @@
              
             </a>
           </li>
+
+        
          
           <% } %>
           <% if (role == 1) { %>
