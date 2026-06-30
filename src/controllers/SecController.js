@@ -35,7 +35,20 @@ exports.dashboard = async (req, res) => {
     
   });
 };
+exports.profile = async (req, res) => {
+  const dmdNo = req.session.user.dmdNo;
+  const [approvedData] = await pool.execute(
+      `SELECT p.*, n.Psu_Name  FROM tbl_psu_profile as p join tbl_psu_name n on p.psu_id = n.id WHERE dmd_no = ? and status > ? `,
+      [dmdNo, 4]
+    );
 
+  res.render('sec/Profile_sec', {
+    layout: 'layouts/dashboard',
+    title: 'PSU Profile',
+    scripts: ['getDeptData'],
+    approved: approvedData
+  });
+};
 exports.approveRecord = async (req, res) => {
   const id = req.params.id;
   

@@ -237,14 +237,14 @@ function rejectProfile(profileId, remarks)
     })
     .then(res => res.json())
     .then(data => {
-
+        console.log(data)
         Swal.fire({
             icon: 'success',
             title: 'Rejected',
             text: data.message
         }).then(() => {
 
-            location.reload();
+            //location.reload();
 
         });
 

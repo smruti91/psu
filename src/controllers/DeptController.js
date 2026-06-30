@@ -36,7 +36,7 @@ exports.dashboard = async (req, res) => {
   });
 };
 
-exports.getYearDetails = async (req, res) => {
+exports.getYearDetails = async (req, res) => { 
   try {
     const { id } = req.params;
 
@@ -116,7 +116,7 @@ exports.rejectRecord = async (req, res) => {
   const { reason } = req.body;
 
   await pool.execute(
-    `UPDATE tbl_psu_yearwise_mstr 
+    `UPDATE tbl_psu_yearwise_mstr  
      SET status = 2,
          reject_message = ?
      WHERE id = ?`,

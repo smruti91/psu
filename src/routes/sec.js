@@ -11,5 +11,6 @@ router.use(SecController.setUserLocals)
 
 router.get('/', ensureAuth, SecController.dashboard);
 router.post('/approve/:id', SecController.approveRecord);
+router.get('/profile/', SecController.profile);
 
 module.exports = router;

@@ -234,22 +234,7 @@ function renderDynamicTable(data, columns, targetId, options = {}) {
     container.innerHTML = html;
 }
 
-document.getElementById('SelectDmdNo').addEventListener('click', async function () {
-    const dmdNo = this.value;
-    console.log(`Selected DmdNo: ${dmdNo}`);
-    if (!dmdNo) return;
-    // Fetch PSU names for the depended drop down
-    const res = await fetch(`/finance/psu-names?dmdNo=${dmdNo}`);
-    const data = await res.json();
-    const psuNameSelect = document.getElementById('psuList');
-    psuNameSelect.innerHTML = '<option value="">Select PSU Name</option>';
-    data.PsuNames.forEach(psu => {
-        const option = document.createElement('option');
-        option.value = psu.id;
-        option.textContent = psu.Psu_Name;
-        psuNameSelect.appendChild(option);
-    }); 
-});
+
 
 function renderReport(data) {
     if (!data || data.length === 0) {

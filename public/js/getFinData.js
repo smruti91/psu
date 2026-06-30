@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if(reportBtn){
     reportBtn.addEventListener('click', async function () {
         console.log(123);
-        const finYr = document.getElementById('SelectFinYear').value;
+        const finYr = document.getElementById('SelectFinYear').value; 
         const dmdNo = document.getElementById('SelectDmdNo').value;
         const psuId = document.getElementById('SelectPsu').value;
 
@@ -19,6 +19,23 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById('downloadBtns').classList.remove('d-none');
     });
 }
+});
+
+document.getElementById('SelectDmdNo').addEventListener('click', async function () {
+    const dmdNo = this.value;
+    console.log(`Selected DmdNo: ${dmdNo}`);
+    if (!dmdNo) return;
+    // Fetch PSU names for the depended drop down
+    const res = await fetch(`/finance/psu-names?dmdNo=${dmdNo}`);
+    const data = await res.json();
+    const psuNameSelect = document.getElementById('psuList');
+    psuNameSelect.innerHTML = '<option value="">Select PSU Name</option>';
+    data.PsuNames.forEach(psu => {
+        const option = document.createElement('option');
+        option.value = psu.id;
+        option.textContent = psu.Psu_Name;
+        psuNameSelect.appendChild(option);
+    }); 
 });
 
 function renderReport(data) {
