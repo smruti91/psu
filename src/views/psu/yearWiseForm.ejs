@@ -1,5 +1,5 @@
 <!-- Stepper UI (hidden by default) -->
- <h4 class="text-center text-info" >Add Data For Year Of <%= Fin_Yr %> </h4>
+ <h4 class="text-center text-info" >FY <%= Fin_Yr %> </h4>
 <% if (!profileData) { %>
     <div class="alert alert-warning text-center" role="alert">
         Your profile is incomplete. Please complete your profile before adding year-wise data.
@@ -19,132 +19,28 @@
                 <div class="stepper d-flex justify-content-between mb-4">
                     <div class="step" id="step-indicator-1">
                         <div class="circle">1</div>
-                        <div class="label">Year Wise Data</div>
+                        <div class="label">Income Statement</div>
                     </div>
                     <div class="step" id="step-indicator-2">
                         <div class="circle">2</div>
-                        <div class="label">Income Statement</div>
+                        <div class="label">Balance Sheet</div>
                     </div>
                     <div class="step" id="step-indicator-3">
                         <div class="circle">3</div>
-                        <div class="label">Balance Sheet</div>
+                        <div class="label">Profit & Loss</div>
                     </div>
                     <div class="step" id="step-indicator-4">
                         <div class="circle">4</div>
-                        <div class="label">Profit & Loss</div>
+                        <div class="label">Govt. Relationship</div>
                     </div>
                     <div class="step" id="step-indicator-5">
                         <div class="circle">5</div>
-                        <div class="label">Govt. Relationship</div>
-                    </div>
-                    <div class="step" id="step-indicator-6">
-                        <div class="circle">6</div>
                         <div class="label">Annual Report</div>
                     </div>
                 </div>
-                
+
                 <div id="step-content-1" class="step-content">
-                    <form class="forms-sample" id="psuFormYearWiseData" method="POST">
-                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                        <div id="psuFormYearWiseDataErrors" class="alert alert-danger" style="display:none;"></div>
-                        <div id="psuFormYearWiseDataSuccess" class="alert alert-success" style="display:none;"></div>
-
-                        <div class="form-group row">
-                            <label for="exampleInputUsername2" class="col-sm-3 col-form-label">Name Of the
-                                PSU</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" id="txtNameofPSU" name="txtNameofPSU"
-                                    placeholder="Name of the PSU"
-                                    value="<%= typeof Psu_Name !== 'undefined' ? Psu_Name : (typeof user !== 'undefined' && user.Psu_Name ? user.Psu_Name : '') %>"
-                                    readonly>
-                                <div class="invalid-feedback" id="error_txtNameofPSU"></div>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="exampleInputEmail2" class="col-sm-3 col-form-label">Authorized Share
-                                Capital</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" id="txtAuthorizedShareCap"
-                                    name="txtAuthorizedShareCap" placeholder="Authorized Share Capital"
-                                    value="<%= profileData ? profileData.Auth_Share_Capital : '' %>" readonly>
-                                <div class="invalid-feedback" id="error_txtAuthorizedShareCap"></div>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="exampleInputMobile" class="col-sm-3 col-form-label">Subscribed Share
-                                Capital</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" id="txtSubShareCap" name="txtSubShareCap"
-                                    placeholder="Subscribed Share Capital"
-                                    value="<%= profileData ? profileData.Sub_Share_Capital : '' %>" readonly>
-                                <div class="invalid-feedback" id="error_txtSubShareCap"></div>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="exampleInputPassword2" class="col-sm-3 col-form-label">Paid-up Share
-                                Capital</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" id="txtPaidUpShareCap" name="txtPaidUpShareCap"
-                                    placeholder="Paid-up Share Capital"
-                                    value="<%= profileData ? profileData.Paid_Share_Capital : '' %>" readonly>
-                                <div class="invalid-feedback" id="error_txtPaidUpShareCap"></div>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="exampleInputConfirmPassword2" class="col-sm-3 col-form-label">Govt.
-                                Contribution in Amount</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" id="txtGovtContribution"
-                                    name="txtGovtContribution" placeholder="Govt. Contribution"
-                                    value="<%= profileData ? profileData.Govt_Contri_Amt : '' %>" readonly>
-                                <div class="invalid-feedback" id="error_txtGovtContribution"></div>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="exampleInputConfirmPassword2" class="col-sm-3 col-form-label">Govt.
-                                Contribution in Percent</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" id="txtGovtContributionPercent"
-                                    name="txtGovtContributionPercent" placeholder="Govt. Contribution In Percent"
-                                    value="<%= profileData ? profileData.Govt_Contri_Percent : '' %>" readonly>
-                                <div class="invalid-feedback" id="error_txtGovtContributionPercent"></div>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="exampleInputConfirmPassword2" class="col-sm-3 col-form-label">Name of the
-                                Share Holders</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" id="txtNameofShareHolders"
-                                    name="txtNameofShareHolders" placeholder="Name of the Share Holders"
-                                    value="<%= profileData ? profileData.NameOf_Share_Holder : '' %>" readonly>
-                                <div class="invalid-feedback" id="error_txtNameofShareHolders"></div>
-                            </div>
-                        </div>
-                     
-                        <div class="d-flex justify-content-end mt-4 py-5">
-                            <input type="hidden" name="txtFinYr" id="txtFinYr"
-                                value="<%= typeof Fin_Yr !== 'undefined' ? Fin_Yr : '' %>">
-                             <input type="hidden" name="profile_id" id="profile_id"
-                                value="<%= profileData.id %>">
-                            <% if (yearWiseData) { %>
-                                <% if (yearWiseData.status === 0) { %>
-                                <input type="hidden" name="yearWiseId" id="yearWiseId" value="<%= yearWiseData.id %>">
-                                <button type="submit" class="btn btn-warning mr-2 btn-update-step1" data-step="1">Update</button>
-                                <% }%>
-                                <% } else { %>
-                                    <button type="submit" class="btn btn-info mr-2 btn-save-step1" data-step="1">Save</button>
-                                    <% } %>
-                                        <button type="button" class="btn btn-primary" id="nextStep1">Next</button>
-                        </div>
-                        <!-- Edit button container - shown after form submit -->
-                        <div id="editButtonContainerStep1" class="mt-3" style="display:none;">
-                            <button type="button" class="btn btn-warning" id="btnEditStep1">Edit</button>
-                        </div>
-                    </form>
-
-                </div>
-                <div id="step-content-2" class="step-content" style="display:none;">
-                     <!-- Step 2: Income Statement Indicator -->
+                     <!-- Step 1: Income Statement Indicator -->
                     <form class="forms-sample" id="psuFormIncomeStatement">
                         <div id="psuFormIncomeStatementErrors" class="alert alert-danger" style="display:none;"></div>
                         <div id="psuFormIncomeStatementSuccess" class="alert alert-success" style="display:none;"></div>
@@ -240,29 +136,28 @@
                         <input type="hidden" name="psu_mstr_id" id="psu_mstr_id"
                             value="<%= yearWiseData ? yearWiseData.id : '' %>">
                         <div class="d-flex justify-content-between mt-4">
-                            <button type="button" class="btn btn-secondary" id="prevStep2">Previous</button>
                              <div>
                             <% if (incomeSheetData) { %>
                                 <% if (yearWiseData.status === 0) { %>
                                     <input type="hidden" name="incomeSheetId" id="incomeSheetId"
                                         value="<%= incomeSheetData.id %>">
-                                    <button type="submit" class="btn btn-warning" id="updateStep2">Update</button>
+                                    <button type="submit" class="btn btn-warning" id="updateStep1">Update</button>
                                 <% }%>
 
                                 <% } else { %>
-                                    <button type="submit" class="btn btn-info" id="submitStep2">Save</button>
+                                    <button type="submit" class="btn btn-info" id="submitStep1">Save</button>
                                     <% } %>
-                                     <button type="button" class="btn btn-primary" id="nextStep2">Next</button>
+                                     <button type="button" class="btn btn-primary" id="nextStep1">Next</button>
                             </div>
                             <!-- Edit button container - shown after form submit -->
-                            <div id="editButtonContainerStep3" class="mt-3" style="display:none;">
-                                <button type="button" class="btn btn-warning" id="btnEditStep2">Edit</button>
+                            <div id="editButtonContainerStep1" class="mt-3" style="display:none;">
+                                <button type="button" class="btn btn-warning" id="btnEditStep1">Edit</button>
                             </div>
                         </div>
                     </form>
                 </div>
-                <div id="step-content-3" class="step-content" style="display:none;">
-                    <!-- Step 3: Balance Sheet Indicator -->
+                <div id="step-content-2" class="step-content" style="display:none;">
+                    <!-- Step 2: Balance Sheet Indicator -->
                      <form class="forms-sample" id="psuFormBalanceSheet">
                         <div id="psuFormBalanceSheetErrors" class="alert alert-danger" style="display:none;"></div>
                         <div id="psuFormBalanceSheetSuccess" class="alert alert-success" style="display:none;"></div>
@@ -342,30 +237,30 @@
                         <input type="hidden" name="psu_mstr_id" id="psu_mstr_id"
                             value="<%= yearWiseData ? yearWiseData.id : '' %>">
                         <div class="d-flex justify-content-between mt-4 py-4">
-                            <button type="button" class="btn btn-secondary" id="prevStep3">Previous</button>
+                            <button type="button" class="btn btn-secondary" id="prevStep2">Previous</button>
 
                         <div>
                             <% if (balanceSheetData) { %>
                                 <% if (yearWiseData.status === 0) { %>
                                <input type="hidden" name="balanceSheetId" id="balanceSheetId"
                                     value="<%= balanceSheetData.id %>">
-                                <button type="submit" class="btn btn-warning" id="updateStep3">Update</button>
+                                <button type="submit" class="btn btn-warning" id="updateStep2">Update</button>
                                 <% }%>
 
                                 <% } else { %>
-                                    <button type="submit" class="btn btn-info" id="submitStep3">Save</button>
+                                    <button type="submit" class="btn btn-info" id="submitStep2">Save</button>
                                     <% } %>
-                                    <button type="button" class="btn btn-primary" id="nextStep3">Next</button>
+                                    <button type="button" class="btn btn-primary" id="nextStep2">Next</button>
                         </div>
                         </div>
                         <!-- Edit button container - shown after form submit -->
                         <div id="editButtonContainerStep2" class="mt-3" style="display:none;">
-                            <button type="button" class="btn btn-warning" id="btnEditStep3">Edit</button>
+                            <button type="button" class="btn btn-warning" id="btnEditStep2">Edit</button>
                         </div>
                     </form>
                 </div>
-                <div id="step-content-4" class="step-content" style="display:none;">
-                    <!-- Step 4: Profit and Loss -->
+                <div id="step-content-3" class="step-content" style="display:none;">
+                    <!-- Step 3: Profit and Loss -->
                      <form class="forms-sample" id="psuFormProfitLoss" method="POST" enctype="multipart/form-data">
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                         <div id="psuFormProfitLossErrors" class="alert alert-danger" style="display:none;"></div>
@@ -491,26 +386,26 @@
                         <input type="hidden" name="yearWiseId" id="yearWiseId"  value="<%= yearWiseData ? yearWiseData.id : '' %>">
                         <div class="d-flex justify-content-between mt-4 py-5">
                           
-                                 <button type="button" class="btn btn-secondary" id="prevStep4">Previous</button>
+                                 <button type="button" class="btn btn-secondary" id="prevStep3">Previous</button>
                             <% if (profitLossData) { %>
                                 <% if (yearWiseData.status === 0) { %>
                                 
-                                <button type="submit" class="btn btn-warning mr-2 btn-update-step4" data-step="1">Update</button>
+                                <button type="submit" class="btn btn-warning mr-2 btn-update-step3" data-step="1">Update</button>
                                 <% }%>
                                 <% } else { %>
-                                    <button type="submit" class="btn btn-info mr-2 btn-save-step4" data-step="1">Save</button>
+                                    <button type="submit" class="btn btn-info mr-2 btn-save-step3" data-step="1">Save</button>
                                     <% } %>
-                                <button type="button" class="btn btn-primary" id="nextStep4">Next</button>
+                                <button type="button" class="btn btn-primary" id="nextStep3">Next</button>
                         </div>
                         <!-- Edit button container - shown after form submit -->
-                        <div id="editButtonContainerStep4" class="mt-3" style="display:none;">
-                            <button type="button" class="btn btn-warning" id="btnEditStep4">Edit</button>
+                        <div id="editButtonContainerStep3" class="mt-3" style="display:none;">
+                            <button type="button" class="btn btn-warning" id="btnEditStep3">Edit</button>
                         </div>
                     </form>
                 </div>
 
-                <div id="step-content-5" class="step-content" style="display:none;">
-                    <!-- Step 5: Govt. Relationship -->
+                <div id="step-content-4" class="step-content" style="display:none;">
+                    <!-- Step 4: Govt. Relationship -->
                     <form class="forms-sample" id="psuFormGovtRel">
                         <div id="psuFormGovtRelErrors" class="alert alert-danger" style="display:none;"></div>
                         <div id="psuFormGovtRelSuccess" class="alert alert-success" style="display:none;"></div>
@@ -534,27 +429,27 @@
                         <input type="hidden" name="psu_mstr_id" id="psu_mstr_id"
                             value="<%= yearWiseData ? yearWiseData.id : '' %>">
                         <div class="d-flex justify-content-between mt-4">
-                            <button type="button" class="btn btn-secondary" id="prevStep5">Previous</button>
+                            <button type="button" class="btn btn-secondary" id="prevStep4">Previous</button>
                             <% if (govtRelData) { %>
                                  <% if (yearWiseData.status === 0) { %>
                                      <input type="hidden" name="govtRelId" id="govtRelId" value="<%= govtRelData.id %>">
-                                     <button type="submit" class="btn btn-warning" id="updateStep5">Update</button>
+                                     <button type="submit" class="btn btn-warning" id="updateStep4">Update</button>
                                 <% }%>
 
                                 <% } else { %>
-                                    <button type="submit" class="btn btn-success" id="submitStep5">Save</button>
+                                    <button type="submit" class="btn btn-success" id="submitStep4">Save</button>
                                     <% } %>
-                                 <button type="button" class="btn btn-primary" id="nextStep5">Next</button>
+                                 <button type="button" class="btn btn-primary" id="nextStep4">Next</button>
                         </div>
                         <!-- Edit button container - shown after form submit -->
-                        <div id="editButtonContainerStep5" class="mt-3" style="display:none;">
-                            <button type="button" class="btn btn-warning" id="btnEditStep5">Edit</button>
+                        <div id="editButtonContainerStep4" class="mt-3" style="display:none;">
+                            <button type="button" class="btn btn-warning" id="btnEditStep4">Edit</button>
                         </div>
                     </form>
                 </div>
 
-                <div id="step-content-6" class="step-content" style="display:none;">
-                    <!-- Step 6: Annual Report Upload -->
+                <div id="step-content-5" class="step-content" style="display:none;">
+                    <!-- Step 5: Annual Report Upload -->
                     <form class="forms-sample" id="psuFormAnnualReportUpload" enctype="multipart/form-data">
                         <div id="psuFormUploadErrors" class="alert alert-danger" style="display:none;"></div>
                         <div id="psuFormUploadSuccess" class="alert alert-success" style="display:none;"></div>
@@ -615,8 +510,8 @@
                         <input type="hidden" name="psu_mstr_id" id="psu_mstr_id"
                             value="<%= yearWiseData ? yearWiseData.id : '' %>">
                         <div class="d-flex justify-content-between mt-4 m-2">
-                            <button type="button" class="btn btn-secondary" id="prevStep6">Previous</button>
-                            <button type="button" class="btn btn-info" id="previewStep6">Preview Form</button>
+                            <button type="button" class="btn btn-secondary" id="prevStep5">Previous</button>
+                            <button type="button" class="btn btn-info" id="previewStep5">Preview Form</button>
                         </div>
                     </form>
                 </div>

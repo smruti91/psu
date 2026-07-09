@@ -8,7 +8,7 @@ const fs = require('fs');
 const path = require('path');
 
 
-// Set user in res.locals for all routes in this router 
+// Set user in res.locals for all routes in this router  
 router.use(DeptController.setUserLocals);
 
 router.get('/', ensureAuth, DeptController.dashboard);

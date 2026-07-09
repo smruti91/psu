@@ -29,6 +29,7 @@ router.post('/govt-rel-update', ensureAuth,upload.none(), PsuController.updateGo
 
 // --- PSU Profile ---
 router.post('/psu-profile', ensureAuth, upload.any(), validatePsuProfile, PsuController.submitPsuProfile);
+router.get('/get-shareholders/:profileId', ensureAuth, PsuController.getShareholdersByProfileId);
 router.post('/profile-approval', ensureAuth, PsuController.approvePsuProfile);
 
 // --- Annual Report Upload (Step 5) ---
@@ -113,7 +114,7 @@ router.post('/delete-challan-file', async (req, res) => {
     return res.json({ success: false });
 });
 router.post('/year-wise-form', ensureAuth, PsuController.getYearWiseForm);
-router.get('/view-data', ensureAuth, PsuController.viewPsuData);
+router.get('/view-data', ensureAuth, PsuController.viewPsuData); 
 router.get('/view-data-yearwise', ensureAuth, PsuController.viewPsuDataYearwise);
 router.get('/profile', ensureAuth, PsuController.profile);
 

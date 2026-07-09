@@ -1,22 +1,501 @@
-<div class="container">
-    <h2>View PSU Data</h2>
-    <div class="mb-3">
-        <label for="finYearSelect" class="form-label">Select Financial Year:</label>
-        <select id="finYearSelect" class="form-select">
-            <option value="">-- Select Year --</option>
-            <option value="2020-21">2020-21</option>
-                <option value="2021-22">2021-22</option>
-                <option value="2022-23">2022-23</option>
-                <option value="2023-24">2023-24</option>
-                <option value="2024-25">2024-25</option>
-        </select>
-        <input type="hidden" id="dmdNo" value="<%= DmdNo ? DmdNo : '' %>">
-        <input type="hidden" id="psuName" value="<%= Psu_Name ? Psu_Name : '' %>">
+<style>
+  /* Enhanced Dashboard Styles */
+  .dashboard-header {
+    margin-bottom: 2rem;
+  }
+  
+  .dashboard-header h2 {
+    font-weight: 600;
+    color: #001737;
+    margin-bottom: 0.5rem;
+  }
+  
+  .dashboard-header p {
+    color: #76838f;
+    font-size: 0.875rem;
+  }
+
+  /* Enhanced Stat Cards */
+  .stat-card {
+    border: none;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
+    height: 100%;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .stat-card .card-body {
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .stat-card .stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+  }
+
+  .stat-card .stat-icon i {
+    color: white;
+  }
+
+  .stat-card .stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-card .stat-label {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .stat-card .stat-description {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 0.5rem;
+  }
+
+  /* Gradient backgrounds */
+  .bg-gradient-warning {
+    background: linear-gradient(135deg, #f39915 0%, #ff6b6b 100%);
+  }
+
+  .bg-gradient-success {
+    background: linear-gradient(135deg, #21bf06 0%, #00d9ff 100%);
+  }
+
+  .bg-gradient-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #ff416c 100%);
+  }
+
+  /* Tab Navigation */
+  .tab-navigation {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+    padding: 0.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .tab-navigation .nav-link {
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    color: #76838f;
+    transition: all 0.3s ease;
+    border: none;
+    background: transparent;
+    margin: 0 0.25rem;
+  }
+
+  .tab-navigation .nav-link:hover {
+    background: rgba(132, 79, 193, 0.1);
+    color: #844fc1;
+  }
+
+  .tab-navigation .nav-link.active {
+    background: linear-gradient(135deg, #844fc1 0%, #6d44a8 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(132, 79, 193, 0.3);
+  }
+
+  .tab-navigation .nav-link .badge {
+    margin-left: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+  }
+
+  /* Enhanced Tables */
+  .table-container {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+    padding: 1.5rem;
+    animation: fadeIn 0.5s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .table-container h4 {
+    font-weight: 600;
+    color: #001737;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f3f3f3;
+  }
+
+  .enhanced-table {
+    margin-bottom: 0;
+  }
+
+  .enhanced-table thead th {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    color: #001737;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    padding: 1rem 1.25rem;
+    border: none;
+  }
+
+  .enhanced-table tbody tr {
+    transition: all 0.2s ease;
+    border-bottom: 1px solid #f3f3f3;
+  }
+
+  .enhanced-table tbody tr:hover {
+    background: linear-gradient(90deg, rgba(132, 79, 193, 0.05) 0%, rgba(132, 79, 193, 0.02) 100%);
+    transform: translateX(2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .enhanced-table tbody td {
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+    color: #495057;
+    font-size: 0.875rem;
+    border: none;
+  }
+
+  .enhanced-table tbody td:first-child {
+    font-weight: 600;
+    color: #001737;
+  }
+
+  .enhanced-table tbody td .badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 0.75rem;
+  }
+
+  /* Enhanced Buttons */
+  .btn-action {
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    border: none;
+    margin: 0 0.25rem;
+  }
+
+  .btn-view {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+  }
+
+  .btn-view:hover {
+    background: linear-gradient(135deg, #138496 0%, #117a8b 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+  }
+
+  .btn-approve {
+    background: linear-gradient(135deg, #21bf06 0%, #1aa105 100%);
+    color: white;
+  }
+
+  .btn-approve:hover {
+    background: linear-gradient(135deg, #1aa105 0%, #168704 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(33, 191, 6, 0.3);
+  }
+
+  .btn-reject {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+  }
+
+  .btn-reject:hover {
+    background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+  }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #76838f;
+  }
+
+  .empty-state i {
+    font-size: 4rem;
+    color: #e4e4f4;
+    margin-bottom: 1rem;
+  }
+
+  .empty-state p {
+    font-size: 1rem;
+    margin-bottom: 0;
+  }
+
+  /* Status Badges */
+  .badge-pending {
+    background: linear-gradient(135deg, #f39915 0%, #ff6b6b 100%);
+    color: white;
+  }
+
+  .badge-approved {
+    background: linear-gradient(135deg, #21bf06 0%, #00d9ff 100%);
+    color: white;
+  }
+
+  .badge-rejected {
+    background: linear-gradient(135deg, #dc3545 0%, #ff416c 100%);
+    color: white;
+  }
+
+  @media (max-width: 768px) {
+    .stat-card .stat-value {
+      font-size: 2rem;
+    }
+    
+    .stat-card .card-body {
+      padding: 1.5rem 1rem;
+    }
+
+    .tab-navigation .nav-link {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+  }
+</style>
+
+<div class="container-fluid px-4 mt-4">
+  <!-- Dashboard Header -->
+  <div class="dashboard-header">
+    <h2><i class="ti-dashboard me-2"></i>Data Summary Overview</h2>
+   
+  </div>
+
+  <!-- Statistics Cards -->
+ 
+
+  <!-- Tab Navigation -->
+  <div class="tab-navigation">
+    <ul class="nav nav-pills" id="dashboardTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="pending-tab" data-toggle="tab" data-target="#pendingTable" type="button" role="tab">
+          <i class="ti-time me-2"></i>Pending
+          <span class="badge bg-warning"><%= pendingYears.length %></span>
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="approved-tab" data-toggle="tab" data-target="#approvedTable" type="button" role="tab">
+          <i class="ti-check me-2"></i>Approved
+          <span class="badge bg-success"><%= approvedYears.length %></span>
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="rejected-tab" data-toggle="tab" data-target="#rejectedTable" type="button" role="tab">
+          <i class="ti-close me-2"></i>Rejected
+          <span class="badge bg-danger"><%= rejectedYears.length %></span>
+        </button>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="tab-content" id="dashboardTabsContent">
+    <!-- Pending Table -->
+    <div class="tab-pane fade show active" id="pendingTable" role="tabpanel">
+      <div class="table-container">
+        <h4><i class="ti-time me-2 text-warning"></i>Pending Records</h4>
+        <% if (pendingYears.length > 0) { %>
+          <table class="table enhanced-table">
+            <thead>
+              <tr>
+                <th style="width: 10%;">Sl No</th>
+                <th style="width: 40%;">Financial Year</th>
+                <th style="width: 20%;">Status</th>
+                <th style="width: 30%;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% pendingYears.forEach((row, index)=> { %>
+                <tr>
+                  <td><%= index + 1 %></td>
+                  <td><strong><%= row.FinYr %></strong></td>
+                  <td><span class="badge badge-pending">Pending</span></td>
+                  <td>
+                    <button class="btn btn-action btn-view view-btn" data-id="<%= row.id %>" data-url="/dept/get-details">
+                      <i class="ti-eye me-1"></i>View
+                    </button>
+                    <button class="btn btn-action btn-warning view-transation" data-id="<%= row.id %>" data-url="/dept/audit-history">
+                      <i class="ti-eye me-1"></i>Transaction
+                    </button>
+                    <!-- <button class="btn btn-action btn-approve approve-btn" data-id="<%= row.id %>">
+                      <i class="ti-check me-1"></i>Approve
+                    </button>
+                    <button class="btn btn-action btn-reject reject-btn" data-id="<%= row.id %>">
+                      <i class="ti-close me-1"></i>Reject
+                    </button> -->
+                  </td>
+                </tr>
+                <% }) %>
+            </tbody>
+          </table>
+        <% } else { %>
+          <div class="empty-state">
+            <i class="ti-time"></i>
+            <p>No pending records found</p>
+          </div>
+        <% } %>
+      </div>
     </div>
 
-    <div id="yearwiseGrid" class="mb-4"></div>
-    <div id="balanceSheetGrid" class="mb-4"></div>
-    <div id="incomeSheetGrid" class="mb-4"></div>
-    <div id="govtRelGrid" class="mb-4"></div>
+    <!-- Approved Table -->
+    <div class="tab-pane fade" id="approvedTable" role="tabpanel">
+      <div class="table-container">
+        <h4><i class="ti-check me-2 text-success"></i>Approved Records</h4>
+        <% if (approvedYears.length > 0) { %>
+          <table class="table enhanced-table">
+            <thead>
+              <tr>
+                <th style="width: 10%;">Sl No</th>
+                <th style="width: 40%;">Financial Year</th>
+                <th style="width: 20%;">Status</th>
+                <th style="width: 30%;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% approvedYears.forEach((row, index)=> { %>
+                <tr>
+                  <td><%= index + 1 %></td>
+                  <td><strong><%= row.FinYr %></strong></td>
+                  <td><span class="badge badge-approved">Approved</span></td>
+                  <td>
+                    <button class="btn btn-action btn-view view-btn" data-id="<%= row.id %>" data-url="/dept/get-details">
+                      <i class="ti-eye me-1"></i>View
+                    </button>
+                  </td>
+                </tr>
+                <% }) %>
+            </tbody>
+          </table>
+        <% } else { %>
+          <div class="empty-state">
+            <i class="ti-check"></i>
+            <p>No approved records found</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Rejected Table -->
+    <div class="tab-pane fade" id="rejectedTable" role="tabpanel">
+      <div class="table-container">
+        <h4><i class="ti-close me-2 text-danger"></i>Rejected Records</h4>
+        <% if (rejectedYears.length > 0) { %>
+          <table class="table enhanced-table">
+            <thead>
+              <tr>
+                <th style="width: 10%;">Sl No</th>
+                <th style="width: 40%;">Financial Year</th>
+                <th style="width: 20%;">Status</th>
+                <th style="width: 30%;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% rejectedYears.forEach((row, index)=> { %>
+                <tr>
+                  <td><%= index + 1 %></td>
+                  <td><strong><%= row.FinYr %></strong></td>
+                  <td><span class="badge badge-rejected">Rejected</span></td>
+                  <td>
+                    <button class="btn btn-action btn-view view-btn" data-id="<%= row.id %>" data-url="/dept/get-details">
+                      <i class="ti-eye me-1"></i>View
+                    </button>
+                  </td>
+                </tr>
+                <% }) %>
+            </tbody>
+          </table>
+        <% } else { %>
+          <div class="empty-state">
+            <i class="ti-close"></i>
+            <p>No rejected records found</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
 </div>
+
+<script>
+  // Enhanced tab switching function for stat cards
+  function switchTab(tabName) {
+    // Trigger the Bootstrap 4 tab
+    const tabId = '#' + tabName + 'Table';
+    const tabLink = document.querySelector('[data-target="' + tabId + '"], [href="' + tabId + '"]');
+    
+    if (tabLink) {
+      // Use jQuery to trigger Bootstrap 4 tab
+      if (typeof $ !== 'undefined') {
+        $(tabLink).tab('show');
+      } else {
+        // Fallback: manually activate the tab
+        tabLink.click();
+      }
+    }
+  }
+
+  // Add smooth scroll and interactions
+  document.addEventListener('DOMContentLoaded', function() {
+    // Add hover effects to stat cards
+    const statCards = document.querySelectorAll('.stat-card');
+    statCards.forEach(card => {
+      card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-5px)';
+      });
+      
+      card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+      });
+    });
+
+    // Add animation to table rows on load
+    const tableRows = document.querySelectorAll('.enhanced-table tbody tr');
+    tableRows.forEach((row, index) => {
+      row.style.animation = `fadeIn 0.5s ease ${index * 0.1}s both`;
+    });
+
+    // Initialize tooltips if Bootstrap is available
+    if (typeof $ !== 'undefined' && $.fn.tooltip) {
+      $('[data-toggle="tooltip"]').tooltip();
+    }
+  });
+</script>
 

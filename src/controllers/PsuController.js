@@ -20,16 +20,33 @@ exports.submitPsuProfile = async (req, res) => {
     Paid_Share_Capital,
     Govt_Contri_Amt,
     Govt_Contri_Percent,
-    NameOf_Share_Holder,
     fin_year,
     status = 1
   } = req.body;
+console.log('Received PSU Profile data:', req.body);
+  // Handle multiple shareholders - can be a string (single) or array
+ let shareholders = req.body.shareholders || [];
+ let shareholderPercents = req.body.shareholder_percent || [];
+
+  if (!Array.isArray(shareholders)) {
+    shareholders = [shareholders];
+  }
+
+  if (!Array.isArray(shareholderPercents)) {
+    shareholderPercents = [shareholderPercents];
+  }
+
+  const shareholderData = shareholders
+    .map((name, index) => ({
+      shareholder_name: (name || '').trim(),
+      shareholder_percent: shareholderPercents[index] || 0
+    }))
+    .filter(item => item.shareholder_name !== '');
 
   try {
     let rocDocumentPath = null;
 
     // Handle File Upload for roc_document
-    console.log(req.files);
     
     if (req.files && req.files.length > 0) {
       const rocFile = req.files.find(f => f.fieldname === 'roc' || f.fieldname === 'roc_document');
@@ -48,6 +65,12 @@ exports.submitPsuProfile = async (req, res) => {
     }
 
     // Ensure no undefined values are passed to the database
+    // Use first shareholder name for backward compatibility
+    const firstShareholderName =
+    shareholderData.length > 0
+      ? shareholderData[0].shareholder_name
+      : null;
+    console.log('First Shareholder Name:', firstShareholderName);
     const sanitizedBody = {
       dmd_no: dmd_no ?? null,
       psu_id: psu_id ?? null,
@@ -56,7 +79,7 @@ exports.submitPsuProfile = async (req, res) => {
       Paid_Share_Capital: Paid_Share_Capital ?? null,
       Govt_Contri_Amt: Govt_Contri_Amt ?? null,
       Govt_Contri_Percent: Govt_Contri_Percent ?? null,
-      NameOf_Share_Holder: NameOf_Share_Holder ?? null,
+      NameOf_Share_Holder: firstShareholderName??null,
       fin_year: fin_year ?? null,
       status: status ?? 1
     };
@@ -67,35 +90,96 @@ exports.submitPsuProfile = async (req, res) => {
       [sanitizedBody.psu_id, sanitizedBody.fin_year]
     );
 
+    let profileId;
+
     if (existing && existing.length > 0) {
+      profileId = existing[0].id;
       // Update existing record
       const updateQuery = `UPDATE tbl_psu_profile SET 
         dmd_no=?, Auth_Share_Capital=?, Sub_Share_Capital=?, Paid_Share_Capital=?, 
-        Govt_Contri_Amt=?, Govt_Contri_Percent=?, NameOf_Share_Holder=?, status=?, roc_document=?, updated_at=NOW() 
+        Govt_Contri_Amt=?, Govt_Contri_Percent=?, status=?, roc_document=?, updated_at=NOW() 
         WHERE id=?`;
       const updateValues = [
         sanitizedBody.dmd_no, sanitizedBody.Auth_Share_Capital, sanitizedBody.Sub_Share_Capital, sanitizedBody.Paid_Share_Capital, 
-        sanitizedBody.Govt_Contri_Amt, sanitizedBody.Govt_Contri_Percent, sanitizedBody.NameOf_Share_Holder, sanitizedBody.status, rocDocumentPath, existing[0].id
+        sanitizedBody.Govt_Contri_Amt, sanitizedBody.Govt_Contri_Percent, sanitizedBody.status, rocDocumentPath, profileId
       ];
       await pool.execute(updateQuery, updateValues);
-      return res.json({ success: true, message: 'PSU Profile updated successfully!' });
+      
+      // Delete old shareholders for this profile
+      await pool.execute('DELETE FROM tbl_psu_shareholders WHERE profile_id = ?', [profileId]);
+    } else {
+      // Insert new record
+      const insertQuery = `INSERT INTO tbl_psu_profile 
+        (dmd_no, psu_id, Auth_Share_Capital, Sub_Share_Capital, Paid_Share_Capital, Govt_Contri_Amt, Govt_Contri_Percent, fin_year, status, roc_document, created_at, updated_at) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`;
+      const insertValues = [
+        sanitizedBody.dmd_no, sanitizedBody.psu_id, sanitizedBody.Auth_Share_Capital, sanitizedBody.Sub_Share_Capital, sanitizedBody.Paid_Share_Capital, 
+        sanitizedBody.Govt_Contri_Amt, sanitizedBody.Govt_Contri_Percent, sanitizedBody.fin_year, sanitizedBody.status, rocDocumentPath
+      ];
+      const [result] = await pool.execute(insertQuery, insertValues);
+      profileId = result.insertId;
     }
 
-    // Insert new record
-    const insertQuery = `INSERT INTO tbl_psu_profile 
-      (dmd_no, psu_id, Auth_Share_Capital, Sub_Share_Capital, Paid_Share_Capital, Govt_Contri_Amt, Govt_Contri_Percent, NameOf_Share_Holder, fin_year, status, roc_document, created_at, updated_at) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`;
-    const insertValues = [
-      sanitizedBody.dmd_no, sanitizedBody.psu_id, sanitizedBody.Auth_Share_Capital, sanitizedBody.Sub_Share_Capital, sanitizedBody.Paid_Share_Capital, 
-      sanitizedBody.Govt_Contri_Amt, sanitizedBody.Govt_Contri_Percent, sanitizedBody.NameOf_Share_Holder, sanitizedBody.fin_year, sanitizedBody.status, rocDocumentPath
-    ];
-    const [result] = await pool.execute(insertQuery, insertValues);
-    return res.json({ success: true, message: 'PSU Profile saved successfully!', id: result.insertId });
+    // Save shareholders to tbl_psu_shareholders
+   if (shareholderData.length > 0) {
+
+    const shareholderQuery = `
+        INSERT INTO tbl_psu_shareholders
+        (
+            profile_id,
+            shareholder_name,
+            shareholder_percent,
+            created_at
+        )
+        VALUES (?, ?, ?, NOW())
+    `;
+
+    for (const shareholder of shareholderData) {
+
+      await pool.execute(
+        shareholderQuery,
+        [
+          profileId,
+          shareholder.shareholder_name,
+          shareholder.shareholder_percent
+        ]
+      );
+    }
+  }
+
+    return res.json({ 
+      success: true, 
+      message: 'PSU Profile and Shareholders saved successfully!', 
+      id: profileId 
+    });
   } catch (err) {
     console.error('DB Error (PSU Profile):', err);
     return res.status(500).json({ success: false, errors: [{ msg: 'Database error: ' + err.message }] });
   }
 };
+
+exports.getShareholdersByProfileId = async (req, res) => {
+  const { profileId } = req.params;
+
+  try {
+    const [shareholders] = await pool.execute(
+      'SELECT id, shareholder_name FROM tbl_psu_shareholders WHERE profile_id = ? ORDER BY created_at ASC',
+      [profileId]
+    );
+    
+    return res.json({
+      success: true,
+      shareholders: shareholders.map(s => s.shareholder_name)
+    });
+  } catch (err) {
+    console.error('DB Error (Get Shareholders):', err);
+    return res.status(500).json({ 
+      success: false, 
+      errors: [{ msg: 'Database error: ' + err.message }] 
+    });
+  }
+};
+
 exports.approvePsuProfile = async (req, res) => {
     try {
 
@@ -161,16 +245,62 @@ exports.submitIncomeStatement = async (req, res) => {
     psu_mstr_id
   } = req.body;
 
-  // Validate psu_mstr_id
-  if (!psu_mstr_id) {
-    return res.status(400).json({ errors: [{ msg: 'Please save Year Wise Data first (Step 1).' }] });
-  }
-
   try {
-    // Check if record already exists
+    let yearwiseId = psu_mstr_id;
+
+    // If psu_mstr_id is not provided or empty, create a yearwise record first
+    if (!yearwiseId) {
+      const userId = req.session.user.id;
+      const DmdNo = req.session.user.dmdNo;
+      const Psu_Name = req.session.user.Psu_Name;
+      const profileId = req.session.user.profileId; // Get profile_id from session
+
+      // Get Financial Year from current date if not provided
+      const currentDate = new Date();
+      const fiscalYear = currentDate.getFullYear();
+
+      // Fetch profile data from tbl_psu_profile
+      const [profileData] = await pool.execute(
+        'SELECT Auth_Share_Capital, Sub_Share_Capital, Paid_Share_Capital, Govt_Contri_Amt, Govt_Contri_Percent, NameOf_Share_Holder FROM tbl_psu_profile WHERE id = ?',
+        [profileId]
+      );
+
+      if (!profileData || profileData.length === 0) {
+        return res.status(400).json({ errors: [{ msg: 'Profile data not found. Please complete your profile first.' }] });
+      }
+
+      const profile = profileData[0];
+
+      // Insert into tbl_psu_yearwise_mstr
+      const insertYearwiseQuery = `INSERT INTO tbl_psu_yearwise_mstr 
+        (user_id, DmdNo, profile_id, Psu_Name, Auth_Share_Capital, Sub_Share_Capital, Paid_Share_Capital, 
+         Govt_Contri_Amt, Govt_Contri_Percent, NameOf_Share_Holder, FinYr, Created_Dt, Modifed_Dt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`;
+      
+      const yearwiseValues = [
+        userId,
+        DmdNo,
+        profileId,
+        Psu_Name,
+        profile.Auth_Share_Capital,
+        profile.Sub_Share_Capital,
+        profile.Paid_Share_Capital,
+        profile.Govt_Contri_Amt,
+        profile.Govt_Contri_Percent || null,
+        profile.NameOf_Share_Holder,
+        fiscalYear || null
+      ];
+
+      const [yearwiseResult] = await pool.execute(insertYearwiseQuery, yearwiseValues);
+      yearwiseId = yearwiseResult.insertId;
+
+      console.log('Created new yearwise record with ID:', yearwiseId);
+    }
+
+    // Check if income statement record already exists
     const [existing] = await pool.execute(
       'SELECT id FROM tbl_income_sheet_indicator WHERE psu_mstr_id = ?',
-      [psu_mstr_id]
+      [yearwiseId]
     );
 
     if (existing && existing.length > 0) {
@@ -183,22 +313,25 @@ exports.submitIncomeStatement = async (req, res) => {
       const updateValues = [
         tot_revenue, cost_ofgoods_sold, operating_expenses, tot_expenses,
         ebitda, depreciation, ebit_operating, int_expenses, tax_expenses,
-        any_other_expenses, net_income, psu_mstr_id
+        any_other_expenses, net_income, yearwiseId
       ];
       await pool.execute(updateQuery, updateValues);
-      return res.json({ success: true, message: 'Income Statement updated successfully!' });
+      return res.json({ success: true, message: 'Income Statement updated successfully!', id: yearwiseId });
     }
 
+    // Insert new income statement record
     const insertQuery = `INSERT INTO tbl_income_sheet_indicator
       (tot_revenue, cost_ofgoods_sold, operating_expenses, tot_expenses, ebitda, depreciation, ebit_operating, int_expenses, tax_expenses, any_other_expenses, net_income, psu_mstr_id, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`;
     const insertValues = [
       tot_revenue, cost_ofgoods_sold, operating_expenses, tot_expenses,
       ebitda, depreciation, ebit_operating, int_expenses, tax_expenses,
-      any_other_expenses, net_income, psu_mstr_id
+      any_other_expenses, net_income, yearwiseId
     ];
     const [result] = await pool.execute(insertQuery, insertValues);
-    return res.json({ success: true, message: 'Income Statement saved successfully!', id: result.insertId });
+    
+    // Return the yearwise ID in response so it can be used for subsequent steps
+    return res.json({ success: true, message: 'Income Statement saved successfully!', id: yearwiseId });
   } catch (err) {
     console.error('DB Insert Error (Income Statement):', err);
     return res.status(500).json({ errors: [{ msg: 'Database error: ' + err.message }] });
@@ -815,7 +948,7 @@ exports.updateYearWiseData = async (req, res) => {
   }
 };
 // Fetch year-wise data for a given year and PSU
-exports.getYearWiseForm = async (req, res) => {
+exports.getYearWiseForm = async (req, res) => { 
   console.log('Request body for year-wise form:', req.session);
   const Fin_Yr = req.body.finYr;
   const Psu_Name = req.session.user.Psu_Name;
@@ -884,8 +1017,7 @@ exports.getYearWiseForm = async (req, res) => {
       `SELECT * FROM tbl_psu_profile  WHERE psu_id = ? and status = ? `,
       [psuId, 8]
     );
-    console.log(psuId, 8);
-
+    
   
     if (profile && profile.length > 0) {
         profileData = profile[0];
@@ -1168,12 +1300,26 @@ exports.submitPrfitLoss = async (req, res) => {
 
 // View all PSU data for the logged-in user
 exports.viewPsuData = async (req, res) => {
-  
+  const userId = req.session.user.id;
+  const dmdNo = req.session.user.dmdNo;
+
+  const [yearwiseData] = await pool.execute(
+        `SELECT * FROM tbl_psu_yearwise_mstr WHERE DmdNo = ? AND user_id = ? ORDER BY FinYr DESC`,
+        [dmdNo, userId]
+      );
+  const pendingYears = yearwiseData.filter(row => row.status === 1);
+  const approvedYears = yearwiseData.filter(row => row.status === 3);
+  const rejectedYears = yearwiseData.filter(row => row.status === 2);
   res.render('psu/viewData', { 
       layout: 'layouts/dashboard',
+      scripts:['getDeptData'],
       title: 'View PSU Data', 
       DmdNo: req.session.user.dmdNo,
-      Psu_Name: req.session.user.Psu_Name
+      Psu_Name: req.session.user.Psu_Name,
+      yearwiseData:yearwiseData,
+      pendingYears: pendingYears,
+      approvedYears: approvedYears,
+      rejectedYears: rejectedYears
     });
 };
 
@@ -1333,6 +1479,7 @@ exports.profile = async (req, res) => {
   const psuId = req.session.user.psu_id;
   const dmdNo = req.session.user.dmdNo;
   let psuProfile = null;
+  let shareholders = [];
   try {
     const [rows] = await pool.execute(
       `SELECT * FROM tbl_psu_profile WHERE psu_id = ? LIMIT 1`,
@@ -1340,6 +1487,16 @@ exports.profile = async (req, res) => {
     );
     if (rows && rows.length > 0) {
       psuProfile = rows[0];
+      // Fetch shareholders for this profile
+      const [shareholderRows] = await pool.execute(
+      `SELECT shareholder_name, shareholder_percent
+      FROM tbl_psu_shareholders
+      WHERE profile_id = ?
+      ORDER BY created_at ASC`,
+      [psuProfile.id]
+    );
+
+    shareholders = shareholderRows;
     }
   } catch (err) {
     console.error('Error fetching PSU profile:', err);
@@ -1349,6 +1506,7 @@ exports.profile = async (req, res) => {
       title: 'PSU Profile' ,
       scripts: ['psuProfile'],
       psuProfile,
+      shareholders,
       psuId,
       dmdNo
     });

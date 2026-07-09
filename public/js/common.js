@@ -13,133 +13,87 @@ function hideFormButton(form, selector) {
     if (btn) btn.style.display = 'none';
 }
 const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-// --- Step 1: Year Wise Data ---
+// --- Step 1: Income Statement ---
 document.addEventListener('DOMContentLoaded', function () {
-  var form = document.getElementById('psuFormYearWiseData');
-  if (!form) return;
-  form.addEventListener('submit', function (e) {
+  var form1 = document.getElementById('psuFormIncomeStatement');
+  
+  if (!form1) return;
+  form1.addEventListener('submit', function (e) {
     e.preventDefault();
-
+    console.log('Income Statement form:', form1);
     var fieldIds = [
-      'txtNameofPSU', 'txtAuthorizedShareCap', 'txtSubShareCap', 'txtPaidUpShareCap',
-      'txtGovtContribution', 'txtNameofShareHolders'
+      'txtTotRevenue', 'txtCostofGoodsSold', 'txtOprexpenses', 'txtTotalExpenses',
+      'txtEbitda', 'txtDepAmor', 'txtEbit', 'txtIntExpenses', 'txtTaxExpenses',
+      'txtAnyExpenses', 'txtNetIncome'
     ];
-    
     fieldIds.forEach(function (id) {
-      var errDiv = document.getElementById('error_' + id);
-      if (errDiv) { errDiv.textContent = ''; errDiv.style.display = 'none'; }
-      if (form[id]) form[id].classList.remove('is-invalid');
+      var field = form1.querySelector('#' + id);
+      if (field) field.classList.remove('is-invalid');
     });
+    var hasError = false;
+    function isNum(id) { return /^\d+(\.\d+)?$/.test(form1.querySelector('#' + id).value.trim()); }
+    function isEmp(id) { return !form1.querySelector('#' + id).value.trim(); }
+    fieldIds.forEach(function (id) {
+      if (isEmp(id) || !isNum(id)) { form1.querySelector('#' + id).classList.add('is-invalid'); hasError = true; }
+    });
+    if (hasError) return;
 
-    var errorDiv = document.getElementById('psuFormYearWiseDataErrors');
-    var successDiv = document.getElementById('psuFormYearWiseDataSuccess');
+    var formData = new FormData(form1);
+    var isUpdate = form1.querySelector('#incomeSheetId');
+    var url = isUpdate ? '/psu/income-statement-update' : '/psu/income-statement';
+    var successDiv = document.getElementById('psuFormIncomeStatementSuccess');
+    var errorDiv = document.getElementById('psuFormIncomeStatementErrors');
     errorDiv.style.display = 'none';
     successDiv.style.display = 'none';
 
-    var hasError = false;
-    function setFieldError(id, msg) {
-      var errDiv = document.getElementById('error_' + id);
-      if (errDiv) { errDiv.textContent = msg; errDiv.style.display = 'block'; }
-      if (form[id]) form[id].classList.add('is-invalid');
-      hasError = true;
-    }
-    function isEmpty(id) { return !form[id].value.trim(); }
-    function isNumber(id) { return /^\d+(\.\d+)?$/.test(form[id].value.trim()); }
-
-    if (isEmpty('txtNameofPSU')) setFieldError('txtNameofPSU', 'Name of the PSU is required.');
-    if (isEmpty('txtAuthorizedShareCap') || !isNumber('txtAuthorizedShareCap')) setFieldError('txtAuthorizedShareCap', 'Authorized Share Capital must be a number.');
-    if (isEmpty('txtSubShareCap') || !isNumber('txtSubShareCap')) setFieldError('txtSubShareCap', 'Subscribed Share Capital must be a number.');
-    if (isEmpty('txtPaidUpShareCap') || !isNumber('txtPaidUpShareCap')) setFieldError('txtPaidUpShareCap', 'Paid-up Share Capital must be a number.');
-    if (isEmpty('txtGovtContribution') || !isNumber('txtGovtContribution')) setFieldError('txtGovtContribution', 'Govt. Contribution must be a number.');
-    if (isEmpty('txtNameofShareHolders')) setFieldError('txtNameofShareHolders', 'Name of the Share Holders is required.');
-    
-    if (hasError) return;
-
-    var formData = new FormData(form);
-    var isUpdate = formData.get('yearWiseId');
-    var url = isUpdate ? '/psu/year-wise-data-update' : '/psu/year-wise-data';
-    console.log('Submitting form to URL:', url, 'with data:', Object.fromEntries(formData.entries()));
-    console.log(url);
-    fetch(url, {
-      method: 'POST',
-      body: formData,
-      credentials: 'same-origin',
-      headers: { 'Accept': 'application/json',  'CSRF-Token': csrfToken }
-    })
-    .then(function(res) { return res.json(); })
-    .then(function(data) {
-      console.log('Response from server:', data);
-      if (data.errors) {
-        data.errors.forEach(function (err) {
-          if (err.param && document.getElementById('error_' + err.param)) {
-            var field = form[err.param];
-            var errDiv = document.getElementById('error_' + err.param);
-            errDiv.textContent = err.msg;
-            errDiv.style.display = 'block';
-            if (field) field.classList.add('is-invalid');
-          }
-        });
-        
-        
-      } else if (data.success) {
-        successDiv.innerHTML = data.message;
-        successDiv.style.display = 'block';
-        Swal.fire({
-        title: "Success!",
-        text: data.message,
-        icon: "success"
-      });
-        hideFormButton(form, '.btn-save-step1, .btn-update-step1');
-        var nextBtn = document.getElementById('nextStep1');
-        if (nextBtn) nextBtn.style.display = 'inline-block';
-        showEditButton('editButtonContainerStep1');
-        setTimeout(function() { hideMsgDivs(errorDiv, successDiv); }, 5000);
-        if (data.id) {
-          // Update all hidden psu_mstr_id fields using name attribute (avoid duplicate id issues)
-          var psuInputs = document.querySelectorAll('input[name="psu_mstr_id"]');
-          console.log('Updating ' + psuInputs.length + ' psu_mstr_id inputs with value: ' + data.id);
-          psuInputs.forEach(function(el) {
-            el.value = data.id;
-            console.log('Updated input:', el.id || el.name, '=', el.value);
+    fetch(url, { method: 'POST', body: formData, credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.success) {
+          successDiv.innerHTML = data.message;
+          successDiv.style.display = 'block';
+          Swal.fire({
+            title: "Success!",
+            text: data.message,
+            icon: "success"
           });
-          var ywId = document.getElementById('yearWiseId');
-          if (ywId) ywId.value = data.id;
+          hideFormButton(form1, '#submitStep1, #updateStep1');
+          var nextBtn = document.getElementById('nextStep1');
+          if (nextBtn) nextBtn.style.display = 'inline-block';
+          showEditButton('editButtonContainerStep1');
+          if (data.id) {
+            var psuInputs = document.querySelectorAll('input[name="psu_mstr_id"]');
+            console.log('Updating ' + psuInputs.length + ' psu_mstr_id inputs with value: ' + data.id);
+            psuInputs.forEach(function(el) {
+              el.value = data.id;
+              console.log('Updated input:', el.id || el.name, '=', el.value);
+            });
+          }
+        } else if (data.errors) {
+          errorDiv.innerHTML = data.errors.map(function(e) { return e.msg; }).join('<br>');
+          errorDiv.style.display = 'block';
+        } else if (data.message) {
+          errorDiv.innerHTML = data.message;
+          errorDiv.style.display = 'block';
         }
-      }
-    })
-    .catch(function() {
-      errorDiv.innerHTML = 'An error occurred while submitting the form.';
-      errorDiv.style.display = 'block';
-    });
+        setTimeout(function() { hideMsgDivs(errorDiv, successDiv); }, 5000);
+      })
+      .catch(function(err) {
+        console.error('Error:', err);
+        errorDiv.innerHTML = 'Network error. Please check your connection.';
+        errorDiv.style.display = 'block';
+      });
   });
 
   // Edit button for Step 1
   var editBtn1 = document.getElementById('btnEditStep1');
   if (editBtn1) {
     editBtn1.addEventListener('click', function() {
-      var btn = form.querySelector('.btn-save-step1, .btn-update-step1');
+      var btn = form1.querySelector('.btn-save-step1, .btn-update-step1');
       if (btn) btn.style.display = 'inline-block';
       this.style.display = 'none';
     });
   }
-
-  // Delete existing file (single file delete)
-  document.querySelectorAll('.delete-btn').forEach(function(button) {
-    button.addEventListener('click', function() {
-      var csrfToken = document.querySelector('[name="csrf-token"]')?.getAttribute('content');
-      var id = this.getAttribute('data-id');
-      if (confirm('Are you sure you want to delete this file?')) {
-        fetch('/psu/delete-challan-file', {
-          method: 'POST',
-          credentials: 'same-origin',
-          headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
-          body: JSON.stringify({ id: id })
-        })
-        .then(function(res) { return res.json(); })
-        .then(function(data) { if (data.success) location.reload(); });
-      }
-    });
-  });
 
   // Delete file from list (new handler)
   document.querySelectorAll('.delete-file-btn').forEach(function(button) {
@@ -229,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function () {
             text: data.message,
             icon: "success"
           });
-          hideFormButton(form2, '#submitStep3, #updateStep3');
+          hideFormButton(form2, '#submitStep2, #updateStep2');
           var nextBtn = document.getElementById('nextStep2');
           if (nextBtn) nextBtn.style.display = 'inline-block';
           showEditButton('editButtonContainerStep2');
@@ -329,7 +283,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 
-// --- Step 4: Profit & Loss ---
+// --- Step 3: Profit & Loss ---
 document.addEventListener('DOMContentLoaded', function () {
   var formPL = document.getElementById('psuFormProfitLoss');
   if (!formPL) return;
@@ -373,11 +327,11 @@ document.addEventListener('DOMContentLoaded', function () {
           });
           }
           // Logic to show next step or edit button
-           hideFormButton(formPL, '.btn-save-step4, .btn-update-step4');
-          var nextBtn = document.getElementById('nextStep4'); // Adjust based on your stepper
+           hideFormButton(formPL, '.btn-save-step3, .btn-update-step3');
+          var nextBtn = document.getElementById('nextStep3'); // Adjust based on your stepper
           if (nextBtn) nextBtn.style.display = 'inline-block';
 
-           showEditButton('editButtonContainerStep4');
+           showEditButton('editButtonContainerStep3');
         } else if (data.errors) {
           if (errorDiv) {
             errorDiv.innerHTML = data.errors.map(function(e) { return e.msg; }).join('<br>');
@@ -395,7 +349,7 @@ document.addEventListener('DOMContentLoaded', function () {
       });
   });
 });
-// --- Step 5: Govt. Relationship ---
+// --- Step 4: Govt. Relationship ---
 document.addEventListener('DOMContentLoaded', function () {
   var form5 = document.getElementById('psuFormGovtRel');
   if (!form5) return;
@@ -431,10 +385,10 @@ document.addEventListener('DOMContentLoaded', function () {
             text: data.message,
             icon: "success"
           });
-          hideFormButton(form5, '#submitStep5, #updateStep5');
+          hideFormButton(form5, '#submitStep4, #updateStep4');
           var nextBtn = document.getElementById('nextStep4');
           if (nextBtn) nextBtn.style.display = 'inline-block';
-          showEditButton('editButtonContainerStep5');
+          showEditButton('editButtonContainerStep4');
         } else if (data.errors) {
           errorDiv.innerHTML = data.errors.map(function(e) { return e.msg; }).join('<br>');
           errorDiv.style.display = 'block';
@@ -460,12 +414,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 });
-// --- Step 6: Annual Report Upload ---
+// --- Step 5: Annual Report Upload ---
 document.addEventListener('DOMContentLoaded', function () {
-  var form6 = document.getElementById('psuFormAnnualReportUpload');
-  if (!form6) return;
+  var form5 = document.getElementById('psuFormAnnualReportUpload');
+  if (!form5) return;
 
-  form6.addEventListener('submit', function (e) {
+  form5.addEventListener('submit', function (e) {
     e.preventDefault();
     var errorDiv = document.getElementById('psuFormUploadErrors');
     var successDiv = document.getElementById('psuFormUploadSuccess');
@@ -491,7 +445,7 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    var formData = new FormData(form6);
+    var formData = new FormData(form5);
     var isUpdate = formData.get('annualReportId');
     var url = isUpdate ? '/psu/annual-report-update' : '/psu/annual-report';
 
@@ -510,10 +464,10 @@ document.addEventListener('DOMContentLoaded', function () {
             text: data.message,
             icon: "success"
           });
-          var submitBtn = form6.querySelector('#submitStep6');
+          var submitBtn = form5.querySelector('#submitStep5');
           if (submitBtn) submitBtn.style.display = 'none';
 
-           localStorage.setItem('activeStep', '6');
+           localStorage.setItem('activeStep', '5');
 
           location.reload();
         } else {
@@ -534,22 +488,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const activeStep = localStorage.getItem('activeStep');
 
-    if (activeStep === '6') {
+    if (activeStep === '5') {
 
         document.querySelectorAll('.step-content').forEach(step => {
             step.style.display = 'none';
         });
 
-        document.getElementById('step-content-6').style.display = 'block';
+        document.getElementById('step-content-5').style.display = 'block';
 
         // Optional: activate step indicator/tab
         document.querySelectorAll('.step-item').forEach(item => {
             item.classList.remove('active');
         });
 
-        const step6Indicator = document.querySelector('[data-step="6"]');
-        if (step6Indicator) {
-            step6Indicator.classList.add('active');
+        const step5Indicator = document.querySelector('[data-step="5"]');
+        if (step5Indicator) {
+            step5Indicator.classList.add('active');
         }
 
         localStorage.removeItem('activeStep');
@@ -578,7 +532,7 @@ document.addEventListener('DOMContentLoaded', function () {
 // --- Preview Modal and Send for Approval ---
 document.addEventListener('DOMContentLoaded', function () {
   // Preview modal
-  document.getElementById('previewStep6')?.addEventListener('click', function () {
+  document.getElementById('previewStep5')?.addEventListener('click', function () {
     var modal = new bootstrap.Modal(document.getElementById('previewModal'));
     modal.show();
   });
@@ -699,7 +653,7 @@ document.addEventListener("click", async function (e) {
 // --- Step Navigation (IIFE to avoid global conflicts) ---
 (function () {
   var currentStep = 1;
-  var totalSteps = 6;
+  var totalSteps = 5;
 
   function showStep(step) {
 
@@ -727,11 +681,9 @@ document.addEventListener("click", async function (e) {
   document.getElementById('nextStep2')?.addEventListener('click', function() { showStep(++currentStep); });
   document.getElementById('nextStep3')?.addEventListener('click', function() { showStep(++currentStep); });
   document.getElementById('nextStep4')?.addEventListener('click', function() { showStep(++currentStep); });
-  document.getElementById('nextStep5')?.addEventListener('click', function() { showStep(++currentStep); });
 
   document.getElementById('prevStep2')?.addEventListener('click', function() { showStep(--currentStep); });
   document.getElementById('prevStep3')?.addEventListener('click', function() { showStep(--currentStep); });
   document.getElementById('prevStep4')?.addEventListener('click', function() { showStep(--currentStep); });
   document.getElementById('prevStep5')?.addEventListener('click', function() { showStep(--currentStep); });
-  document.getElementById('prevStep6')?.addEventListener('click', function() { showStep(--currentStep); });
 })();

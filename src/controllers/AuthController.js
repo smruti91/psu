@@ -331,9 +331,12 @@ body('captcha')
       // Successful login
       await SecurityService.trackLoginAttempt(username, true, req);
       await SecurityService.resetFailedAttempts(username);
-
+      const [profileData] = await pool.execute(
+      `SELECT * FROM tbl_psu_profile WHERE psu_id = ? and dmd_no = ? and status = ?`,
+      [user.Psu_id, user.DmdNo, 8]
+    );
       // Save user in session
-      req.session.user = { id: user.id, role: user.Role, dmdNo: user.DmdNo, Psu_Name: user.Name, psu_id: user.Psu_id };
+      req.session.user = { id: user.id, role: user.Role, dmdNo: user.DmdNo, Psu_Name: user.Name, psu_id: user.Psu_id , profileId: profileData.length > 0 ? profileData[0].id : null};
 
       // Create active session and force logout from other devices
       await SecurityService.createActiveSession(user.id, req.sessionID, req);

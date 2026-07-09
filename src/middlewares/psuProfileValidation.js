@@ -9,7 +9,6 @@ const validatePsuProfile = (req, res, next) => {
         Paid_Share_Capital: Joi.number().integer().required(),
         Govt_Contri_Amt: Joi.number().precision(2).required(),
         Govt_Contri_Percent: Joi.string().max(255).required(),
-        NameOf_Share_Holder: Joi.string().max(255).required(),
         fin_year: Joi.string().max(100).allow(null, ''),
         status: Joi.number().integer().default(1)
     }).unknown(true);

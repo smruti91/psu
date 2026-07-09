@@ -15,12 +15,10 @@
         border-bottom: 2px solid #e2e8f0;
         padding-bottom: 0.5rem;
     }
-
-    
 </style>
 <div class="container">
     <h2>Profile Details </h2>
-   
+
     <% if (psuProfile) { %>
 
         <div class="card mt-4">
@@ -33,19 +31,48 @@
                         <%=psuProfile.Sub_Share_Capital %>
                     </span></p>
                 <p class="card-text">Paid-up Share Capital: <span id="paidupShareCap">
-                    <%=psuProfile.Paid_Share_Capital %></span>
+                        <%=psuProfile.Paid_Share_Capital %>
+                    </span>
                 </p>
-                 <p class="card-text">Govt. Contribution in Amount: <span id="paidupShareCap">
-                    <%=psuProfile.Govt_Contri_Amt %></span>
+                <p class="card-text">Govt. Contribution in Amount: <span id="paidupShareCap">
+                        <%=psuProfile.Govt_Contri_Amt %>
+                    </span>
                 </p>
-                 <p class="card-text">Govt. Contribution in Percent: <span id="paidupShareCap">
-                                                            
-                    <%=psuProfile.Govt_Contri_Percent %></span>
+                <p class="card-text">Govt. Contribution in Percent: <span id="paidupShareCap">
+
+                        <%=psuProfile.Govt_Contri_Percent %>
+                    </span>
                 </p>
-                 <p class="card-text">Name of the Share Holders: <span id="paidupShareCap">
-                                                            
-                    <%=psuProfile.NameOf_Share_Holder %></span>
-                </p>
+                <div class="mt-3">
+    <h6>Share Holders</h6>
+
+    <% if (shareholders && shareholders.length > 0) { %>
+
+        <table class="table table-bordered table-sm">
+            <thead>
+                <tr>
+                    <th>Sl. No.</th>
+                    <th>Share Holder Name</th>
+                    <th>Share %</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% shareholders.forEach((shareholder, index) => { %>
+                    <tr>
+                        <td><%= index + 1 %></td>
+                        <td><%= shareholder.shareholder_name %></td>
+                        <td><%= shareholder.shareholder_percent %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+
+    <% } else { %>
+
+        <p>N/A</p>
+
+    <% } %>
+</div>
                 <p class="card-text">ROC Document: <span id="rocDocument">
                                                             
                     <a  href="/<%= psuProfile.roc_document.replace(/^public\//,'') %>" target="_blank" >View</a>
@@ -142,18 +169,40 @@
                                                         <div class="col-sm-9">
                                                             <input type="text" class="form-control" id="txtGovtContributionPercent"
                                                                 name="Govt_Contri_Percent" placeholder="Govt. Contribution In Percent"
-                                                                value="">
+                                                                value="" readonly>
                                                             <div class="invalid-feedback" id="error_txtGovtContributionPercent"></div>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
-                                                        <label for="exampleInputConfirmPassword2" class="col-sm-3 col-form-label">Name of the
-                                                            Share Holders</label>
+                                                        <label for="exampleInputConfirmPassword2" class="col-sm-3 col-form-label">Name of the Share Holders</label>
                                                         <div class="col-sm-9">
-                                                            <input type="text" class="form-control" id="txtNameofShareHolders"
-                                                                name="NameOf_Share_Holder" placeholder="Name of the Share Holders"
-                                                                value="">
-                                                            <div class="invalid-feedback" id="error_txtNameofShareHolders"></div>
+                                                            <div id="shareholdersContainer">
+                                                            <div class="shareholder-input-row row align-items-center mb-2">
+                                                                <div class="col-md-2">
+                                                                    <input type="text" class="form-control shareholder-slno text-dark" value="1" readonly>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" name="shareholders[]"
+                                                                        placeholder="Name of the Share Holder">
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <input type="number" class="form-control"
+                                                                        name="shareholder_percent[]"
+                                                                        placeholder="Share %"
+                                                                        min="0" max="100" step="0.01">
+                                                                </div>
+                                                                <div class="col-md-1">
+                                                                    <button type="button" class="btn btn-danger btn-sm remove-shareholder-btn">
+                                                                        ✕
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <button type="button" class="btn btn-success btn-sm mt-2" id="addShareholderBtn">
+                                                            + Add Shareholder
+                                                        </button>
+                                                            <div class="invalid-feedback" id="error_shareholders"></div>
                                                         </div>
                                                     </div>
                                                  
@@ -167,7 +216,8 @@
                                                         </div>
                                                     </div>
                                                     <input type="hidden" name="psu_id" value="<%= psuId %>" >
-                                                     <input type="hidden" name="dmd_no" value="<%= dmdNo %>" >
+                                                    <input type="hidden" name="dmd_no" value="<%= dmdNo %>" >
+                                                    <input type="hidden" id="profileId" name="profile_id" value="<%= psuProfile && psuProfile.id ? psuProfile.id : '' %>" >
                                                 <button type="submit" class="btn btn-primary">Submit</button>
                                             </form>
                                         </div>
