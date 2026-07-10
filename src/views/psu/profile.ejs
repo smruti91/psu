@@ -23,23 +23,25 @@
 
         <div class="card mt-4">
             <div class="card-body">
-                <h5 class="card-title">PSU Profile Data</h5>
-                <p class="card-text">Authorized Share Capital: <span id="authorizedShareCap">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title mb-0">PSU Profile Data</h5>
+                    <button type="button" class="btn btn-warning btn-sm" id="editProfileDataBtn">Edit</button>
+                </div>
+                <p class="card-text">Authorized Share Capital: <span id="authorizedShareCapValue">
                         <%= psuProfile.Auth_Share_Capital %>
                     </span></p>
-                <p class="card-text">Subscribed Share Capital: <span id="subscribedShareCap">
+                <p class="card-text">Subscribed Share Capital: <span id="subscribedShareCapValue">
                         <%=psuProfile.Sub_Share_Capital %>
                     </span></p>
-                <p class="card-text">Paid-up Share Capital: <span id="paidupShareCap">
+                <p class="card-text">Paid-up Share Capital: <span id="paidupShareCapValue">
                         <%=psuProfile.Paid_Share_Capital %>
                     </span>
                 </p>
-                <p class="card-text">Govt. Contribution in Amount: <span id="paidupShareCap">
+                <p class="card-text">Govt. Contribution in Amount: <span id="govtContributionAmtValue">
                         <%=psuProfile.Govt_Contri_Amt %>
                     </span>
                 </p>
-                <p class="card-text">Govt. Contribution in Percent: <span id="paidupShareCap">
-
+                <p class="card-text">Govt. Contribution in Percent: <span id="govtContributionPercentValue">
                         <%=psuProfile.Govt_Contri_Percent %>
                     </span>
                 </p>
@@ -130,7 +132,7 @@
                                                     <div class="col-sm-9">
                                                         <input type="text" class="form-control"
                                                             id="txtAuthorizedShareCap" name="Auth_Share_Capital"
-                                                            placeholder="Authorized Share Capital" value="">
+                                                            placeholder="Authorized Share Capital" value="<%= psuProfile && psuProfile.Auth_Share_Capital ? psuProfile.Auth_Share_Capital : '' %>">
                                                     </div>
                                                 </div>
 
@@ -140,7 +142,7 @@
                                                     <div class="col-sm-9">
                                                         <input type="text" class="form-control"
                                                             id="txtSubscribedShareCap" name="Sub_Share_Capital"
-                                                            placeholder="Subscribed Share Capital" value="">
+                                                            placeholder="Subscribed Share Capital" value="<%= psuProfile && psuProfile.Sub_Share_Capital ? psuProfile.Sub_Share_Capital : '' %>">
                                                     </div>
                                                 </div>
 
@@ -159,7 +161,7 @@
                                                         <div class="col-sm-9">
                                                             <input type="text" class="form-control" id="txtGovtContribution"
                                                                 name="Govt_Contri_Amt" placeholder="Govt. Contribution"
-                                                                value="">
+                                                                value="<%= psuProfile && psuProfile.Govt_Contri_Amt ? psuProfile.Govt_Contri_Amt : '' %>">
                                                             <div class="invalid-feedback" id="error_txtGovtContribution"></div>
                                                         </div>
                                                     </div>
@@ -169,7 +171,7 @@
                                                         <div class="col-sm-9">
                                                             <input type="text" class="form-control" id="txtGovtContributionPercent"
                                                                 name="Govt_Contri_Percent" placeholder="Govt. Contribution In Percent"
-                                                                value="" readonly>
+                                                                value="<%= psuProfile && psuProfile.Govt_Contri_Percent ? psuProfile.Govt_Contri_Percent : '' %>" readonly>
                                                             <div class="invalid-feedback" id="error_txtGovtContributionPercent"></div>
                                                         </div>
                                                     </div>
@@ -211,14 +213,23 @@
                                                             Additional Roc Document
                                                         </label>
                                                         <div class="col-sm-9">
-                                                            <input type="file" class="form-control" id="roc_document" 
-                                                                name="roc_document" accept=".pdf">
+                                                            <% if (psuProfile && psuProfile.roc_document) { %>
+                                                                <div class="d-flex align-items-center mb-2" id="rocDocumentActions">
+                                                                    <a href="/<%= psuProfile.roc_document.replace(/^public\//,'') %>" target="_blank" class="mr-2">View existing ROC document</a>
+                                                                    <button type="button" class="btn btn-danger btn-sm" id="deleteRocDocumentBtn">Delete</button>
+                                                                </div>
+                                                            <% } %>
+                                                            <div id="rocUploadContainer" style="<%= psuProfile && psuProfile.roc_document ? 'display:none;' : '' %>">
+                                                                <input type="file" class="form-control" id="roc_document" 
+                                                                    name="roc_document" accept=".pdf">
+                                                                <small class="form-text text-muted">Upload a new PDF to replace the existing document.</small>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <input type="hidden" name="psu_id" value="<%= psuId %>" >
                                                     <input type="hidden" name="dmd_no" value="<%= dmdNo %>" >
                                                     <input type="hidden" id="profileId" name="profile_id" value="<%= psuProfile && psuProfile.id ? psuProfile.id : '' %>" >
-                                                <button type="submit" class="btn btn-primary">Submit</button>
+                                                <button type="submit" class="btn btn-primary" id="profileSubmitBtn">Submit</button>
                                             </form>
                                         </div>
                                     </div>

@@ -392,6 +392,7 @@
             <thead>
               <tr>
                 <th style="width: 10%;">Sl No</th>
+                <th style="width: 10%;">PSU</th>
                 <th style="width: 40%;">Financial Year</th>
                 <th style="width: 20%;">Status</th>
                 <th style="width: 30%;">Actions</th>
@@ -401,7 +402,8 @@
               <% pendingYears.forEach((row, index)=> { %>
                 <tr>
                   <td><%= index + 1 %></td>
-                  <td><strong><%= row.FinYr %></strong></td>
+                  <td><strong><%= row.Psu_Name || 'N/A' %></strong></td>
+                  <td><%= row.FinYr || 'N/A' %></td>
                   <td><span class="badge badge-pending">Pending</span></td>
                   <td>
                     <button class="btn btn-action btn-view view-btn" data-id="<%= row.id %>" data-url="/dept/get-details">
@@ -439,6 +441,7 @@
             <thead>
               <tr>
                 <th style="width: 10%;">Sl No</th>
+                <th style="width: 10%;">PSU</th>
                 <th style="width: 40%;">Financial Year</th>
                 <th style="width: 20%;">Status</th>
                 <th style="width: 30%;">Actions</th>
@@ -448,7 +451,8 @@
               <% approvedYears.forEach((row, index)=> { %>
                 <tr>
                   <td><%= index + 1 %></td>
-                  <td><strong><%= row.FinYr %></strong></td>
+                  <td><strong><%= row.Psu_Name || 'N/A' %></strong></td>
+                  <td><%= row.FinYr || 'N/A' %></td>
                   <td><span class="badge badge-approved">Approved</span></td>
                   <td>
                     <button class="btn btn-action btn-view view-btn" data-id="<%= row.id %>" data-url="/dept/get-details">
@@ -477,6 +481,7 @@
             <thead>
               <tr>
                 <th style="width: 10%;">Sl No</th>
+                <th style="width: 10%;">PSU</th>
                 <th style="width: 40%;">Financial Year</th>
                 <th style="width: 20%;">Status</th>
                 <th style="width: 30%;">Actions</th>
@@ -486,7 +491,8 @@
               <% rejectedYears.forEach((row, index)=> { %>
                 <tr>
                   <td><%= index + 1 %></td>
-                  <td><strong><%= row.FinYr %></strong></td>
+                  <td><strong><%= row.Psu_Name || 'N/A' %></strong></td>
+                  <td><%= row.FinYr || 'N/A' %></td>
                   <td><span class="badge badge-rejected">Rejected</span></td>
                   <td>
                     <button class="btn btn-action btn-view view-btn" data-id="<%= row.id %>" data-url="/dept/get-details">

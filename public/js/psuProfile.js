@@ -1,48 +1,165 @@
 const addBtn = document.getElementById('addProfileData');
-if(addBtn){
-  document.getElementById('addProfileData').addEventListener('click', async function() {
-    // Open the modal
-    $('#profileDataModal').modal('show');
-    
-    // Fetch shareholders for existing profile
-    const profileId = document.getElementById('profileId').value;
-    if (profileId) {
-      try {
-        const response = await fetch(`/psu/get-shareholders/${profileId}`);
-        const data = await response.json();
-        
-        if (data.success && data.shareholders && data.shareholders.length > 0) {
-          // Clear existing shareholders
-          const container = document.getElementById('shareholdersContainer');
-          container.innerHTML = '';
-          
-          // Populate with fetched shareholders
-          data.shareholders.forEach((shareholderName) => {
-            const newRow = document.createElement('div');
-            newRow.className = 'shareholder-input-row d-flex align-items-center mb-2';
-            newRow.innerHTML = `<input type="text" class="form-control" name="shareholders[]" placeholder="Name of the Share Holder" value="${shareholderName}"><button type="button" class="btn btn-danger btn-sm ml-2 remove-shareholder-btn" title="Remove">✕</button>`;
-            container.appendChild(newRow);
-            
-            // Add remove handler
-            newRow.querySelector('.remove-shareholder-btn').addEventListener('click', function() {
-              container.removeChild(newRow);
-            });
-          });
-        } else {
-          // If no shareholders found, ensure at least one empty field exists
-          ensureMinimumShareholderField();
-        }
-      } catch (error) {
-        console.error('Error fetching shareholders:', error);
-        // Ensure at least one empty field on error
-        ensureMinimumShareholderField();
+const editBtn = document.getElementById('editProfileDataBtn');
+const profileModal = document.getElementById('profileDataModal');
+const profileForm = document.getElementById('profileDataForm');
+const previewTitle = document.getElementById('previewModalLabel');
+const submitBtn = document.getElementById('profileSubmitBtn');
+
+function setProfileModalMode(mode) {
+  if (!previewTitle || !submitBtn) return;
+  if (mode === 'edit') {
+    previewTitle.textContent = 'Edit PSU Profile Data';
+    submitBtn.textContent = 'Update';
+  } else {
+    previewTitle.textContent = 'Add PSU Profile Data';
+    submitBtn.textContent = 'Submit';
+  }
+}
+
+function populateProfileFormValuesFromPage() {
+  if (!profileForm) return;
+  const formElements = profileForm.elements;
+
+  formElements['Auth_Share_Capital'].value = document.getElementById('authorizedShareCapValue')?.textContent.trim() || '';
+  formElements['Sub_Share_Capital'].value = document.getElementById('subscribedShareCapValue')?.textContent.trim() || '';
+  formElements['Paid_Share_Capital'].value = document.getElementById('paidupShareCapValue')?.textContent.trim() || '';
+  formElements['Govt_Contri_Amt'].value = document.getElementById('govtContributionAmtValue')?.textContent.trim() || '';
+  formElements['Govt_Contri_Percent'].value = document.getElementById('govtContributionPercentValue')?.textContent.trim() || '';
+}
+
+async function deleteExistingRocDocument() {
+  const profileId = document.getElementById('profileId')?.value;
+  const deleteBtn = document.getElementById('deleteRocDocumentBtn');
+
+  if (!profileId || !deleteBtn) return;
+
+  const confirmed = window.confirm('Delete the existing ROC document?');
+  if (!confirmed) return;
+
+  try {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    const response = await fetch('/psu/delete-roc-document', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken
+      },
+      body: JSON.stringify({ profile_id: profileId, _csrf: csrfToken })
+    });
+    const result = await response.json();
+
+    if (result.success) {
+      const container = document.getElementById('rocDocumentActions');
+      if (container) {
+        container.remove();
+      }
+      const uploadContainer = document.getElementById('rocUploadContainer');
+      if (uploadContainer) {
+        uploadContainer.style.display = 'block';
+      }
+      const fileInput = document.getElementById('roc_document');
+      if (fileInput) {
+        fileInput.value = '';
       }
     } else {
-      // If no profileId (new profile), ensure at least one empty field
+      alert(result.message || 'Unable to delete ROC document.');
+    }
+  } catch (error) {
+    console.error('Error deleting ROC document:', error);
+    alert('Unable to delete ROC document.');
+  }
+}
+
+async function populateExistingShareholders(profileId) {
+  const container = document.getElementById('shareholdersContainer');
+  if (!container || !profileId) {
+    ensureMinimumShareholderField();
+    return;
+  }
+
+  try {
+    const response = await fetch(`/psu/get-shareholders/${profileId}`);
+    const data = await response.json();
+
+    if (data.success && data.shareholders && data.shareholders.length > 0) {
+      container.innerHTML = '';
+      data.shareholders.forEach((shareholder) => {
+        const newRow = document.createElement('div');
+        newRow.className = 'shareholder-input-row row align-items-center mb-2';
+        newRow.innerHTML = `
+          <div class="col-md-2">
+            <input type="text" class="form-control shareholder-slno text-dark" value="1" readonly>
+          </div>
+          <div class="col-md-6">
+            <input type="text" class="form-control" name="shareholders[]" placeholder="Name of the Share Holder" value="${shareholder.shareholder_name || ''}">
+          </div>
+          <div class="col-md-3">
+            <input type="number" class="form-control" name="shareholder_percent[]" placeholder="Share %" min="0" max="100" step="0.01" value="${shareholder.shareholder_percent ?? ''}">
+          </div>
+          <div class="col-md-1">
+            <button type="button" class="btn btn-danger btn-sm remove-shareholder-btn">✕</button>
+          </div>`;
+        container.appendChild(newRow);
+        newRow.querySelector('.remove-shareholder-btn').addEventListener('click', function() {
+          newRow.remove();
+          updateSerialNumbers();
+        });
+      });
+      updateSerialNumbers();
+    } else {
       ensureMinimumShareholderField();
     }
-});
+  } catch (error) {
+    console.error('Error fetching shareholders:', error);
+    ensureMinimumShareholderField();
+  }
 }
+
+async function openProfileModal(mode = 'add') {
+  setProfileModalMode(mode);
+
+  if (profileForm) {
+    if (mode === 'edit') {
+      populateProfileFormValuesFromPage();
+    } else {
+      profileForm.reset();
+      const hiddenProfileId = document.getElementById('profileId');
+      if (hiddenProfileId) {
+        hiddenProfileId.value = hiddenProfileId.defaultValue || '';
+      }
+    }
+  }
+
+  const profileId = document.getElementById('profileId')?.value;
+  if (mode === 'edit') {
+    await populateExistingShareholders(profileId);
+  } else {
+    ensureMinimumShareholderField();
+  }
+
+  $(profileModal).modal('show');
+}
+
+if(addBtn){
+  addBtn.addEventListener('click', async function(e) {
+    e.preventDefault();
+    await openProfileModal('add');
+  });
+}
+
+if(editBtn){
+  editBtn.addEventListener('click', async function(e) {
+    e.preventDefault();
+    await openProfileModal('edit');
+  });
+}
+
+document.addEventListener('click', function (event) {
+  if (event.target && event.target.id === 'deleteRocDocumentBtn') {
+    event.preventDefault();
+    deleteExistingRocDocument();
+  }
+});
 
 // Helper function to ensure there's at least one shareholder input field
 function ensureMinimumShareholderField() {

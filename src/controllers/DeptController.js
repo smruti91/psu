@@ -16,7 +16,7 @@ exports.dashboard = async (req, res) => {
   
   const dmdNo = req.session.user.dmdNo;
   const [yearwiseData] = await pool.execute(
-        `SELECT * FROM tbl_psu_yearwise_mstr WHERE DmdNo = ?`,
+        `SELECT id, Psu_Name, FinYr, status FROM tbl_psu_yearwise_mstr WHERE DmdNo = ?`,
         [dmdNo]
       );
   const pendingYears = yearwiseData.filter(row => row.status === 1);

@@ -21,7 +21,8 @@ exports.submitPsuProfile = async (req, res) => {
     Govt_Contri_Amt,
     Govt_Contri_Percent,
     fin_year,
-    status = 1
+    status,
+    profile_id: profileIdFromBody
   } = req.body;
 console.log('Received PSU Profile data:', req.body);
   // Handle multiple shareholders - can be a string (single) or array
@@ -44,7 +45,19 @@ console.log('Received PSU Profile data:', req.body);
     .filter(item => item.shareholder_name !== '');
 
   try {
-    let rocDocumentPath = null;
+    let existingProfile = null;
+    let profileId = null;
+
+    if (profileIdFromBody) {
+      const [profileRows] = await pool.execute(
+        'SELECT id, roc_document, status, fin_year FROM tbl_psu_profile WHERE id = ?',
+        [profileIdFromBody]
+      );
+      existingProfile = profileRows && profileRows.length > 0 ? profileRows[0] : null;
+      profileId = existingProfile ? existingProfile.id : null;
+    }
+
+    let rocDocumentPath = existingProfile?.roc_document || null;
 
     // Handle File Upload for roc_document
     
@@ -79,21 +92,26 @@ console.log('Received PSU Profile data:', req.body);
       Paid_Share_Capital: Paid_Share_Capital ?? null,
       Govt_Contri_Amt: Govt_Contri_Amt ?? null,
       Govt_Contri_Percent: Govt_Contri_Percent ?? null,
-      NameOf_Share_Holder: firstShareholderName??null,
-      fin_year: fin_year ?? null,
-      status: status ?? 1
+      NameOf_Share_Holder: firstShareholderName ?? null,
+      fin_year: fin_year ?? existingProfile?.fin_year ?? null,
+      status: status ?? existingProfile?.status ?? 1
     };
 
     // Check if record already exists for this psu_id and fin_year to decide between Update or Insert
-    const [existing] = await pool.execute(
-      'SELECT id FROM tbl_psu_profile WHERE psu_id = ? AND fin_year = ?',
-      [sanitizedBody.psu_id, sanitizedBody.fin_year]
-    );
+    if (!profileId) {
+      const [existing] = await pool.execute(
+        'SELECT id, roc_document, status, fin_year FROM tbl_psu_profile WHERE psu_id = ? AND fin_year = ?',
+        [sanitizedBody.psu_id, sanitizedBody.fin_year]
+      );
 
-    let profileId;
+      if (existing && existing.length > 0) {
+        profileId = existing[0].id;
+        existingProfile = existing[0];
+        rocDocumentPath = existingProfile?.roc_document || rocDocumentPath;
+      }
+    }
 
-    if (existing && existing.length > 0) {
-      profileId = existing[0].id;
+    if (profileId) {
       // Update existing record
       const updateQuery = `UPDATE tbl_psu_profile SET 
         dmd_no=?, Auth_Share_Capital=?, Sub_Share_Capital=?, Paid_Share_Capital=?, 
@@ -158,18 +176,49 @@ console.log('Received PSU Profile data:', req.body);
   }
 };
 
+exports.deleteRocDocument = async (req, res) => {
+  const profileId = req.body.profile_id || req.body.profileId;
+  console.log('Deleting ROC document for profile ID:', profileId);
+  if (!profileId) {
+    return res.status(400).json({ success: false, message: 'Profile ID is required.' });
+  }
+
+  try {
+    const [rows] = await pool.execute('SELECT roc_document FROM tbl_psu_profile WHERE id = ?', [profileId]);
+    const currentDocument = rows && rows.length > 0 ? rows[0].roc_document : null;
+
+    if (currentDocument) {
+      const physicalPath = path.join(process.cwd(), currentDocument);
+      if (fs.existsSync(physicalPath)) {
+        fs.unlinkSync(physicalPath);
+      }
+    }
+
+    await pool.execute('UPDATE tbl_psu_profile SET roc_document = NULL, updated_at = NOW() WHERE id = ?', [profileId]);
+
+    return res.json({ success: true, message: 'ROC document deleted successfully.' });
+  } catch (err) {
+    console.error('Error deleting ROC document:', err);
+    return res.status(500).json({ success: false, message: 'Unable to delete ROC document.' });
+  }
+};
+
 exports.getShareholdersByProfileId = async (req, res) => {
   const { profileId } = req.params;
 
   try {
     const [shareholders] = await pool.execute(
-      'SELECT id, shareholder_name FROM tbl_psu_shareholders WHERE profile_id = ? ORDER BY created_at ASC',
+      'SELECT id, shareholder_name, shareholder_percent FROM tbl_psu_shareholders WHERE profile_id = ? ORDER BY created_at ASC',
       [profileId]
     );
     
     return res.json({
       success: true,
-      shareholders: shareholders.map(s => s.shareholder_name)
+      shareholders: shareholders.map(s => ({
+        id: s.id,
+        shareholder_name: s.shareholder_name,
+        shareholder_percent: s.shareholder_percent
+      }))
     });
   } catch (err) {
     console.error('DB Error (Get Shareholders):', err);
