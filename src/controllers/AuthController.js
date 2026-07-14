@@ -11,7 +11,7 @@ exports.showLogin = async (req, res) => {
   const svg_captcha = captcha.create({ 
     size: 4,
     ignoreChars: '0o1i',
-    noise: 2,
+    noise: 0,
     color: false,
     background: '#fff'
   });

@@ -72,8 +72,8 @@
 
                         <td>
 
-                            <span class="badge bg-warning text-dark">
-                                Pending Review
+                            <span class="badge bg-warning text-light fs-6 px-3 py-2">
+                                Pending at Finance
                             </span>
 
                         </td>
@@ -117,14 +117,48 @@
                                                                                                 
                                                         <%=item.Govt_Contri_Percent %></span>
                                                     </p>
-                                                    <p class="card-text">Name of the Share Holders: <span id="paidupShareCap">
-                                                                                                
-                                                        <%=item.NameOf_Share_Holder %></span>
-                                                    </p>
+                                                    
                                                     <p class="card-text">ROC Document: <span id="rocDocument">
                                                                                                 
                                                         <a  href="/<%= item.roc_document.replace(/^public\//,'') %>" target="_blank" >View</a>
                                                     </p>
+                                                    <div class="mt-3">
+                                                        <h6 class="fw-bold">Share Holders</h6>
+
+                                                        <% if(item.shareholders.length > 0){ %>
+
+                                                        <table class="table table-bordered table-sm">
+                                                            <thead class="table-light">
+                                                                <tr>
+                                                                    <th width="60">Sl.</th>
+                                                                    <th>Share Holder Name</th>
+                                                                    <th width="150">Holding (%)</th>
+                                                                </tr>
+                                                            </thead>
+
+                                                            <tbody>
+
+                                                                <% item.shareholders.forEach((shareholder,index)=>{ %>
+
+                                                                <tr>
+                                                                    <td><%= index+1 %></td>
+                                                                    <td><%= shareholder.shareholder_name %></td>
+                                                                    <td><%= shareholder.shareholder_percent %>%</td>
+                                                                </tr>
+
+                                                                <% }) %>
+
+                                                            </tbody>
+
+                                                        </table>
+
+                                                        <% } else { %>
+
+                                                        <p class="text-muted">No shareholders found.</p>
+
+                                                        <% } %>
+
+                                                    </div>
                                                   
                                                 </div>
                                             </div>
@@ -138,7 +172,8 @@
                                     </div>
                                 </div>
                             </div>
-
+                          
+                              <% if (role == 4) { %>
                             <button
                                 class="btn btn-success btn-sm approveBtn"
                                 data-id="<%= item.id %>">
@@ -153,8 +188,8 @@
 
                                 <i class="fa fa-times"></i> Reject
 
-                            </button>
-
+                            </button> 
+                            <% } %>
                         </td>
 
                     </tr>

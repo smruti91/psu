@@ -4,6 +4,7 @@
 <% const govtRelData = data.govtRelation[0]; %>
 <% const annualReportData = data.annualReport[0]; %>
 <% const profitLoss = data.profitLoss[0]; %>
+<% const shareholders = data.shareholders; %>
 
 <%
 let noneClass = '';
@@ -11,6 +12,13 @@ if (yearWiseData.status == 5) {
     noneClass = 'd-none';
 }
 %>
+<% if(role == 3 && yearWiseData.status != 0){
+    noneClass = 'd-none';
+}  %>
+
+<% if(role == 2 && yearWiseData.status != 1){
+    noneClass = 'd-none';
+}  %>
 <div class="mb-3">
 
 <h6>1. Profile Details </h6>
@@ -66,13 +74,54 @@ if (yearWiseData.status == 5) {
                 <%= yearWiseData ? yearWiseData.Govt_Contri_Percent : '-' %>
             </td>
         </tr>
-        <tr>
+        <!-- <tr>
             <td>7</td>
             <td>Name of the Share Holders</td>
             <td>
                 <%= yearWiseData ? yearWiseData.NameOf_Share_Holder : '-' %>
             </td>
-        </tr>
+        </tr> -->
+
+        <tr>
+    <td>7</td>
+    <td>Share Holders</td>
+    <td>
+
+        <% if (shareholders && shareholders.length > 0) { %>
+
+            <table class="table table-bordered table-sm mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th width="10%">Sl.</th>
+                        <th width="60%">Share Holder Name</th>
+                        <th width="30%">Holding (%)</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <% shareholders.forEach((holder,index)=>{ %>
+
+                    <tr>
+                        <td><%= index + 1 %></td>
+                        <td><%= holder.shareholder_name %></td>
+                        <td><%= holder.shareholder_percent %>%</td>
+                    </tr>
+
+                    <% }) %>
+
+                </tbody>
+
+            </table>
+
+        <% } else { %>
+
+            <span>-</span>
+
+        <% } %>
+
+    </td>
+</tr>
         
         <tr>
             <td>8</td>
@@ -96,8 +145,8 @@ if (yearWiseData.status == 5) {
         <thead>
             <tr>
                 <th style="width: 10%;">Sl. No</th>
-                <th style="width: 35%;">Field</th>
-                <th style="width: 35%;">Value</th>
+                <th style="width: 35%;">Particulars</th>
+                <th style="width: 35%;">Amount in Rs.</th>
                 <th style="width: 20%;">Action</th>
             </tr>
         </thead>
@@ -332,8 +381,8 @@ if (yearWiseData.status == 5) {
         <thead>
             <tr>
                 <th style="width: 10%;">Sl. No</th>
-                <th style="width: 35%;">Field</th>
-                <th style="width: 35%;">Value</th>
+               <th style="width: 35%;">Particulars</th>
+               <th style="width: 35%;">Amount in Rs.</th>
                 <th style="width: 20%;">Action</th>
             </tr>
         </thead>
@@ -518,8 +567,8 @@ if (yearWiseData.status == 5) {
     <thead>
         <tr>
             <th style="width: 10%;">Sl. No</th>
-            <th style="width: 35%;">Field</th>
-            <th style="width: 35%;">Value</th>
+            <th style="width: 35%;">Particulars</th>
+            <th style="width: 35%;">Amount in Rs.</th>
             <th style="width: 20%;">Action</th>
         </tr>
     </thead>
@@ -627,8 +676,8 @@ if (yearWiseData.status == 5) {
         <thead>
             <tr>
                 <th style="width: 10%;">Sl. No</th>
-                <th style="width: 35%;">Field</th>
-                <th style="width: 35%;">Value</th>
+                <th style="width: 35%;">Particulars</th>
+                <th style="width: 35%;">Amount in Rs.</th>
                 <th style="width: 20%;">Action</th>
             </tr>
         </thead>
@@ -681,8 +730,8 @@ if (yearWiseData.status == 5) {
         <thead>
             <tr>
                 <th style="width: 10%;">Sl. No</th>
-                <th style="width: 35%;">Field</th>
-                <th style="width: 35%;">Value</th>
+               <th style="width: 35%;">Particulars</th>
+               <th style="width: 35%;">Amount in Rs.</th>
                 <th style="width: 20%;">Action</th>
             </tr>
         </thead>

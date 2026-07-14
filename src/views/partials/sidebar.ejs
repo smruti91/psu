@@ -60,15 +60,15 @@
 
             <li class="nav-item">
                 <a class="nav-link" href="/dept/approved-profile">
-                    Approved
+                    History
                 </a>
             </li>
 
-            <li class="nav-item">
+            <!-- <li class="nav-item">
                 <a class="nav-link" href="/dept/rejected-profile">
                     Rejected
                 </a>
-            </li>
+            </li> -->
 
         </ul>
     </div>
@@ -99,7 +99,7 @@
                               Financial Year
                           </a>
                       </li>
-<!-- 
+                      <!-- 
                       <li class="nav-item">
                           <a class="nav-link" href="#">
                               Approved
@@ -115,6 +115,38 @@
                   </ul>
               </div>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="collapse" href="#psuApprveProfileMenu"
+                aria-expanded="false" aria-controls="psuProfileMenu">
+                <i class="typcn typcn-folder menu-icon"></i>
+                <span class="menu-title">PSU Profile</span>
+                <i class="menu-arrow"></i>
+            </a>
+
+            <div class="collapse" id="psuApprveProfileMenu">
+                <ul class="nav flex-column sub-menu">
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/finance/pending-profile">
+                            Pending For Approval
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dept/approved-profile">
+                            History
+                        </a>
+                    </li>
+
+                    <!-- <li class="nav-item">
+                        <a class="nav-link" href="/dept/rejected-profile">
+                            Rejected
+                        </a>
+                    </li> -->
+
+                </ul>
+            </div>
+        </li>
           <% } %>
 
           <% if (role == 5) { %>

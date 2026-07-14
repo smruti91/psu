@@ -38,7 +38,7 @@ exports.getFinYrReport = async(req, res)=>{
     }
     res.render('finance/finYrReport', {
         layout: 'layouts/dashboard',
-        title: 'Financial Year',
+        title: 'Financial Year', 
         scripts:['getFinData'],
         DemandData: DemandData
     });
@@ -55,7 +55,8 @@ exports.getFinYearReport = async(req, res)=>{
                 m.FinYr,
                 m.Govt_Contri_Amt,
                 pl.PAT,
-                pl.Dividend_Paid
+                pl.Dividend_Paid,
+                pl.Dividend_Payable
             FROM tbl_psu_yearwise_mstr m
             INNER JOIN tbl_psu_profit_loss pl
                 ON m.id = pl.psu_mstr_id
@@ -97,6 +98,54 @@ exports.getFinYearReport = async(req, res)=>{
             message: error.message
         });
     }
+}
+exports.getPendingProfile = async(req, res)=>{
+   const dmdNo = req.session.user.dmdNo;
+  
+   // Get Profiles
+    const [profiles] = await pool.execute(`
+        SELECT p.*, n.Psu_Name
+        FROM tbl_psu_profile p
+        JOIN tbl_psu_name n ON p.psu_id = n.id
+        WHERE
+        p.status = ?
+    `, [6]);
+
+    // Get Shareholders
+    const [shareholders] = await pool.execute(`
+        SELECT profile_id,
+               shareholder_name,
+               shareholder_percent
+        FROM tbl_psu_shareholders
+        ORDER BY profile_id,id
+    `);
+
+    // Group shareholders by profile_id
+    const shareholderMap = {};
+
+    shareholders.forEach(row => {
+        if (!shareholderMap[row.profile_id]) {
+            shareholderMap[row.profile_id] = [];
+        }
+
+        shareholderMap[row.profile_id].push(row);
+    });
+
+    // Attach shareholders to each profile
+    profiles.forEach(profile => {
+        profile.shareholders = shareholderMap[profile.id] || [];
+    });
+
+   res.render('dept/pendingProfile', {
+    layout: 'layouts/dashboard',
+    title: 'PSU Dashboard',
+    scripts:['getDeptData'],
+    Psu_Name: req.session.user.Psu_Name,
+    approvals: profiles,
+    
+    
+  }); 
+
 }
 exports.getPsuNames = async (req, res) => {
   const dmdNo = req.query.dmdNo;

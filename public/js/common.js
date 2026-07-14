@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var fieldIds = [
       'txtTotRevenue', 'txtCostofGoodsSold', 'txtOprexpenses', 'txtTotalExpenses',
       'txtEbitda', 'txtDepAmor', 'txtEbit', 'txtIntExpenses', 'txtTaxExpenses',
-      'txtAnyExpenses', 'txtNetIncome'
+      'txtAnyExpenses', 'txtNetIncome','FinYr'
     ];
     fieldIds.forEach(function (id) {
       var field = form1.querySelector('#' + id);
@@ -289,16 +289,16 @@ document.addEventListener('DOMContentLoaded', function () {
   if (!formPL) return;
   formPL.addEventListener('submit', function (e) {
     e.preventDefault();
-    var fieldIds = ['txtProfitLossAmount', 'txtPAT', 'txtDividendPayable', 'txtDividendpaid'];
-    fieldIds.forEach(function (id) {
-      var field = formPL.querySelector('#' + id);
-      if (field) field.classList.remove('is-invalid');
-    });
-    var hasError = false;
-    function isNum(id) { return /^\d+(\.\d+)?$/.test(formPL.querySelector('#' + id).value.trim()); }
-    function isEmp(id) { return !formPL.querySelector('#' + id).value.trim(); }
-    fieldIds.forEach(function (id) { if (isEmp(id) || !isNum(id)) { formPL.querySelector('#' + id).classList.add('is-invalid'); hasError = true; } });
-    if (hasError) return;
+    // var fieldIds = ['txtProfitLossAmount'];
+    // fieldIds.forEach(function (id) {
+    //   var field = formPL.querySelector('#' + id);
+    //   if (field) field.classList.remove('is-invalid');
+    // });
+    // var hasError = false;
+    // function isNum(id) { return /^\d+(\.\d+)?$/.test(formPL.querySelector('#' + id).value.trim()); }
+    // function isEmp(id) { return !formPL.querySelector('#' + id).value.trim(); }
+    // fieldIds.forEach(function (id) { if (isEmp(id) || !isNum(id)) { formPL.querySelector('#' + id).classList.add('is-invalid'); hasError = true; } });
+    // if (hasError) return;
 
     var formData = new FormData(formPL);
     
@@ -349,6 +349,38 @@ document.addEventListener('DOMContentLoaded', function () {
       });
   });
 });
+
+  function toggleProfitFields() {
+
+        let type = $('input[name="profitLossType"]:checked').val();
+
+        if (type === 'loss') {
+
+            $('#profitFields').hide();
+
+            // Remove required validation
+            $('#txtPAT').prop('required', false);
+            $('#txtDividendPayable').prop('required', false);
+            $('#txtDividendpaid').prop('required', false);
+
+        } else {
+
+            $('#profitFields').show();
+
+            $('#txtPAT').prop('required', true);
+            $('#txtDividendPayable').prop('required', true);
+            $('#txtDividendpaid').prop('required', true);
+
+        }
+    }
+
+    // Initial page load
+    toggleProfitFields();
+
+    // Radio button change
+    $('input[name="profitLossType"]').on('change', function () {
+        toggleProfitFields();
+    });
 // --- Step 4: Govt. Relationship ---
 document.addEventListener('DOMContentLoaded', function () {
   var form5 = document.getElementById('psuFormGovtRel');

@@ -51,7 +51,15 @@ exports.getYearDetails = async (req, res) => {
     }
 
     const psuId = yearData[0].id;
-
+    //console.log('Year Data:', yearData[0]);
+    // Get Shareholders
+const [shareholders] = await pool.execute(
+  `SELECT shareholder_name, shareholder_percent
+   FROM tbl_psu_shareholders
+   WHERE profile_id = ?`,
+  [yearData[0].profile_id]
+);
+//console.log('Shareholders:', shareholders);
     // 2️⃣ Get Related Tables
     const [balanceSheet] = await pool.execute(
       `SELECT * FROM tbl_balancesheet_indicator WHERE psu_mstr_id = ?`,
@@ -89,6 +97,7 @@ console.log('Profit Loss:', profitLoss);
         govtRelation,
         annualReport,
         profitLoss,
+        shareholders
       }
     });
 
@@ -128,17 +137,46 @@ exports.rejectRecord = async (req, res) => {
 
 exports.getPendingProfile = async(req, res)=>{
    const dmdNo = req.session.user.dmdNo;
-   const [pendingData] = await pool.execute(
-      `SELECT p.*, n.Psu_Name  FROM tbl_psu_profile as p join tbl_psu_name n on p.psu_id = n.id WHERE dmd_no = ? and status = ? `,
-      [dmdNo, 2]
-    );
+  
+   // Get Profiles
+    const [profiles] = await pool.execute(`
+        SELECT p.*, n.Psu_Name
+        FROM tbl_psu_profile p
+        JOIN tbl_psu_name n ON p.psu_id = n.id
+        WHERE p.dmd_no = ? AND p.status = ?
+    `, [dmdNo, 6]);
+
+    // Get Shareholders
+    const [shareholders] = await pool.execute(`
+        SELECT profile_id,
+               shareholder_name,
+               shareholder_percent
+        FROM tbl_psu_shareholders
+        ORDER BY profile_id,id
+    `);
+
+    // Group shareholders by profile_id
+    const shareholderMap = {};
+
+    shareholders.forEach(row => {
+        if (!shareholderMap[row.profile_id]) {
+            shareholderMap[row.profile_id] = [];
+        }
+
+        shareholderMap[row.profile_id].push(row);
+    });
+
+    // Attach shareholders to each profile
+    profiles.forEach(profile => {
+        profile.shareholders = shareholderMap[profile.id] || [];
+    });
 
    res.render('dept/pendingProfile', {
     layout: 'layouts/dashboard',
     title: 'PSU Dashboard',
     scripts:['getDeptData'],
     Psu_Name: req.session.user.Psu_Name,
-    approvals: pendingData,
+    approvals: profiles,
     
     
   }); 
@@ -191,7 +229,7 @@ exports.approveProfile = async(req, res)=>{
             `UPDATE tbl_psu_profile
              SET status = ?
              WHERE id = ?`,
-            [4, profileId]
+            [8, profileId]
         );
 
         res.json({

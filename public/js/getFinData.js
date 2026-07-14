@@ -213,7 +213,8 @@ function renderFinReport(data) {
 
             govt: row.Govt_Contri_Amt,
             pat: row.PAT,
-            dividend: row.Dividend_Paid
+            dividend: row.Dividend_Paid,
+            dividend_payable: row.Dividend_Payable
         };
     });
 
@@ -245,7 +246,7 @@ function renderFinReport(data) {
     years.forEach(year => {
 
         html += `
-            <th colspan="3"
+            <th colspan="4"
                 class="text-center ">
                 ${year}
             </th>
@@ -278,6 +279,9 @@ function renderFinReport(data) {
             <th class="text-center">
                 Dividend Paid
             </th>
+            <th class="text-center">
+                Dividend Payable
+            </th>   
         `;
     });
 
@@ -329,6 +333,9 @@ function renderFinReport(data) {
 
                 <td class="text-end">
                     ${row.dividend ?? ''}
+                </td>
+                <td class="text-end">
+                    ${row.dividend_payable ?? ''}
                 </td>
             `;
         });

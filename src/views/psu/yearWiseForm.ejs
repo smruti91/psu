@@ -135,6 +135,7 @@
                         </div>
                         <input type="hidden" name="psu_mstr_id" id="psu_mstr_id"
                             value="<%= yearWiseData ? yearWiseData.id : '' %>">
+                        <input type="hidden" name="FinYr"  value="<%= Fin_Yr %>">
                         <div class="d-flex justify-content-between mt-4">
                              <div>
                             <% if (incomeSheetData) { %>
@@ -283,13 +284,20 @@
                                         <label class="form-check-label" for="lossType">Loss</label>
                                     </div>
                                 </div>
+                               
+                               
+                            </div>
+                        </div>
+                           <div class="form-group row">
+                             <label for="exampleInputConfirmPassword2" class="col-sm-3 col-form-label">Amount(in Rs.)</label>
+                              <div class="col-sm-9">
                                 <input type="text" class="form-control" id="txtProfitLossAmount" name="txtProfitLossAmount"
                                     placeholder="Enter Amount"
                                     value="<%= profitLossData && profitLossData.Profit_Loss ? profitLossData.Profit_Loss : '' %>">
                                 <div class="invalid-feedback" id="error_txtProfitLossAmount"></div>
-                               
-                            </div>
+                                </div>
                         </div>
+                        <div id="profitFields">
                         <div class="form-group row">
                             <label for="exampleInputConfirmPassword2" class="col-sm-3 col-form-label">Profit After
                                 Tax (PAT)</label>
@@ -382,6 +390,7 @@
                                 <div class="invalid-feedback" id="error_chaln_recipt"></div>
 
                             </div>
+                        </div>
                         </div>
                         <input type="hidden" name="yearWiseId" id="yearWiseId"  value="<%= yearWiseData ? yearWiseData.id : '' %>">
                         <div class="d-flex justify-content-between mt-4 py-5">
@@ -536,7 +545,7 @@
                             <strong>Review All Sections</strong>
                         </div>
                         <div class="card-body">
-                            <div class="mb-3">
+                             <!--<div class="mb-3">
                                 <h6>1. Year Wise Data </h6>
                                <table class="table table-bordered table-striped">
                                     <thead>
@@ -585,16 +594,16 @@
                                         
                                     </tbody>
                                 </table>
-                            </div>
+                            </div> -->
                              <div class="mb-3">
-                                <h6>2. Income Statement <button class="btn btn-sm btn-link btn-edit-section <%= yearWiseData ? yearWiseData.status !=0 ? 'd-none' : '' : '' %>" data-step="3  ">Edit</button></h6>
+                                <h6>1. Income Statement <button class="btn btn-sm btn-link btn-edit-section <%= yearWiseData ? yearWiseData.status !=0 ? 'd-none' : '' : '' %>" data-step="3  ">Edit</button></h6>
                                 
                                 <table class="table table-bordered table-striped">
                                     <thead>
                                         <tr>
                                             <th style="width: 10%;">Sl. No</th>
-                                            <th style="width: 45%;">Field</th>
-                                            <th style="width: 45%;">Value</th>
+                                            <th style="width: 45%;">Particulars</th>
+                                            <th style="width: 45%;">Amount</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -657,14 +666,14 @@
                                 </table>
                             </div>
                             <div class="mb-3">
-                                <h6>3. Balance Sheet <button class="btn btn-sm btn-link btn-edit-section <%= yearWiseData ? yearWiseData.status !=0 ? 'd-none' : '' : '' %>" data-step="2">Edit</button></h6>
+                                <h6>2. Balance Sheet <button class="btn btn-sm btn-link btn-edit-section <%= yearWiseData ? yearWiseData.status !=0 ? 'd-none' : '' : '' %>" data-step="2">Edit</button></h6>
                                
                                 <table class="table table-bordered table-striped">
                                     <thead>
                                         <tr>
                                             <th style="width: 10%;">Sl. No</th>
-                                            <th style="width: 45%;">Field</th>
-                                            <th style="width: 45%;">Value</th>
+                                            <th style="width: 45%;">Particulars</th>
+                                            <th style="width: 45%;">Amount</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -716,85 +725,16 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="mb-3">
-                                <h6>3. Income Statement <button class="btn btn-sm btn-link btn-edit-section <%= yearWiseData ? yearWiseData.status !=0 ? 'd-none' : '' : '' %>" data-step="3">Edit</button></h6>
-                                
-                                <table class="table table-bordered table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 10%;">Sl. No</th>
-                                            <th style="width: 45%;">Field</th>
-                                            <th style="width: 45%;">Value</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>1</td>
-                                            <td>Total Revenue</td>
-                                            <td><%= incomeSheetData ? incomeSheetData.tot_revenue : '-' %></td>
-                                        </tr>
-                                        <tr>
-                                            <td>2</td>
-                                            <td>Cost of Goods Sold</td>
-                                            <td><%= incomeSheetData ? incomeSheetData.cost_ofgoods_sold : '-' %></td>
-                                        </tr>
-                                        <tr>
-                                            <td>3</td>
-                                            <td>Operating expenses</td>
-                                            <td><%= incomeSheetData ? incomeSheetData.operating_expenses : '-' %></td>
-                                        </tr>
-                                        <tr>
-                                            <td>4</td>
-                                            <td>Total expenses</td>
-                                            <td><%= incomeSheetData ? incomeSheetData.tot_expenses : '-' %></td>
-                                        </tr>
-                                        <tr>
-                                            <td>5</td>
-                                            <td>EBITDA</td>
-                                            <td><%= incomeSheetData ? incomeSheetData.ebitda : '-' %></td>
-                                        </tr>
-                                        <tr>
-                                            <td>6</td>
-                                            <td>Depreciation & amortization</td>
-                                            <td><%= incomeSheetData ? incomeSheetData.depreciation : '-' %></td>
-                                        </tr>
-                                        <tr>
-                                            <td>7</td>
-                                            <td>EBIT (Operating profit)</td>
-                                            <td><%= incomeSheetData ? incomeSheetData.ebit_operating : '-' %></td>
-                                        </tr>
-                                        <tr>
-                                            <td>8</td>
-                                            <td>Interest Expenses</td>
-                                            <td><%= incomeSheetData ? incomeSheetData.int_expenses : '-' %></td>
-                                        </tr>
-                                        <tr>
-                                            <td>9</td>
-                                            <td>Tax Expenses</td>
-                                            <td><%= incomeSheetData ? incomeSheetData.tax_expenses : '-' %></td>
-                                        </tr>
-                                        <tr>
-                                            <td>10</td>
-                                            <td>Any Other Expenses</td>
-                                            <td><%= incomeSheetData ? incomeSheetData.any_other_expenses : '-' %></td>
-                                        </tr>
-                                        <tr>
-                                            <td>11</td>
-                                            <td>Net Income</td>
-                                            <td><%= incomeSheetData ? incomeSheetData.net_income : '-' %></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                            
                              <div class="mb-3">
-                                <h6>4. Profit Loss <button class="btn btn-sm btn-link btn-edit-section <%= yearWiseData ? yearWiseData.status !=0 ? 'd-none' : '' : '' %>" data-step="4">Edit</button></h6>
+                                <h6>3. Profit Loss <button class="btn btn-sm btn-link btn-edit-section <%= yearWiseData ? yearWiseData.status !=0 ? 'd-none' : '' : '' %>" data-step="4">Edit</button></h6>
                                 
                                 <table class="table table-bordered table-striped">
                                     <thead>
                                         <tr>
                                             <th style="width: 10%;">Sl. No</th>
-                                            <th style="width: 45%;">Field</th>
-                                            <th style="width: 45%;">Value</th>
+                                            <th style="width: 45%;">Particulars</th>
+                                            <th style="width: 45%;">Amount</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -845,14 +785,14 @@
                                 </table>
                             </div>
                             <div class="mb-3">
-                                <h6>5. Govt Relationship <button class="btn btn-sm btn-link btn-edit-section <%= yearWiseData ? yearWiseData.status !=0 ? 'd-none' : '' : '' %>" data-step="5">Edit</button></h6>
+                                <h6>4. Govt Relationship <button class="btn btn-sm btn-link btn-edit-section <%= yearWiseData ? yearWiseData.status !=0 ? 'd-none' : '' : '' %>" data-step="5">Edit</button></h6>
                               
                                 <table class="table table-bordered table-striped">
                                     <thead>
                                         <tr>
                                             <th style="width: 10%;">Sl. No</th>
-                                            <th style="width: 45%;">Field</th>
-                                            <th style="width: 45%;">Value</th>
+                                            <th style="width: 45%;">Particulars</th>
+                                            <th style="width: 45%;">Amount</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -870,14 +810,14 @@
                                 </table>
                             </div>
                             <div class="mb-3">
-                                <h6>6. Annual Report <button class="btn btn-sm btn-link btn-edit-section <%= yearWiseData ? yearWiseData.status !=0 ? 'd-none' : '' : '' %>" data-step="6">Edit</button></h6>
+                                <h6>5. Annual Report <button class="btn btn-sm btn-link btn-edit-section <%= yearWiseData ? yearWiseData.status !=0 ? 'd-none' : '' : '' %>" data-step="6">Edit</button></h6>
                                 
                                 <table class="table table-bordered table-striped">
                                     <thead>
                                         <tr>
                                             <th style="width: 10%;">Sl. No</th>
-                                            <th style="width: 45%;">Field</th>
-                                            <th style="width: 45%;">Value</th>
+                                            <th style="width: 45%;">Particulars</th>
+                                            <th style="width: 45%;">Amount</th>
                                         </tr>
                                     </thead>
                                     <tbody>

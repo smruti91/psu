@@ -12,6 +12,7 @@ const pool = require('../config/db');
 // Set user in res.locals for all routes in this router
 router.use(FinanceController.setUserLocals);
 router.get('/', ensureAuth, FinanceController.dashboard);
+router.get('/pending-profile', FinanceController.getPendingProfile);
 router.get('/psu-names', ensureAuth, FinanceController.getPsuNames);
 router.get('/finYr-report', ensureAuth, FinanceController.getFinYrReport)
 router.get('/finyear-report', ensureAuth, FinanceController.getFinYearReport)
