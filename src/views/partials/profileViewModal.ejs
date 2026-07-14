@@ -1,0 +1,84 @@
+<% const item = profile; %>
+<div class="modal fade" id="viewModal-<%= item.profile_id %>" tabindex="-1" aria-labelledby="viewModalLabel-<%= item.profile_id %>" aria-hidden="true">
+                                <div class="modal-dialog modal-md modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="viewModalLabel-<%= item.id %>"><%= item.Psu_Name %></h5>
+                                            <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">X</button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <!-- Replace or extend the fields below with the specific item properties you want to show -->
+                                             <div class="card mt-4">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">PSU Profile Data</h5>
+                                                    <p class="card-text">Authorized Share Capital: <span id="authorizedShareCap">
+                                                            <%= item.Auth_Share_Capital %>
+                                                        </span></p>
+                                                    <p class="card-text">Subscribed Share Capital: <span id="subscribedShareCap">
+                                                            <%=item.Sub_Share_Capital %>
+                                                        </span></p>
+                                                    <p class="card-text">Paid-up Share Capital: <span id="paidupShareCap">
+                                                        <%=item.Paid_Share_Capital %></span>
+                                                    </p>
+                                                    <p class="card-text">Govt. Contribution in Amount: <span id="paidupShareCap">
+                                                        <%=item.Govt_Contri_Amt %></span>
+                                                    </p>
+                                                    <p class="card-text">Govt. Contribution in Percent: <span id="paidupShareCap">
+                                                                                                
+                                                        <%=item.Govt_Contri_Percent %></span>
+                                                    </p>
+                                                    
+                                                    <p class="card-text">ROC Document: <span id="rocDocument">
+                                                                                                
+                                                        <a  href="/<%= item.roc_document.replace(/^public\//,'') %>" target="_blank" >View</a>
+                                                    </p>
+                                                    <div class="mt-3">
+                                                        <h6 class="fw-bold">Share Holders</h6>
+
+                                                        <% if(item.shareholders.length > 0){ %>
+
+                                                        <table class="table table-bordered table-sm">
+                                                            <thead class="table-light">
+                                                                <tr>
+                                                                    <th width="60">Sl.</th>
+                                                                    <th>Share Holder Name</th>
+                                                                    <th width="150">Holding (%)</th>
+                                                                </tr>
+                                                            </thead>
+
+                                                            <tbody>
+
+                                                                <% item.shareholders.forEach((shareholder,index)=>{ %>
+
+                                                                <tr>
+                                                                    <td><%= index+1 %></td>
+                                                                    <td><%= shareholder.shareholder_name %></td>
+                                                                    <td><%= shareholder.shareholder_percent %>%</td>
+                                                                </tr>
+
+                                                                <% }) %>
+
+                                                            </tbody>
+
+                                                        </table>
+
+                                                        <% } else { %>
+
+                                                        <p class="text-muted">No shareholders found.</p>
+
+                                                        <% } %>
+
+                                                    </div>
+                                                  
+                                                </div>
+                                            </div>
+                                            <!-- Example: show all fields as JSON for quick inspection -->
+                                            <hr />
+                                            
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>

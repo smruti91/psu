@@ -1,0 +1,58 @@
+<table class="table table-bordered">
+
+<thead>
+
+<tr>
+
+<th>Sl.</th>
+<th>Financial Year</th>
+<th>PSU Name</th>
+<th>Status</th>
+<th>Date</th>
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<% profiles.forEach((item,index)=>{ %>
+
+<tr>
+
+<td><%= index+1 %></td>
+
+<td><%= item.FinYr %></td>
+
+<td><%= item.Psu_Name %></td>
+
+<td>
+
+<%- include('../partials/statusBadge',{
+    status:item.status
+}) %>
+
+</td>
+
+<td><%= item.Created_Dt %></td>
+
+<td>
+
+<a
+class="btn btn-primary btn-sm"
+href="/profile-history/<%= item.id %>">
+
+View
+
+</a>
+
+</td>
+
+</tr>
+
+<% }) %>
+
+</tbody>
+
+</table>

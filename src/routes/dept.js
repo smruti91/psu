@@ -14,7 +14,7 @@ router.use(DeptController.setUserLocals);
 router.get('/', ensureAuth, DeptController.dashboard);
 router.get('/year-details/:id', DeptController.getYearDetails);
 router.post('/approve/:id', DeptController.approveRecord);
-router.post('/reject/:id', DeptController.rejectRecord);
+router.post('/reject/:id', DeptController.rejectRecord); 
 router.get('/pending-profile', DeptController.getPendingProfile);
 router.post('/approve-profile', DeptController.approveProfile);
 router.post('/reject-profile', DeptController.rejectProfile);

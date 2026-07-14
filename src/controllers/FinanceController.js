@@ -143,7 +143,6 @@ exports.getPendingProfile = async(req, res)=>{
     Psu_Name: req.session.user.Psu_Name,
     approvals: profiles,
     
-    
   }); 
 
 }

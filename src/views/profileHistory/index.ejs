@@ -1,0 +1,214 @@
+<div class="container-fluid py-4">
+
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <h3 class="mb-1">
+                                <i class="typcn typcn-document-text"></i>
+                                Profile History
+                            </h3>
+
+                            <p class="text-muted mb-0">
+                                View all submitted PSU Profiles with current status.
+                            </p>
+                        </div>
+
+                        <div>
+
+                            <span class="badge bg-primary fs-6 px-3 py-2">
+
+                                Total :
+                                <%= profiles.length %>
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Table -->
+
+    <div class="card shadow-sm border-0">
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover" id="profileHistoryTable">
+
+                    <thead class="table-dark">
+
+                        <tr>
+
+                            <th width="60">Sl.</th>
+
+                            <th>PSU Name</th>
+
+                            <th width="120">Financial Year</th>
+
+                            <th width="180">Created On</th>
+
+                            <th width="140">Status</th>
+
+                            <th width="120">Action</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <% if(profiles.length > 0){ %>
+
+                            <% profiles.forEach((item,index)=>{ %>
+
+                                <tr>
+
+                                    <td>
+                                        <%= index+1 %>
+                                    </td>
+
+                                    <td>
+
+                                        <strong>
+
+                                            <%= item.Psu_Name %>
+
+                                        </strong>
+
+                                    </td>
+
+                                    <td>
+
+                                        <%= item.FinYr %>
+
+                                    </td>
+
+                                    <td>
+
+                                        <%= new Date(item.Created_Dt).toLocaleDateString('en-GB') %>
+
+                                    </td>
+
+                                    <td>
+
+                                        <% if(item.profile_status==0){ %>
+
+                                            <span class="badge bg-secondary">
+                                                Draft
+                                            </span>
+
+                                        <% }else if(item.profile_status==1){ %>
+
+                                            <span class="badge bg-info">
+                                                Submitted
+                                            </span>
+
+                                        <% }else if(item.profile_status==2){ %>
+
+                                            <span class="badge bg-warning text-dark">
+                                                Pending Department
+                                            </span>
+
+                                        <% }else if(item.profile_status==3){ %>
+
+                                            <span class="badge bg-primary">
+                                                Pending Finance
+                                            </span>
+
+                                        <% }else if(item.profile_status==4){ %>
+
+                                            <span class="badge bg-danger">
+                                                Rejected
+                                            </span>
+
+                                        <% }else if(item.profile_status==5){ %>
+
+                                            <span class="badge bg-success">
+                                                Approved
+                                            </span>
+
+                                        <% }else if(item.profile_status==6){ %>
+
+                                            <span class="badge bg-warning text-dark">
+                                                Pending
+                                            </span>
+
+                                        <% } else if(item.profile_status==8){%>
+                                            <span class="badge bg-warning text-dark">
+                                                Approved
+                                            </span>
+                                         <% } %>    
+                                    </td>
+
+                                    <td>
+<!-- 
+                                        <a
+                                            href="/profile-history/<%= item.profile_id %>"
+                                            class="btn btn-primary btn-sm">
+
+                                            <i class="typcn typcn-eye"></i>
+
+                                            View
+
+                                        </a> -->
+
+                                    <button
+                                        class="btn btn-primary btn-sm"
+                                        data-toggle="modal"
+                                        data-target="#viewModal-<%= item.profile_id %>">
+
+                                        <i class="fa fa-eye"></i>
+
+                                        View
+
+                                    </button>
+
+                                    <%- include('../partials/profileViewModal',{
+                                        profile:item
+                                    }) %>
+
+                                    </td>
+
+                                </tr>
+
+                            <% }) %>
+
+                        <% }else{ %>
+
+                            <tr>
+
+                                <td colspan="6" class="text-center text-muted">
+
+                                    No Profile History Found
+
+                                </td>
+
+                            </tr>
+
+                        <% } %>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+

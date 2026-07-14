@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 document.addEventListener("click", async function (e) {
 
-  if (e.target.classList.contains("view-btn")) {
+  if (e.target.classList.contains("view-btn")) { 
 
     const id = e.target.dataset.id;
     const modalElement = document.getElementById("dynamicViewModal");
