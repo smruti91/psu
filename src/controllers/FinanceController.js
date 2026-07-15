@@ -36,7 +36,7 @@ exports.getFinYrReport = async(req, res)=>{
     if (rows && rows.length > 0) {
       DemandData = rows;
     }
-    res.render('finance/finYrReport', {
+    res.render('finance/finYrReport', { 
         layout: 'layouts/dashboard',
         title: 'Financial Year', 
         scripts:['getFinData'],
@@ -46,7 +46,7 @@ exports.getFinYrReport = async(req, res)=>{
 exports.getFinYearReport = async(req, res)=>{
   try {
 
-        const { dmdNo, psuId } = req.query;
+        const { dmdNo, psuId,fromYear, toYear } = req.query;
 
         let query = `
             SELECT
@@ -78,6 +78,25 @@ exports.getFinYearReport = async(req, res)=>{
             query += ` AND p.id = ?`;
             params.push(psuId);
         }
+        if (fromYear && toYear) {
+
+          query += ` AND m.FinYr BETWEEN ? AND ?`;
+
+          params.push(fromYear, toYear);
+
+      } else if (fromYear) {
+
+          query += ` AND m.FinYr >= ?`;
+
+          params.push(fromYear);
+
+      } else if (toYear) {
+
+          query += ` AND m.FinYr <= ?`;
+
+          params.push(toYear);
+
+      }
 
         query += `
             ORDER BY

@@ -135,8 +135,24 @@ function getParams() {
     window.location.href = `/psu/report/pdf?${getParams()}`;
   };
 
-  document.addEventListener('DOMContentLoaded', () => {
+  function loadFinancialYears() {
 
+    const from = document.getElementById("fromYear");
+    const to = document.getElementById("toYear");
+
+    const currentYear = new Date().getFullYear();
+
+    for(let year = 2020; year <= currentYear; year++){
+
+        from.innerHTML += `<option value="${year}">${year}</option>`;
+        to.innerHTML += `<option value="${year}">${year}</option>`;
+
+    }
+
+}
+
+  document.addEventListener('DOMContentLoaded', () => {
+     loadFinancialYears();
     const btn = document.getElementById('generateFinReportBtn');
 
     btn.addEventListener('click', loadFinReport);
@@ -153,8 +169,11 @@ const excelBtn = document.getElementById('exportReportExcelBtn');
         const dmdNo = document.getElementById('SelectDmdNo').value;
         const psuId = document.getElementById('SelectPsu').value;
 
+        const fromYear = document.getElementById("fromYear").value;
+        const toYear = document.getElementById("toYear").value;
+
         const response = await fetch(
-            `/finance/finyear-report?dmdNo=${dmdNo}&psuId=${psuId}`
+        `/finance/finyear-report?dmdNo=${dmdNo}&psuId=${psuId}&fromYear=${fromYear}&toYear=${toYear}`
         );
 
         const data = await response.json();

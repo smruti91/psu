@@ -18,7 +18,7 @@
     <h3>PSU Financial Report</h3>
     <hr>
     <div class="row">
-        <div class="col-md-3">
+        <div class="col-md-2"> 
             <label for="SelectDmdNo">Select Department</label>
             <select id="SelectDmdNo" class="form-control mb-3">
                 <option value="">-- ALL --</option>
@@ -27,13 +27,26 @@
                 <% }); %>
             </select>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <label for="SelectDmdNo">Select PSU</label>
             <select id="SelectPsu" class="form-control mb-3">
                 
                 <div id="psuList"></div>
             </select>
         </div>
+        <div class="col-md-2">
+    <label>From Year</label>
+    <select id="fromYear" class="form-control">
+        <option value="">-- Select --</option>
+    </select>
+</div>
+
+<div class="col-md-2">
+    <label>To Year</label>
+    <select id="toYear" class="form-control">
+        <option value="">-- Select --</option>
+    </select>
+</div>
        
         <div class="col-md-3 d-flex align-items-end">
             <button class="btn btn-primary w-80 mb-3" id="generateFinReportBtn">Generate Report</button>
