@@ -12,19 +12,37 @@ exports.dashboard = async (req, res) => {
   console.log('Session data:', req.session.user);
     const userId = req.session.user.id;
     const role = req.session.user.role;
-    let DemantData = null;
+    let DeptData = null;
+    let psuData = null;
+    let reportData = null;
     const [rows] = await pool.execute(
       `SELECT * FROM tbl_department order BY DmdNo ASC`
     );
     if (rows && rows.length > 0) {
-      DemantData = rows;
+      DeptData = rows;
+    }
+
+    const [psurows] = await pool.execute(
+      `SELECT * FROM tbl_psu_name order BY Psu_Name ASC`
+    );
+    if (psurows && psurows.length > 0) {
+      psuData = psurows;
+    }
+
+    const [reportrows] = await pool.execute(
+      `SELECT * FROM tbl_psu_yearwise_mstr order BY FinYr DESC`
+    );
+    if (reportrows && reportrows.length > 0) {
+       reportData = reportrows;
     }
     res.render('finance/dashboard', {
-      layout: 'layouts/dashboard',
+        layout: 'layouts/dashboard',
         title: 'Finance Dashboard',
         scripts:['getFinData'],
         role: req.session.user.role,
-        DemantData: DemantData
+        DeptData: DeptData,
+        psuData: psuData,
+        reportData: reportData
     });
 };
 

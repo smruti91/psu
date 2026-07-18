@@ -1,44 +1,358 @@
-<div class="">
-    <h3>PSU Financial Report</h3>
-    <hr>
-    <div class="row">
-        <div class="col-md-3">
-            <label for="SelectDmdNo">Select Department</label>
-            <select id="SelectDmdNo" class="form-control mb-3">
-                <option value="">-- ALL --</option>
-                <% DemantData.forEach(function(demand) { %>
-                    <option value="<%= demand.DmdNo %>"><%= demand.DmdNo %> - <%= demand.DeptName %></option>
-                <% }); %>
-            </select>
+<style>
+  /* Enhanced Dashboard Styles */
+  .dashboard-header {
+    margin-bottom: 2rem;
+  }
+  
+  .dashboard-header h2 {
+    font-weight: 600;
+    color: #001737;
+    margin-bottom: 0.5rem;
+  }
+  
+  .dashboard-header p {
+    color: #76838f;
+    font-size: 0.875rem;
+  }
+
+  /* Enhanced Stat Cards */
+  .stat-card {
+    border: none;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
+    height: 100%;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .stat-card .card-body {
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .stat-card .stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+  }
+
+  .stat-card .stat-icon i {
+    color: white;
+  }
+
+  .stat-card .stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-card .stat-label {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .stat-card .stat-description {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 0.5rem;
+  }
+
+  /* Gradient backgrounds */
+  .bg-gradient-warning {
+    background: linear-gradient(135deg, #f39915 0%, #ff6b6b 100%);
+  }
+
+  .bg-gradient-success {
+    background: linear-gradient(135deg, #21bf06 0%, #00d9ff 100%);
+  }
+
+  .bg-gradient-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #ff416c 100%);
+  }
+
+  /* Tab Navigation */
+  .tab-navigation {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+    padding: 0.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .tab-navigation .nav-link {
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    color: #76838f;
+    transition: all 0.3s ease;
+    border: none;
+    background: transparent;
+    margin: 0 0.25rem;
+  }
+
+  .tab-navigation .nav-link:hover {
+    background: rgba(132, 79, 193, 0.1);
+    color: #844fc1;
+  }
+
+  .tab-navigation .nav-link.active {
+    background: linear-gradient(135deg, #844fc1 0%, #6d44a8 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(132, 79, 193, 0.3);
+  }
+
+  .tab-navigation .nav-link .badge {
+    margin-left: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+  }
+
+  /* Enhanced Tables */
+  .table-container {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+    padding: 1.5rem;
+    animation: fadeIn 0.5s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .table-container h4 {
+    font-weight: 600;
+    color: #001737;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f3f3f3;
+  }
+
+  .enhanced-table {
+    margin-bottom: 0;
+  }
+
+  .enhanced-table thead th {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    color: #001737;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    padding: 1rem 1.25rem;
+    border: none;
+  }
+
+  .enhanced-table tbody tr {
+    transition: all 0.2s ease;
+    border-bottom: 1px solid #f3f3f3;
+  }
+
+  .enhanced-table tbody tr:hover {
+    background: linear-gradient(90deg, rgba(132, 79, 193, 0.05) 0%, rgba(132, 79, 193, 0.02) 100%);
+    transform: translateX(2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .enhanced-table tbody td {
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+    color: #495057;
+    font-size: 0.875rem;
+    border: none;
+  }
+
+  .enhanced-table tbody td:first-child {
+    font-weight: 600;
+    color: #001737;
+  }
+
+  .enhanced-table tbody td .badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 0.75rem;
+  }
+
+  /* Enhanced Buttons */
+  .btn-action {
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    border: none;
+    margin: 0 0.25rem;
+  }
+
+  .btn-view {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+  }
+
+  .btn-view:hover {
+    background: linear-gradient(135deg, #138496 0%, #117a8b 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+  }
+
+  .btn-approve {
+    background: linear-gradient(135deg, #21bf06 0%, #1aa105 100%);
+    color: white;
+  }
+
+  .btn-approve:hover {
+    background: linear-gradient(135deg, #1aa105 0%, #168704 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(33, 191, 6, 0.3);
+  }
+
+  .btn-reject {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+  }
+
+  .btn-reject:hover {
+    background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+  }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #76838f;
+  }
+
+  .empty-state i {
+    font-size: 4rem;
+    color: #e4e4f4;
+    margin-bottom: 1rem;
+  }
+
+  .empty-state p {
+    font-size: 1rem;
+    margin-bottom: 0;
+  }
+
+  /* Status Badges */
+  .badge-pending {
+    background: linear-gradient(135deg, #f39915 0%, #ff6b6b 100%);
+    color: white;
+  }
+
+  .badge-approved {
+    background: linear-gradient(135deg, #21bf06 0%, #00d9ff 100%);
+    color: white;
+  }
+
+  .badge-rejected {
+    background: linear-gradient(135deg, #dc3545 0%, #ff416c 100%);
+    color: white;
+  }
+
+  @media (max-width: 768px) {
+    .stat-card .stat-value {
+      font-size: 2rem;
+    }
+    
+    .stat-card .card-body {
+      padding: 1.5rem 1rem;
+    }
+
+    .tab-navigation .nav-link {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+  }
+</style>
+
+<div class="container-fluid px-4 mt-4">
+  <!-- Dashboard Header -->
+  <div class="dashboard-header">
+    <h2><i class="ti-dashboard me-2"></i>Dashboard Overview</h2>
+    <p>Manage and monitor annual report submissions</p>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="row mb-4">
+    <!-- Pending Card -->
+    <div class="col-xl-4 col-md-4 mb-4">
+      <div class="card stat-card bg-gradient-warning shadow" onclick="switchTab('pending')">
+        <div class="card-body">
+          <div>
+            <div class="stat-icon" style="background: rgba(255, 255, 255, 0.2);">
+              <i class="ti-time"></i>
+            </div>
+            <div class="stat-value">
+              <%= DeptData.length %>
+            </div>
+            <div class="stat-label">Departments</div>
+            
+          </div>
         </div>
-        <div class="col-md-3">
-            <label for="SelectDmdNo">Select PSU</label>
-            <select id="SelectPsu" class="form-control mb-3">
-                
-                <div id="psuList"></div>
-            </select> 
-        </div>
-        <div class="col-md-3">
-            <label for="SelectFinYear">Financial Year</label>
-            <select id="SelectFinYear" class="form-control mb-3">
-                <option value="">-- Select Financial Year --</option>
-                <option value="2020-21">2020-21</option>
-                <option value="2021-22">2021-22</option>
-                <option value="2022-23">2022-23</option>
-                <option value="2023-24">2023-24</option>
-                <option value="2024-25">2024-25</option>
-            </select>
-        </div>
-        <div class="col-md-3 d-flex align-items-end">
-            <button class="btn btn-primary w-80 mb-3" id="generateReportBtn">Generate Report</button>
-        </div>
+      </div>
     </div>
 
-
-    <div id="reportDiv"></div>
-
-    <div class="mt-3 d-none" id="downloadBtns">
-      <button id="downloadExcel" class="btn btn-success">Download Excel</button>
-      
+    <!-- Approved Card -->
+    <div class="col-xl-4 col-md-4 mb-4">
+      <div class="card stat-card bg-gradient-success shadow" onclick="switchTab('approved')">
+        <div class="card-body">
+          <div>
+            <div class="stat-icon" style="background: rgba(255, 255, 255, 0.2);">
+              <i class="ti-check"></i>
+            </div>
+            <div class="stat-value">
+              <%= psuData.length %>
+            </div>
+            <div class="stat-label">PSU'S</div>
+           
+          </div>
+        </div>
+      </div>
     </div>
-</div>
+
+    <!-- Rejected Card -->
+    <div class="col-xl-4 col-md-4 mb-4">
+      <div class="card stat-card bg-gradient-danger shadow" onclick="switchTab('rejected')">
+        <div class="card-body">
+          <div>
+            <div class="stat-icon" style="background: rgba(255, 255, 255, 0.2);">
+              <i class="ti-close"></i>
+            </div>
+            <div class="stat-value">
+              <%= reportData.length %>
+            </div>
+            <div class="stat-label">Total Reports</div>
+           
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
