@@ -1,0 +1,193 @@
+<div class="modal-header">
+
+    <h4>
+
+        <i class="fa fa-history"></i>
+
+        Profile History
+
+    </h4>
+
+    <button
+        class="btn-close"
+        data-dismiss="modal"> X
+    </button>
+
+</div>
+
+<div class="modal-body">
+
+<% if(profileHistory.length==0){ %>
+
+<div class="alert alert-warning">
+
+No History Found
+
+</div>
+
+<% } %>
+
+<% profileHistory.forEach(function(item,index){ %>
+
+<div class="card mb-4 shadow-sm">
+
+<div class="card-header bg-primary text-white">
+
+Version <%= profileHistory.length-index %>
+
+<span class="float-end">
+
+<%= new Date(item.created_at).toLocaleString() %>
+
+</span>
+
+</div>
+
+<div class="card-body">
+
+<%
+const profile =
+    typeof item.snapshot === 'string'
+        ? JSON.parse(item.snapshot)
+        : item.snapshot;
+%>
+
+<table class="table table-bordered">
+
+<tr>
+
+<th width="35%">Authorized Share Capital</th>
+
+<td><%= profile.Auth_Share_Capital %></td>
+
+</tr>
+
+<tr>
+
+<th>Subscribed Share Capital</th>
+
+<td><%= profile.Sub_Share_Capital %></td>
+
+</tr>
+
+<tr>
+
+<th>Paid Share Capital</th>
+
+<td><%= profile.Paid_Share_Capital %></td>
+
+</tr>
+
+<tr>
+
+<th>Government Contribution</th>
+
+<td><%= profile.Govt_Contri_Amt %></td>
+
+</tr>
+
+<tr>
+
+<th>Government Contribution %</th>
+
+<td><%= profile.Govt_Contri_Percent %></td>
+
+</tr>
+
+<tr>
+
+<th>Financial Year</th>
+
+<td><%= profile.fin_year %></td>
+
+</tr>
+
+<tr>
+
+<th>ROC Document</th>
+
+<td>
+
+<% if(profile.roc_document){ %>
+
+<a
+href="/<%= profile.roc_document.replace(/^public\//,'') %>"
+target="_blank">
+
+View
+
+</a>
+
+<% } %>
+
+</td>
+
+</tr>
+
+</table>
+
+<h5 class="mt-4">
+
+Shareholders
+
+</h5>
+
+<%
+
+const shareholders=
+shareholderHistory.find(x=>x.created_at.getTime()==new Date(item.created_at).getTime());
+
+let list=[];
+
+if(shareholders){
+
+ list =
+    typeof shareholders.snapshot === 'string'
+        ? JSON.parse(shareholders.snapshot)
+        : shareholders.snapshot;
+}
+
+%>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Sl</th>
+            <th>Shareholder</th>
+            <th>Holding %</th>
+        </tr>
+    </thead>
+    <tbody>
+
+    <% if(list && list.length){ %>
+
+        <% list.forEach((s,index)=>{ %>
+
+            <tr>
+                <td><%= index+1 %></td>
+                <td><%= s.shareholder_name %></td>
+                <td><%= s.shareholder_percent %>%</td>
+            </tr>
+
+        <% }) %>
+
+    <% }else{ %>
+
+        <tr>
+            <td colspan="3" class="text-center">
+                No Shareholders
+            </td>
+        </tr>
+
+    <% } %>
+
+    </tbody>
+</table>
+
+</div>
+
+</div>
+
+<% }) %>
+
+</div>

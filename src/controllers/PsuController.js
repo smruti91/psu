@@ -94,7 +94,8 @@ console.log('Received PSU Profile data:', req.body);
       Govt_Contri_Percent: Govt_Contri_Percent ?? null,
       NameOf_Share_Holder: firstShareholderName ?? null,
       fin_year: fin_year ?? existingProfile?.fin_year ?? null,
-      status: status ?? existingProfile?.status ?? 1
+      // status: status ?? existingProfile?.status ?? 1
+      status: 0
     };
 
     // Check if record already exists for this psu_id and fin_year to decide between Update or Insert
@@ -112,6 +113,64 @@ console.log('Received PSU Profile data:', req.body);
     }
 
     if (profileId) {
+         // ==========================================
+        // SAVE PROFILE SNAPSHOT
+        // ==========================================
+
+        // Existing profile
+        const [oldProfile] = await pool.execute(
+            `SELECT * FROM tbl_psu_profile WHERE id=?`,
+            [profileId]
+        );
+
+        // Existing shareholders
+        const [oldShareholders] = await pool.execute(
+            `SELECT shareholder_name,
+                    shareholder_percent
+            FROM tbl_psu_shareholders
+            WHERE profile_id=?`,
+            [profileId]
+        );
+
+        const changedBy = req.session.user.id;
+
+        // Save profile snapshot
+        await pool.execute(
+            `
+            INSERT INTO tbl_psu_profile_history
+            (
+                profile_id,
+                snapshot,
+                changed_by,
+                action
+            )
+            VALUES (?,?,?,?)
+        `,
+        [
+            profileId,
+            JSON.stringify(oldProfile[0]),
+            changedBy,
+            'UPDATE'
+        ]);
+
+        // Save shareholder snapshot
+        await pool.execute(
+            `
+            INSERT INTO tbl_psu_shareholder_history
+            (
+                profile_id,
+                snapshot,
+                changed_by,
+                action
+            )
+            VALUES (?,?,?,?)
+        `,
+        [
+            profileId,
+            JSON.stringify(oldShareholders),
+            changedBy,
+            'UPDATE'
+        ]);
       // Update existing record
       const updateQuery = `UPDATE tbl_psu_profile SET 
         dmd_no=?, Auth_Share_Capital=?, Sub_Share_Capital=?, Paid_Share_Capital=?, 
@@ -136,6 +195,35 @@ console.log('Received PSU Profile data:', req.body);
       ];
       const [result] = await pool.execute(insertQuery, insertValues);
       profileId = result.insertId;
+
+      await pool.execute(
+      `
+      INSERT INTO tbl_psu_profile_history
+      (
+          profile_id,
+          snapshot,
+          changed_by,
+          action
+      )
+      VALUES (?,?,?,?)
+      `,
+      [
+          profileId,
+          JSON.stringify({
+              dmd_no: sanitizedBody.dmd_no,
+              psu_id: sanitizedBody.psu_id,
+              Auth_Share_Capital: sanitizedBody.Auth_Share_Capital,
+              Sub_Share_Capital: sanitizedBody.Sub_Share_Capital,
+              Paid_Share_Capital: sanitizedBody.Paid_Share_Capital,
+              Govt_Contri_Amt: sanitizedBody.Govt_Contri_Amt,
+              Govt_Contri_Percent: sanitizedBody.Govt_Contri_Percent,
+              roc_document: rocDocumentPath,
+              fin_year: sanitizedBody.fin_year,
+              status: sanitizedBody.status
+          }),
+          req.session.user.id,
+          'CREATE'
+      ]);
     }
 
     // Save shareholders to tbl_psu_shareholders
@@ -163,6 +251,24 @@ console.log('Received PSU Profile data:', req.body);
         ]
       );
     }
+
+    await pool.execute(
+      `
+      INSERT INTO tbl_psu_shareholder_history
+      (
+          profile_id,
+          snapshot,
+          changed_by,
+          action
+      )
+      VALUES (?,?,?,?)
+      `,
+      [
+          profileId,
+          JSON.stringify(shareholderData),
+          req.session.user.id,
+          profileIdFromBody ? 'UPDATE' : 'CREATE'
+      ]);
   }
 
     return res.json({ 

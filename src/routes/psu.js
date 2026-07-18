@@ -117,7 +117,7 @@ router.post('/delete-challan-file', async (req, res) => {
 router.post('/year-wise-form', ensureAuth, PsuController.getYearWiseForm);
 router.get('/view-data', ensureAuth, PsuController.viewPsuData); 
 router.get('/view-data-yearwise', ensureAuth, PsuController.viewPsuDataYearwise);
-router.get('/profile', ensureAuth, PsuController.profile);
+router.get('/profile', ensureAuth, PsuController.profile); 
 
 
 

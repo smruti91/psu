@@ -176,11 +176,22 @@
 
                                     </button>
 
+                                     <button
+                                        class="btn  btn-warning btn-sm historyBtn"
+                                        data-id="<%= item.profile_id %>"
+                                        data-toggle="modal"
+                                        data-target="#historyModal">
+
+                                        <i class="fa fa-history"></i>
+                                        History
+
+                                    </button>
+
                                     <%- include('../partials/profileViewModal',{
                                         profile:item
                                     }) %>
 
-                                    </td>
+                                    </td> 
 
                                 </tr>
 

@@ -719,3 +719,23 @@ document.addEventListener("click", async function (e) {
   document.getElementById('prevStep4')?.addEventListener('click', function() { showStep(--currentStep); });
   document.getElementById('prevStep5')?.addEventListener('click', function() { showStep(--currentStep); });
 })();
+
+$(document).on('click','.historyBtn',function(){
+
+    const profileId=$(this).data('id');
+
+    $('#historyModal .modal-content').html(`
+        <div class="text-center p-5">
+
+            <div class="spinner-border text-primary"></div>
+
+        </div>
+    `);
+
+    $('#historyModal').modal('show');
+
+    $('#historyModal .modal-content').load(
+        '/profile-trns-history/'+profileId
+    );
+
+});

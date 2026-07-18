@@ -8,4 +8,9 @@ router.get(
     ensureAuth,
     profileHistoryController.index
 );
+router.get(
+    '/profile-trns-history/:profileId',
+    ensureAuth,
+    profileHistoryController.getProfileHistory
+);
 module.exports = router; 

@@ -32,7 +32,7 @@
                     <h5 class="card-title mb-0">PSU Profile Data</h5>
                      
                         <button type="button" class="btn btn-warning btn-sm" id="editProfileDataBtn">Edit</button>
-                    
+                        
                        
                    
                 </div>
@@ -90,7 +90,7 @@
 </div>
                 
                 <p class="card-text"> <span id="">
-                    <% if(psuProfile.status == 1){ %>
+                    <% if(psuProfile.status == 0){ %>
                     <button
                         class="btn btn-success"
                         id="sendApprovalBtn"
@@ -102,6 +102,16 @@
                       <% } %>  
                       
                 </p>
+                <button
+                            class="btn  btn-primary btn-sm historyBtn"
+                            data-id="<%= psuProfile.id %>"
+                            data-toggle="modal"
+                            data-target="#historyModal">
+
+                            <i class="fa fa-history"></i>
+                            History
+
+                        </button>
             </div>
         </div>
         <% } else { %>

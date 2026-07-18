@@ -344,7 +344,7 @@ document.getElementById('profileDataForm').addEventListener('submit', async func
             headers: {
                 'X-CSRF-Token': csrfToken // Pass security token in the header safely
             },
-            body: formData // Send the FormData object directly to support file uploads
+            body: formData // Send the FormData object directly to support file uploads 
         });
 
         // Parse the JSON data from the response stream
@@ -364,7 +364,7 @@ document.getElementById('profileDataForm').addEventListener('submit', async func
             $('#profileDataModal').modal('hide');
             form.reset();
             // Optionally reload page or update UI
-          //  location.reload();
+            location.reload();
         }
     } catch (error) {
         console.log(error);
