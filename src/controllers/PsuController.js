@@ -631,185 +631,430 @@ exports.updateGovtRel = async (req, res) => {
 
 // --- Annual Report Upload (Step 5) ---
 // Submit Annual Report
-exports.submitAnnualReport = async (req, res) => {
-  const {
-    psu_mstr_id
-  } = req.body;
 
-  // Check if file exists
-  if (!req.file) {
-    return res.status(400).json({ success: false, message: 'Please select a PDF file to upload.' });
-  }
+exports.uploadDocument = async (req, res) => {
 
-  // Validate file type (PDF only)
-  if (req.file.mimetype !== 'application/pdf') {
-    return res.status(400).json({ success: false, message: 'Only PDF files are allowed.' });
-  }
+    try {
 
-  // Validate file size (max 5MB)
-  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-  if (req.file.size > MAX_FILE_SIZE) {
-    return res.status(400).json({ success: false, message: 'File size should not exceed 5MB.' });
-  }
+        const { psu_mstr_id, document_type } = req.body;
 
-  console.log('Received Annual Report upload:', req.body, req.file);
-  
-  try {
-    const user_id = req.session.user.id;
-    const psu_id = req.session.user.psu_id;
-    
-    // Get DmdNo from psu_mstr_id
-    const [psuData] = await pool.execute(
-      `SELECT DmdNo FROM tbl_psu_yearwise_mstr WHERE id = ?`,
-      [psu_mstr_id]
-    );
-    
-    if (!psuData || psuData.length === 0) {
-      return res.status(400).json({ success: false, message: 'Invalid PSU Master ID.' });
+        if (!req.file) {
+            return res.json({
+                success: false,
+                message: "Please select a PDF."
+            });
+        }
+
+        if (req.file.mimetype !== "application/pdf") {
+            return res.json({
+                success: false,
+                message: "Only PDF files are allowed."
+            });
+        }
+
+        const allowedTypes = {
+            annual: "annual_report",
+            article: "article_report",
+            moa: "moa_report"
+        };
+
+        if (!allowedTypes[document_type]) {
+            return res.json({
+                success: false,
+                message: "Invalid document type."
+            });
+        }
+
+        const column = allowedTypes[document_type];
+
+        const uploadDir = path.join(
+            __dirname,
+            "../../public/uploads/annual-reports"
+        );
+
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+
+        const fileName = Date.now() + "_" + req.file.originalname;
+
+        fs.writeFileSync(
+            path.join(uploadDir, fileName),
+            req.file.buffer
+        );
+
+        const filePath = "public/uploads/annual-reports/" + fileName;
+
+        // Delete old file if exists
+
+        const [old] = await pool.execute(
+            `SELECT ${column} FROM tbl_anual_report WHERE psu_mstr_id=?`,
+            [psu_mstr_id]
+        );
+
+        if (old.length && old[0][column]) {
+
+            const oldPath = path.join(
+                __dirname,
+                "../../",
+                old[0][column]
+            );
+
+            if (fs.existsSync(oldPath)) {
+                fs.unlinkSync(oldPath);
+            }
+
+        }
+
+        // Update existing record
+
+        const [result] = await pool.execute(
+            `UPDATE tbl_anual_report
+             SET ${column}=?,
+                 updated_at=NOW()
+             WHERE psu_mstr_id=?`,
+            [filePath, psu_mstr_id]
+        );
+
+        // If no record exists insert one
+
+        if (result.affectedRows === 0) {
+
+            const user_id = req.session.user.id;
+            const psu_id = req.session.user.psu_id;
+
+            const [psu] = await pool.execute(
+                "SELECT DmdNo FROM tbl_psu_yearwise_mstr WHERE id=?",
+                [psu_mstr_id]
+            );
+
+            await pool.execute(
+
+                `INSERT INTO tbl_anual_report
+                (
+                    user_id,
+                    psu_id,
+                    DmdNo,
+                    psu_mstr_id,
+                    ${column},
+                    created_at,
+                    updated_at
+                )
+                VALUES
+                (
+                    ?,?,?,?,?,NOW(),NOW()
+                )`,
+
+                [
+                    user_id,
+                    psu_id,
+                    psu[0].DmdNo,
+                    psu_mstr_id,
+                    filePath
+                ]
+
+            );
+
+        }
+
+        return res.json({
+
+            success: true,
+
+            message: "Document uploaded successfully."
+
+        });
+
     }
-    
-    const DmdNo = psuData[0].DmdNo;
-    const fileName = `${Date.now()}_${req.file.originalname}`;
-    const filePath = `public/uploads/annual-reports/${fileName}`;
+    catch (err) {
 
-    // Save file to filesystem (store relative path)
-    const fs = require('fs');
-    const path = require('path');
-    const uploadDir = path.join(__dirname, '../../public/uploads/annual-reports');
-    
-    // Create directory if it doesn't exist
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
+        console.log(err);
+
+        return res.json({
+
+            success: false,
+
+            message: err.message
+
+        });
+
     }
-    
-    fs.writeFileSync(path.join(uploadDir, fileName), req.file.buffer);
 
-    const insertQuery = `INSERT INTO tbl_anual_report 
-      (user_id, psu_id, DmdNo, psu_mstr_id, annual_report, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, NOW(), NOW())`;
-    const insertValues = [
-      user_id,
-      psu_id,
-      DmdNo,
-      psu_mstr_id,
-      filePath
-    ];
-    
-    const [result] = await pool.execute(insertQuery, insertValues);
-    return res.json({ 
-      success: true, 
-      message: 'Annual Report uploaded successfully!', 
-      id: result.insertId,
-      filePath: filePath 
-    });
-  } catch (err) {
-    console.error('Error uploading annual report:', err);
-    return res.status(500).json({ 
-      success: false, 
-      message: 'Database error. Please try again.' 
-    });
-  }
 };
 
-//delete annual report
-exports.deleteAnnualReport = async (req, res) => { 
-  const { id } = req.body;
-  try {
-    // Get file path to delete    
-    const [data] = await pool.execute(
-      `SELECT annual_report FROM tbl_anual_report WHERE id = ?`, 
-      [id]    );
-      console.log('Data fetched for deletion:', data[0]);
-    if (data && data.length > 0 && data[0].annual_report) {
-      const filePath = path.join(__dirname, '../../', data[0].annual_report);
-      console.log('File path to delete:', filePath);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
+
+exports.deleteDocument = async (req, res) => {
+
+    try {
+
+        const { id, document_type } = req.body;
+
+        const allowedTypes = {
+
+            annual: "annual_report",
+
+            article: "article_report",
+
+            moa: "moa_report"
+
+        };
+
+        if (!allowedTypes[document_type]) {
+
+            return res.json({
+
+                success: false,
+
+                message: "Invalid document."
+
+            });
+
+        }
+
+        const column = allowedTypes[document_type];
+
+        const [rows] = await pool.execute(
+
+            `SELECT ${column}
+             FROM tbl_anual_report
+             WHERE id=?`,
+
+            [id]
+
+        );
+
+        if (rows.length && rows[0][column]) {
+
+            const filePath = path.join(
+
+                __dirname,
+
+                "../../",
+
+                rows[0][column]
+
+            );
+
+            if (fs.existsSync(filePath)) {
+
+                fs.unlinkSync(filePath);
+
+            }
+
+        }
+
+        await pool.execute(
+
+            `UPDATE tbl_anual_report
+             SET ${column}=NULL,
+                 updated_at=NOW()
+             WHERE id=?`,
+
+            [id]
+
+        );
+
+        return res.json({
+
+            success: true,
+
+            message: "Document deleted successfully."
+
+        });
+
     }
-    const deleteQuery = `DELETE FROM tbl_anual_report WHERE id = ?`;
-    await pool.execute(deleteQuery, [id]);
-     res.json({ success: true, message: 'Annual Report deleted successfully!' });
-  } catch (err) {
-    console.error('Error deleting annual report:', err);
-     res.status(500).json({ success: false, message: 'Database error. Please try again.' });
-  }
-}
+    catch (err) {
 
-// Update Annual Report
-exports.updateAnnualReport = async (req, res) => {
-  const {
-    annualReportId,
-    psu_mstr_id
-  } = req.body;
+        return res.json({
 
-  // Check if file exists
-  if (!req.file) {
-    return res.status(400).json({ success: false, message: 'Please select a PDF file to upload.' });
-  }
+            success: false,
 
-  // Validate file type (PDF only)
-  if (req.file.mimetype !== 'application/pdf') {
-    return res.status(400).json({ success: false, message: 'Only PDF files are allowed.' });
-  }
+            message: err.message
 
-  // Validate file size (max 5MB)
-  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-  if (req.file.size > MAX_FILE_SIZE) {
-    return res.status(400).json({ success: false, message: 'File size should not exceed 5MB.' });
-  }
+        });
 
-  console.log('Updating Annual Report:', req.body, req.file);
-  
-  try {
-    // Get old file path to delete
-    const [oldData] = await pool.execute(
-      `SELECT annual_report FROM tbl_anual_report WHERE id = ?`,
-      [annualReportId]
-    );
-
-    const fileName = `${Date.now()}_${req.file.originalname}`;
-    const filePath = `public/uploads/annual-reports/${fileName}`;
-
-    // Save new file to filesystem
-    const fs = require('fs');
-    const path = require('path');
-    const uploadDir = path.join(__dirname, '../../public/uploads/annual-reports');
-    
-    // Create directory if it doesn't exist
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    
-    fs.writeFileSync(path.join(uploadDir, fileName), req.file.buffer);
-
-    // Delete old file if it exists
-    if (oldData && oldData.length > 0 && oldData[0].annual_report) {
-      const oldFilePath = path.join(__dirname, '../../', oldData[0].annual_report);
-      if (fs.existsSync(oldFilePath)) {
-        fs.unlinkSync(oldFilePath);
-      }
     }
 
-    const updateQuery = `UPDATE tbl_anual_report SET 
-      annual_report=?, updated_at=NOW()
-      WHERE id=?`;
-    const updateValues = [filePath, annualReportId];
-    
-    await pool.execute(updateQuery, updateValues);
-    return res.json({ 
-      success: true, 
-      message: 'Annual Report updated successfully!',
-      filePath: filePath 
-    });
-  } catch (err) {
-    console.error('Error updating annual report:', err);
-    return res.status(500).json({ 
-      success: false, 
-      message: 'Database error. Please try again.' 
-    });
-  }
 };
+// exports.submitAnnualReport = async (req, res) => {
+//   const {
+//     psu_mstr_id
+//   } = req.body;
+
+//   // Check if file exists
+//   if (!req.file) {
+//     return res.status(400).json({ success: false, message: 'Please select a PDF file to upload.' });
+//   }
+
+//   // Validate file type (PDF only)
+//   if (req.file.mimetype !== 'application/pdf') {
+//     return res.status(400).json({ success: false, message: 'Only PDF files are allowed.' });
+//   }
+
+//   // Validate file size (max 5MB)
+//   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+//   if (req.file.size > MAX_FILE_SIZE) {
+//     return res.status(400).json({ success: false, message: 'File size should not exceed 5MB.' });
+//   }
+
+//   console.log('Received Annual Report upload:', req.body, req.file);
+  
+//   try {
+//     const user_id = req.session.user.id;
+//     const psu_id = req.session.user.psu_id;
+    
+//     // Get DmdNo from psu_mstr_id
+//     const [psuData] = await pool.execute(
+//       `SELECT DmdNo FROM tbl_psu_yearwise_mstr WHERE id = ?`,
+//       [psu_mstr_id]
+//     );
+    
+//     if (!psuData || psuData.length === 0) {
+//       return res.status(400).json({ success: false, message: 'Invalid PSU Master ID.' });
+//     }
+    
+//     const DmdNo = psuData[0].DmdNo;
+//     const fileName = `${Date.now()}_${req.file.originalname}`;
+//     const filePath = `public/uploads/annual-reports/${fileName}`;
+
+//     // Save file to filesystem (store relative path)
+//     const fs = require('fs');
+//     const path = require('path');
+//     const uploadDir = path.join(__dirname, '../../public/uploads/annual-reports');
+    
+//     // Create directory if it doesn't exist
+//     if (!fs.existsSync(uploadDir)) {
+//       fs.mkdirSync(uploadDir, { recursive: true });
+//     }
+    
+//     fs.writeFileSync(path.join(uploadDir, fileName), req.file.buffer);
+
+//     const insertQuery = `INSERT INTO tbl_anual_report 
+//       (user_id, psu_id, DmdNo, psu_mstr_id, annual_report, created_at, updated_at)
+//       VALUES (?, ?, ?, ?, ?, NOW(), NOW())`;
+//     const insertValues = [
+//       user_id,
+//       psu_id,
+//       DmdNo,
+//       psu_mstr_id,
+//       filePath
+//     ];
+    
+//     const [result] = await pool.execute(insertQuery, insertValues);
+//     return res.json({ 
+//       success: true, 
+//       message: 'Annual Report uploaded successfully!', 
+//       id: result.insertId,
+//       filePath: filePath 
+//     });
+//   } catch (err) {
+//     console.error('Error uploading annual report:', err);
+//     return res.status(500).json({ 
+//       success: false, 
+//       message: 'Database error. Please try again.' 
+//     });
+//   }
+// };
+
+// //delete annual report
+// exports.deleteAnnualReport = async (req, res) => { 
+//   const { id } = req.body;
+//   try {
+//     // Get file path to delete    
+//     const [data] = await pool.execute(
+//       `SELECT annual_report FROM tbl_anual_report WHERE id = ?`, 
+//       [id]    );
+//       console.log('Data fetched for deletion:', data[0]);
+//     if (data && data.length > 0 && data[0].annual_report) {
+//       const filePath = path.join(__dirname, '../../', data[0].annual_report);
+//       console.log('File path to delete:', filePath);
+//       if (fs.existsSync(filePath)) {
+//         fs.unlinkSync(filePath);
+//       }
+//     }
+//     const deleteQuery = `DELETE FROM tbl_anual_report WHERE id = ?`;
+//     await pool.execute(deleteQuery, [id]);
+//      res.json({ success: true, message: 'Annual Report deleted successfully!' });
+//   } catch (err) {
+//     console.error('Error deleting annual report:', err);
+//      res.status(500).json({ success: false, message: 'Database error. Please try again.' });
+//   }
+// }
+
+// // Update Annual Report
+// exports.updateAnnualReport = async (req, res) => {
+//   const {
+//     annualReportId,
+//     psu_mstr_id
+//   } = req.body;
+
+//   // Check if file exists
+//   if (!req.file) {
+//     return res.status(400).json({ success: false, message: 'Please select a PDF file to upload.' });
+//   }
+
+//   // Validate file type (PDF only)
+//   if (req.file.mimetype !== 'application/pdf') {
+//     return res.status(400).json({ success: false, message: 'Only PDF files are allowed.' });
+//   }
+
+//   // Validate file size (max 5MB)
+//   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+//   if (req.file.size > MAX_FILE_SIZE) {
+//     return res.status(400).json({ success: false, message: 'File size should not exceed 5MB.' });
+//   }
+
+//   console.log('Updating Annual Report:', req.body, req.file);
+  
+//   try {
+//     // Get old file path to delete
+//     const [oldData] = await pool.execute(
+//       `SELECT annual_report FROM tbl_anual_report WHERE id = ?`,
+//       [annualReportId]
+//     );
+
+//     const fileName = `${Date.now()}_${req.file.originalname}`;
+//     const filePath = `public/uploads/annual-reports/${fileName}`;
+
+//     // Save new file to filesystem
+//     const fs = require('fs');
+//     const path = require('path');
+//     const uploadDir = path.join(__dirname, '../../public/uploads/annual-reports');
+    
+//     // Create directory if it doesn't exist
+//     if (!fs.existsSync(uploadDir)) {
+//       fs.mkdirSync(uploadDir, { recursive: true });
+//     }
+    
+//     fs.writeFileSync(path.join(uploadDir, fileName), req.file.buffer);
+
+//     // Delete old file if it exists
+//     if (oldData && oldData.length > 0 && oldData[0].annual_report) {
+//       const oldFilePath = path.join(__dirname, '../../', oldData[0].annual_report);
+//       if (fs.existsSync(oldFilePath)) {
+//         fs.unlinkSync(oldFilePath);
+//       }
+//     }
+
+//     const updateQuery = `UPDATE tbl_anual_report SET 
+//       annual_report=?, updated_at=NOW()
+//       WHERE id=?`;
+//     const updateValues = [filePath, annualReportId];
+    
+//     await pool.execute(updateQuery, updateValues);
+//     return res.json({ 
+//       success: true, 
+//       message: 'Annual Report updated successfully!',
+//       filePath: filePath 
+//     });
+//   } catch (err) {
+//     console.error('Error updating annual report:', err);
+//     return res.status(500).json({ 
+//       success: false, 
+//       message: 'Database error. Please try again.' 
+//     });
+//   }
+// };
 
 // Fetch Annual Report data
 exports.getAnnualReport = async (req, res) => {

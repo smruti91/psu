@@ -471,7 +471,7 @@
                             </div>
                         </div> -->
 
-                           <div class="form-group row">
+                        <div class="form-group row">
                             <label for="challanReceipt" class="col-sm-3 col-form-label">
                                 Upload Annual Report 
                             </label>
@@ -489,27 +489,116 @@
                                         </a>
 
                                         <!-- Delete Button -->
-                                        <button type="button"
-                                                class="btn btn-sm btn-danger delete-annual-report-btn"
-                                                data-id="<%= annualReportData.id %>">
-                                            Delete
-                                        </button>
+                                   <button
+                                        class="btn btn-danger"
+                                        onclick="deleteDocument('<%= annualReportData.id %>','annual')">
+                                        Delete
+                                    </button>
                                     </div>
 
                                 <% } else { %>
 
                                     <!-- Show Upload Input Only If No File -->
+                                    <input type="hidden" name="document_type" value="annual">
+
                                     <input type="file"
-                                        class="form-control"
-                                        id="txtAnnualReport"
-                                        name="annual_report"
-                                        accept=".pdf">
+                                            name="file"
+                                            id="txtAnnualReport">
 
                                     <small class="form-text text-muted">
                                         Accepted format: PDF (Max size: 5MB)
                                     </small>
 
                                     <div class="invalid-feedback" id="error_anualReport"></div>
+                                    <button type="submit" class="btn btn-success" id="submitStep6">Submit</button>
+                                <% } %>
+
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="challanReceipt" class="col-sm-3 col-form-label">
+                              Article
+                            </label>
+
+                            <div class="col-sm-9">
+
+                                <% if (annualReportData && annualReportData.article_report) { %>
+
+                                    <!-- Show View Button -->
+                                    <div class="mt-2">
+                                        <a href="/<%= annualReportData.article_report.replace(/^public\//,'') %>"
+                                        target="_blank"
+                                        class="btn btn-sm btn-info">
+                                        View article Report
+                                        </a>
+
+                                        <!-- Delete Button -->
+                                     <button
+                                    class="btn btn-danger"
+                                    onclick="deleteDocument('<%= annualReportData.id %>','article')">
+                                    Delete
+                                    </button>
+                                    </div>
+
+                                <% } else { %>
+
+                                    <!-- Show Upload Input Only If No File -->
+                                    <input type="hidden" name="document_type" value="article">
+
+                                    <input type="file"
+                                        name="file"
+                                        id="txtArticleReport">
+
+                                    <small class="form-text text-muted">
+                                        Accepted format: PDF (Max size: 5MB)
+                                    </small>
+
+                                    <div class="invalid-feedback" id="error_articleReport"></div>
+                                    <button type="submit" class="btn btn-success" id="submitStep6">Submit</button>
+                                <% } %>
+
+                            </div>
+                        </div>
+
+                         <div class="form-group row">
+                            <label for="challanReceipt" class="col-sm-3 col-form-label">
+                              MOA
+                            </label>
+
+                            <div class="col-sm-9">
+
+                                <% if (annualReportData && annualReportData.moa_report) { %>
+
+                                    <!-- Show View Button -->
+                                    <div class="mt-2">
+                                        <a href="/<%= annualReportData.moa_report.replace(/^public\//,'') %>"
+                                        target="_blank"
+                                        class="btn btn-sm btn-info">
+                                        View MOA Report
+                                        </a>
+
+                                        <!-- Delete Button -->
+                                        <button
+                                        class="btn btn-danger"
+                                        onclick="deleteDocument('<%= annualReportData.id %>','moa')">
+                                        Delete
+                                        </button>
+                                    </div>
+
+                                <% } else { %>
+
+                                    <!-- Show Upload Input Only If No File -->
+                                    <input type="hidden" name="document_type" value="moa">
+
+                                    <input type="file"
+                                        name="file"
+                                        id="txtMOAReport">
+                                    <small class="form-text text-muted">
+                                        Accepted format: PDF (Max size: 5MB)
+                                    </small>
+
+                                    <div class="invalid-feedback" id="error_moaReport"></div>
                                     <button type="submit" class="btn btn-success" id="submitStep6">Submit</button>
                                 <% } %>
 
@@ -827,6 +916,36 @@
                                             <td>
                                                 <% if (annualReportData && annualReportData.annual_report) { %>
                                                     <a href="/<%= annualReportData.annual_report.replace(/^public\//,'') %>" 
+                                                    target="_blank" 
+                                                    class="btn btn-sm btn-info">
+                                                        View PDF
+                                                    </a>
+                                                <% } else { %>
+                                                    -
+                                                <% } %>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td>Article Report</td>
+                                            <td>
+                                                <% if (annualReportData && annualReportData.article_report) { %>
+                                                    <a href="/<%= annualReportData.article_report.replace(/^public\//,'') %>" 
+                                                    target="_blank" 
+                                                    class="btn btn-sm btn-info">
+                                                        View PDF
+                                                    </a>
+                                                <% } else { %>
+                                                    -
+                                                <% } %>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td>Annual Report</td>
+                                            <td>
+                                                <% if (annualReportData && annualReportData.moa_report) { %>
+                                                    <a href="/<%= annualReportData.moa_report.replace(/^public\//,'') %>" 
                                                     target="_blank" 
                                                     class="btn btn-sm btn-info">
                                                         View PDF

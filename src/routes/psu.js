@@ -35,9 +35,24 @@ router.post('/profile-approval', ensureAuth, PsuController.approvePsuProfile);
 
 // --- Annual Report Upload (Step 5) ---
 router.get('/annual-report', ensureAuth, PsuController.getAnnualReport);
-router.post('/annual-report', ensureAuth, upload.single('annual_report'),csrfProtection, PsuController.submitAnnualReport);
-router.post('/annual-report-update', ensureAuth, upload.single('annual_report'),csrfProtection, PsuController.updateAnnualReport);
-router.post('/annual-report-delete', ensureAuth, PsuController.deleteAnnualReport);
+//router.post('/annual-report', ensureAuth, upload.single('annual_report'),csrfProtection, PsuController.submitAnnualReport);
+//router.post('/annual-report-update', ensureAuth, upload.single('annual_report'),csrfProtection, PsuController.updateAnnualReport);
+//router.post('/annual-report-delete', ensureAuth, PsuController.deleteAnnualReport);
+
+router.post(
+    '/document-upload',
+    ensureAuth,
+    upload.single('file'),
+    csrfProtection,
+    PsuController.uploadDocument
+);
+
+router.post(
+    '/document-delete',
+    ensureAuth,
+    csrfProtection,
+    PsuController.deleteDocument
+);
 router.post('/send-for-approval', ensureAuth, PsuController.sendForApproval);
 
 // profit loss 

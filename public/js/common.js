@@ -447,76 +447,244 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 // --- Step 5: Annual Report Upload ---
-document.addEventListener('DOMContentLoaded', function () {
-  var form5 = document.getElementById('psuFormAnnualReportUpload');
-  if (!form5) return;
+function uploadDocument(fileInputId, documentType){
 
-  form5.addEventListener('submit', function (e) {
-    e.preventDefault();
-    var errorDiv = document.getElementById('psuFormUploadErrors');
-    var successDiv = document.getElementById('psuFormUploadSuccess');
-    errorDiv.style.display = 'none';
-    successDiv.style.display = 'none';
+    const input = document.getElementById(fileInputId);
+     if (!input) return;
+    input.addEventListener("change",function(){
 
-    var fileInput = document.getElementById('txtAnnualReport');
-    if (!fileInput.files || !fileInput.files[0]) {
-      errorDiv.innerHTML = 'Please select a PDF file to upload.';
-      errorDiv.style.display = 'block';
-      return;
-    }
-    var file = fileInput.files[0];
-    if (file.type !== 'application/pdf') {
-      errorDiv.innerHTML = 'Only PDF files are allowed.';
-      errorDiv.style.display = 'block';
-      return;
-    }
-    var MAX_FILE_SIZE = 5 * 1024 * 1024;
-    if (file.size > MAX_FILE_SIZE) {
-      errorDiv.innerHTML = 'File size should not exceed 5MB.';
-      errorDiv.style.display = 'block';
-      return;
-    }
+        if(!this.files.length) return;
 
-    var formData = new FormData(form5);
-    var isUpdate = formData.get('annualReportId');
-    var url = isUpdate ? '/psu/annual-report-update' : '/psu/annual-report';
+        const form = document.getElementById("psuFormAnnualReportUpload");
 
-    fetch(url, {
-      method: 'POST',
-      body: formData,
-      headers: { 'Accept': 'application/json' }
+        const fd = new FormData(form);
+
+        fd.set("file", this.files[0]);
+
+        fd.set("document_type", documentType);
+
+        fetch("/psu/document-upload",{
+
+            method:"POST",
+
+            body:fd,
+
+            headers:{
+                Accept:"application/json"
+            }
+
+        })
+
+        .then(r=>r.json())
+
+        .then(data=>{
+            console.log(data);
+            if(data.success){
+
+                Swal.fire(
+                    "Success",
+                    data.message,
+                    "success"
+                ).then(()=>{
+                    localStorage.setItem("activeStep", "5");
+                    location.reload();
+                });
+
+            }
+            else{
+
+                Swal.fire(
+                    "Error",
+                    data.message,
+                    "error"
+                );
+
+            }
+
+        });
+
+    });
+
+}
+
+uploadDocument("txtAnnualReport","annual");
+uploadDocument("txtArticleReport","article");
+uploadDocument("txtMOAReport","moa");
+
+function deleteDocument(id,type){
+
+    fetch("/psu/document-delete",{
+
+        method:"POST",
+
+        headers:{
+            "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+
+            id:id,
+
+            document_type:type
+
+        })
+
     })
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        if (data.success) {
-          successDiv.innerHTML = data.message;
-          successDiv.style.display = 'block';
-          Swal.fire({
-            title: "Success!",
-            text: data.message,
-            icon: "success"
-          });
-          var submitBtn = form5.querySelector('#submitStep5');
-          if (submitBtn) submitBtn.style.display = 'none';
 
-           localStorage.setItem('activeStep', '5');
+    .then(r=>r.json())
 
-          location.reload();
-        } else {
-          errorDiv.innerHTML = data.message || 'Error uploading Annual Report.';
-          errorDiv.style.display = 'block';
+    .then(data=>{
+
+        if(data.success){
+
+            location.reload();
+
         }
 
-        setTimeout(function() { hideMsgDivs(errorDiv, successDiv); }, 5000);
-      })
-      .catch(function(err) {
-        console.error('Error:', err);
-        errorDiv.innerHTML = 'Error submitting Annual Report. Please try again.';
-        errorDiv.style.display = 'block';
-      });
-  });
+    });
 
-  document.addEventListener('DOMContentLoaded', function () {
+}
+// document.addEventListener('DOMContentLoaded', function () {
+//   var form5 = document.getElementById('psuFormAnnualReportUpload');
+//   if (!form5) return;
+
+//   form5.addEventListener('submit', function (e) {
+//     e.preventDefault();
+//     var errorDiv = document.getElementById('psuFormUploadErrors');
+//     var successDiv = document.getElementById('psuFormUploadSuccess');
+//     errorDiv.style.display = 'none';
+//     successDiv.style.display = 'none';
+
+//     var fileInput = document.getElementById('txtAnnualReport');
+//     if (!fileInput.files || !fileInput.files[0]) {
+//       errorDiv.innerHTML = 'Please select a PDF file to upload.';
+//       errorDiv.style.display = 'block';
+//       return;
+//     }
+//     var file = fileInput.files[0];
+//     if (file.type !== 'application/pdf') {
+//       errorDiv.innerHTML = 'Only PDF files are allowed.';
+//       errorDiv.style.display = 'block';
+//       return;
+//     }
+//     var MAX_FILE_SIZE = 5 * 1024 * 1024;
+//     if (file.size > MAX_FILE_SIZE) {
+//       errorDiv.innerHTML = 'File size should not exceed 5MB.';
+//       errorDiv.style.display = 'block';
+//       return;
+//     }
+
+//     var formData = new FormData(form5);
+//     var isUpdate = formData.get('annualReportId');
+//     var url = isUpdate ? '/psu/annual-report-update' : '/psu/annual-report';
+
+//     fetch(url, {
+//       method: 'POST',
+//       body: formData,
+//       headers: { 'Accept': 'application/json' }
+//     })
+//       .then(function(res) { return res.json(); })
+//       .then(function(data) {
+//         if (data.success) {
+//           successDiv.innerHTML = data.message;
+//           successDiv.style.display = 'block';
+//           Swal.fire({
+//             title: "Success!",
+//             text: data.message,
+//             icon: "success"
+//           });
+//           var submitBtn = form5.querySelector('#submitStep5');
+//           if (submitBtn) submitBtn.style.display = 'none';
+
+//            localStorage.setItem('activeStep', '5');
+
+//           location.reload();
+//         } else {
+//           errorDiv.innerHTML = data.message || 'Error uploading Annual Report.';
+//           errorDiv.style.display = 'block';
+//         }
+
+//         setTimeout(function() { hideMsgDivs(errorDiv, successDiv); }, 5000);
+//       })
+//       .catch(function(err) {
+//         console.error('Error:', err);
+//         errorDiv.innerHTML = 'Error submitting Annual Report. Please try again.';
+//         errorDiv.style.display = 'block';
+//       });
+//   });
+
+//   document.addEventListener('DOMContentLoaded', function () {
+
+//     const activeStep = localStorage.getItem('activeStep');
+
+//     if (activeStep === '5') {
+
+//         document.querySelectorAll('.step-content').forEach(step => {
+//             step.style.display = 'none';
+//         });
+
+//         document.getElementById('step-content-5').style.display = 'block';
+
+//         // Optional: activate step indicator/tab
+//         document.querySelectorAll('.step-item').forEach(item => {
+//             item.classList.remove('active');
+//         });
+
+//         const step5Indicator = document.querySelector('[data-step="5"]');
+//         if (step5Indicator) {
+//             step5Indicator.classList.add('active');
+//         }
+
+//         localStorage.removeItem('activeStep');
+//     }
+// });
+
+//   // Delete annual report
+//   document.querySelectorAll('.delete-annual-report-btn').forEach(function(button) {
+//     button.addEventListener('click', function() {
+//       var csrfToken = document.querySelector('[name="csrf-token"]')?.getAttribute('content');
+//       var id = this.getAttribute('data-id');
+//       if (confirm('Are you sure you want to delete this file?')) {
+//         fetch('/psu/annual-report-delete', {
+//           method: 'POST',
+//           credentials: 'same-origin',
+//           headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+//           body: JSON.stringify({ id: id })
+//         })
+//         .then(function(res) { return res.json(); })
+//         .then(function(data) { if (data.success) location.reload(); });
+//       }
+//     });
+//   });
+// });
+
+// document.addEventListener("DOMContentLoaded", function () {
+
+//     const activeStep = localStorage.getItem("activeStep");
+
+//     if (activeStep) {
+
+//         document.querySelectorAll(".step-content").forEach(step => {
+//             step.style.display = "none";
+//         });
+
+//         document.getElementById("step-content-" + activeStep).style.display = "block";
+
+//         document.querySelectorAll(".step-item").forEach(item => {
+//             item.classList.remove("active");
+//         });
+
+//         const indicator = document.querySelector(`[data-step="${activeStep}"]`);
+//         if (indicator) {
+//             indicator.classList.add("active");
+//         }
+
+//         localStorage.removeItem("activeStep");
+//     }
+
+// });
+
+document.addEventListener('DOMContentLoaded', function () {
 
     const activeStep = localStorage.getItem('activeStep');
 
@@ -540,25 +708,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         localStorage.removeItem('activeStep');
     }
-});
-
-  // Delete annual report
-  document.querySelectorAll('.delete-annual-report-btn').forEach(function(button) {
-    button.addEventListener('click', function() {
-      var csrfToken = document.querySelector('[name="csrf-token"]')?.getAttribute('content');
-      var id = this.getAttribute('data-id');
-      if (confirm('Are you sure you want to delete this file?')) {
-        fetch('/psu/annual-report-delete', {
-          method: 'POST',
-          credentials: 'same-origin',
-          headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
-          body: JSON.stringify({ id: id })
-        })
-        .then(function(res) { return res.json(); })
-        .then(function(data) { if (data.success) location.reload(); });
-      }
-    });
-  });
 });
 
 // --- Preview Modal and Send for Approval ---
