@@ -35,6 +35,12 @@ No History Found
 
 Version <%= profileHistory.length-index %>
 
+<span class="badge bg-light text-dark ms-2"><%= item.action || 'UPDATE' %></span>
+
+<% if (item.changed_by_name) { %>
+<span class="ms-2">by <%= item.changed_by_name %></span>
+<% } %>
+
 <span class="float-end">
 
 <%= new Date(item.created_at).toLocaleString() %>
@@ -118,6 +124,36 @@ View
 
 </a>
 
+<% } else { %>
+
+N/A
+
+<% } %>
+
+</td>
+
+</tr>
+
+<tr>
+
+<th>MOA Document</th>
+
+<td>
+
+<% if(profile.moa_document){ %>
+
+<a
+href="/<%= profile.moa_document.replace(/^public\//,'') %>"
+target="_blank">
+
+View
+
+</a>
+
+<% } else { %>
+
+N/A
+
 <% } %>
 
 </td>
@@ -133,9 +169,13 @@ Shareholders
 </h5>
 
 <%
-
-const shareholders=
-shareholderHistory.find(x=>x.created_at.getTime()==new Date(item.created_at).getTime());
+// Match the shareholder snapshot closest to (at or just before) this profile version.
+// Profile + shareholder snapshots are saved in separate INSERTs, so exact-timestamp
+// equality is unreliable - pick the latest shareholder snapshot not newer than this version.
+const itemTime = new Date(item.created_at).getTime();
+const candidates = shareholderHistory.filter(x => new Date(x.created_at).getTime() <= itemTime + 5000);
+candidates.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+const shareholders = candidates[0];
 
 let list=[];
 

@@ -43,3 +43,28 @@ ALTER TABLE `tbl_user` ADD COLUMN IF NOT EXISTS `last_login_ip` VARCHAR(45);
 ALTER TABLE `tbl_user` ADD COLUMN IF NOT EXISTS `last_login_device` TEXT;
 -- Add challan receipt column to tbl_psu_yearwise_mstr
 ALTER TABLE `tbl_psu_yearwise_mstr` ADD COLUMN IF NOT EXISTS `chaln_recipt` VARCHAR(500);
+-- Optional MOA document for PSU profile
+ALTER TABLE `tbl_psu_profile` ADD COLUMN IF NOT EXISTS `moa_document` VARCHAR(255) DEFAULT NULL;
+-- Shareholder percent column (original shareholders migration lacked it)
+-- NOTE: plain MySQL does not support IF NOT EXISTS for ADD COLUMN; run
+-- src/config/migrations_shareholder_percent.sql once on existing databases.
+CREATE TABLE IF NOT EXISTS `tbl_psu_profile_history` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `profile_id` INT NOT NULL,
+  `snapshot` LONGTEXT NOT NULL,
+  `changed_by` INT NULL,
+  `action` VARCHAR(20) NOT NULL DEFAULT 'UPDATE',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  KEY `idx_profile_id` (`profile_id`),
+  KEY `idx_created_at` (`created_at`)
+);
+CREATE TABLE IF NOT EXISTS `tbl_psu_shareholder_history` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `profile_id` INT NOT NULL,
+  `snapshot` LONGTEXT NOT NULL,
+  `changed_by` INT NULL,
+  `action` VARCHAR(20) NOT NULL DEFAULT 'UPDATE',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  KEY `idx_profile_id` (`profile_id`),
+  KEY `idx_created_at` (`created_at`)
+);

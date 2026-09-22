@@ -30,6 +30,7 @@ router.post('/govt-rel-update', ensureAuth,upload.none(), PsuController.updateGo
 // --- PSU Profile ---
 router.post('/psu-profile', ensureAuth, upload.any(), validatePsuProfile, PsuController.submitPsuProfile);
 router.post('/delete-roc-document', ensureAuth, csrfProtection, PsuController.deleteRocDocument);
+router.post('/delete-moa-document', ensureAuth, csrfProtection, PsuController.deleteMoaDocument);
 router.get('/get-shareholders/:profileId', ensureAuth, PsuController.getShareholdersByProfileId);
 router.post('/profile-approval', ensureAuth, PsuController.approvePsuProfile);
 

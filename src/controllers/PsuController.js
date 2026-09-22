@@ -1,6 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const pool = require('../config/db');
+const { PROFILE_STATUS, PSU_EDITABLE_STATUSES } = require('../utils/profileStatus');
+const profileHistoryService = require('../services/profileHistoryService');
 exports.setUserLocals = (req, res, next) => {
   if (req.session && req.session.user) {
     res.locals.user = req.session.user;
@@ -9,6 +11,36 @@ exports.setUserLocals = (req, res, next) => {
   }
   next();
 };
+
+// Ensure schema pieces that older installs may lack (shareholder_percent column,
+// profile/shareholder history tables). Idempotent and safe to call per request.
+async function ensureProfileSchema() {
+  try {
+    await pool.execute('ALTER TABLE tbl_psu_shareholders ADD COLUMN shareholder_percent DECIMAL(5,2) NOT NULL DEFAULT 0');
+  } catch (e) {
+    // Ignore (column already exists - later queries will surface real errors)
+  }
+  await pool.execute(`CREATE TABLE IF NOT EXISTS tbl_psu_profile_history (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    profile_id INT NOT NULL,
+    snapshot LONGTEXT NOT NULL,
+    changed_by INT NULL,
+    action VARCHAR(20) NOT NULL DEFAULT 'UPDATE',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_profile_id (profile_id),
+    KEY idx_created_at (created_at)
+  )`);
+  await pool.execute(`CREATE TABLE IF NOT EXISTS tbl_psu_shareholder_history (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    profile_id INT NOT NULL,
+    snapshot LONGTEXT NOT NULL,
+    changed_by INT NULL,
+    action VARCHAR(20) NOT NULL DEFAULT 'UPDATE',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_profile_id (profile_id),
+    KEY idx_created_at (created_at)
+  )`);
+}
 
 // --- PSU Profile Data ---
 exports.submitPsuProfile = async (req, res) => {
@@ -45,12 +77,22 @@ console.log('Received PSU Profile data:', req.body);
     .filter(item => item.shareholder_name !== '');
 
   try {
+    // Self-heal: older installs lack shareholder_percent + history tables
+    // (caused "Unknown column 'shareholder_percent' in 'field list'" on add/update)
+    await ensureProfileSchema();
+    // Self-heal: ensure optional MOA column exists on installs created before the migration
+    try {
+      await pool.execute('ALTER TABLE tbl_psu_profile ADD COLUMN moa_document VARCHAR(255) DEFAULT NULL');
+    } catch (e) {
+      // Ignore (column already exists or insufficient privilege - later queries will surface real errors)
+    }
+
     let existingProfile = null;
     let profileId = null;
 
     if (profileIdFromBody) {
       const [profileRows] = await pool.execute(
-        'SELECT id, roc_document, status, fin_year FROM tbl_psu_profile WHERE id = ?',
+        'SELECT id, roc_document, moa_document, status, fin_year FROM tbl_psu_profile WHERE id = ?',
         [profileIdFromBody]
       );
       existingProfile = profileRows && profileRows.length > 0 ? profileRows[0] : null;
@@ -58,6 +100,7 @@ console.log('Received PSU Profile data:', req.body);
     }
 
     let rocDocumentPath = existingProfile?.roc_document || null;
+    let moaDocumentPath = existingProfile?.moa_document || null;
 
     // Handle File Upload for roc_document
     
@@ -74,6 +117,21 @@ console.log('Received PSU Profile data:', req.body);
 
         fs.writeFileSync(path.join(uploadDir, fileName), rocFile.buffer);
         rocDocumentPath = filePath;
+      }
+
+      // Handle optional File Upload for moa_document
+      const moaFile = req.files.find(f => f.fieldname === 'moa' || f.fieldname === 'moa_document');
+      if (moaFile) {
+        const fileName = `${Date.now()}_${moaFile.originalname}`;
+        const filePath = `public/uploads/moa-document/${fileName}`;
+        const uploadDir = path.join(__dirname, '../../public/uploads/moa-document');
+
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+        }
+
+        fs.writeFileSync(path.join(uploadDir, fileName), moaFile.buffer);
+        moaDocumentPath = filePath;
       }
     }
 
@@ -94,14 +152,15 @@ console.log('Received PSU Profile data:', req.body);
       Govt_Contri_Percent: Govt_Contri_Percent ?? null,
       NameOf_Share_Holder: firstShareholderName ?? null,
       fin_year: fin_year ?? existingProfile?.fin_year ?? null,
-      // status: status ?? existingProfile?.status ?? 1
-      status: 0
+      // New profiles always start as Draft (0). Updates reset to Draft only
+      // when the current status is editable (0/2/4) - enforced below.
+      status: PROFILE_STATUS.DRAFT
     };
 
     // Check if record already exists for this psu_id and fin_year to decide between Update or Insert
     if (!profileId) {
       const [existing] = await pool.execute(
-        'SELECT id, roc_document, status, fin_year FROM tbl_psu_profile WHERE psu_id = ? AND fin_year = ?',
+        'SELECT id, roc_document, moa_document, status, fin_year FROM tbl_psu_profile WHERE psu_id = ? AND fin_year = ?',
         [sanitizedBody.psu_id, sanitizedBody.fin_year]
       );
 
@@ -109,7 +168,15 @@ console.log('Received PSU Profile data:', req.body);
         profileId = existing[0].id;
         existingProfile = existing[0];
         rocDocumentPath = existingProfile?.roc_document || rocDocumentPath;
+        moaDocumentPath = existingProfile?.moa_document || moaDocumentPath;
       }
+    }
+
+    // Any update by the PSU resets the profile to Draft (0) so it goes
+    // through the approval chain again. The pre-edit snapshot is saved
+    // to history below, keeping the full log intact.
+    if (profileId) {
+      sanitizedBody.status = PROFILE_STATUS.DRAFT;
     }
 
     if (profileId) {
@@ -174,11 +241,11 @@ console.log('Received PSU Profile data:', req.body);
       // Update existing record
       const updateQuery = `UPDATE tbl_psu_profile SET 
         dmd_no=?, Auth_Share_Capital=?, Sub_Share_Capital=?, Paid_Share_Capital=?, 
-        Govt_Contri_Amt=?, Govt_Contri_Percent=?, status=?, roc_document=?, updated_at=NOW() 
+        Govt_Contri_Amt=?, Govt_Contri_Percent=?, status=?, roc_document=?, moa_document=?, updated_at=NOW() 
         WHERE id=?`;
       const updateValues = [
         sanitizedBody.dmd_no, sanitizedBody.Auth_Share_Capital, sanitizedBody.Sub_Share_Capital, sanitizedBody.Paid_Share_Capital, 
-        sanitizedBody.Govt_Contri_Amt, sanitizedBody.Govt_Contri_Percent, sanitizedBody.status, rocDocumentPath, profileId
+        sanitizedBody.Govt_Contri_Amt, sanitizedBody.Govt_Contri_Percent, sanitizedBody.status, rocDocumentPath, moaDocumentPath, profileId
       ];
       await pool.execute(updateQuery, updateValues);
       
@@ -187,11 +254,11 @@ console.log('Received PSU Profile data:', req.body);
     } else {
       // Insert new record
       const insertQuery = `INSERT INTO tbl_psu_profile 
-        (dmd_no, psu_id, Auth_Share_Capital, Sub_Share_Capital, Paid_Share_Capital, Govt_Contri_Amt, Govt_Contri_Percent, fin_year, status, roc_document, created_at, updated_at) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`;
+        (dmd_no, psu_id, Auth_Share_Capital, Sub_Share_Capital, Paid_Share_Capital, Govt_Contri_Amt, Govt_Contri_Percent, fin_year, status, roc_document, moa_document, created_at, updated_at) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`;
       const insertValues = [
         sanitizedBody.dmd_no, sanitizedBody.psu_id, sanitizedBody.Auth_Share_Capital, sanitizedBody.Sub_Share_Capital, sanitizedBody.Paid_Share_Capital, 
-        sanitizedBody.Govt_Contri_Amt, sanitizedBody.Govt_Contri_Percent, sanitizedBody.fin_year, sanitizedBody.status, rocDocumentPath
+        sanitizedBody.Govt_Contri_Amt, sanitizedBody.Govt_Contri_Percent, sanitizedBody.fin_year, sanitizedBody.status, rocDocumentPath, moaDocumentPath
       ];
       const [result] = await pool.execute(insertQuery, insertValues);
       profileId = result.insertId;
@@ -218,6 +285,7 @@ console.log('Received PSU Profile data:', req.body);
               Govt_Contri_Amt: sanitizedBody.Govt_Contri_Amt,
               Govt_Contri_Percent: sanitizedBody.Govt_Contri_Percent,
               roc_document: rocDocumentPath,
+              moa_document: moaDocumentPath,
               fin_year: sanitizedBody.fin_year,
               status: sanitizedBody.status
           }),
@@ -309,10 +377,38 @@ exports.deleteRocDocument = async (req, res) => {
   }
 };
 
+exports.deleteMoaDocument = async (req, res) => {
+  const profileId = req.body.profile_id || req.body.profileId;
+  console.log('Deleting MOA document for profile ID:', profileId);
+  if (!profileId) {
+    return res.status(400).json({ success: false, message: 'Profile ID is required.' });
+  }
+
+  try {
+    const [rows] = await pool.execute('SELECT moa_document FROM tbl_psu_profile WHERE id = ?', [profileId]);
+    const currentDocument = rows && rows.length > 0 ? rows[0].moa_document : null;
+
+    if (currentDocument) {
+      const physicalPath = path.join(process.cwd(), currentDocument);
+      if (fs.existsSync(physicalPath)) {
+        fs.unlinkSync(physicalPath);
+      }
+    }
+
+    await pool.execute('UPDATE tbl_psu_profile SET moa_document = NULL, updated_at = NOW() WHERE id = ?', [profileId]);
+
+    return res.json({ success: true, message: 'MOA document deleted successfully.' });
+  } catch (err) {
+    console.error('Error deleting MOA document:', err);
+    return res.status(500).json({ success: false, message: 'Unable to delete MOA document.' });
+  }
+};
+
 exports.getShareholdersByProfileId = async (req, res) => {
   const { profileId } = req.params;
 
   try {
+    await ensureProfileSchema();
     const [shareholders] = await pool.execute(
       'SELECT id, shareholder_name, shareholder_percent FROM tbl_psu_shareholders WHERE profile_id = ? ORDER BY created_at ASC',
       [profileId]
@@ -338,15 +434,37 @@ exports.getShareholdersByProfileId = async (req, res) => {
 exports.approvePsuProfile = async (req, res) => {
     try {
 
-        const { psuprofile_id } = req.body;
+        // Only PSU users may send their own profile for approval.
+        if (String(req.session?.user?.role || '') !== '3') {
+            return res.status(403).json({ success: false, message: 'Forbidden.' });
+        }
 
-     
+        const { psuprofile_id } = req.body;
+        if (!psuprofile_id) {
+            return res.status(400).json({ success: false, message: 'Profile ID is required.' });
+        }
+
+        const [rows] = await pool.execute(
+            'SELECT status FROM tbl_psu_profile WHERE id = ?',
+            [psuprofile_id]
+        );
+        if (!rows || rows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Profile not found.' });
+        }
+        // Only Draft / FA-rejected / SEC-rejected profiles can be (re)sent for approval.
+        if (!PSU_EDITABLE_STATUSES.includes(Number(rows[0].status))) {
+            return res.status(400).json({ success: false, message: 'Only draft or rejected profiles can be sent for approval.' });
+        }
 
         await pool.execute(
             `UPDATE tbl_psu_profile
-             SET status = ?
+             SET status = ?, updated_at = NOW()
              WHERE id = ?`,
-            [6, psuprofile_id]
+            [PROFILE_STATUS.PENDING_FA, psuprofile_id]
+        );
+
+        await profileHistoryService.logProfileTransition(
+            psuprofile_id, 'SUBMIT', req.session?.user?.id
         );
 
         res.json({
@@ -402,6 +520,13 @@ exports.submitIncomeStatement = async (req, res) => {
   } = req.body;
 
   try {
+    // EBITDA is always derived server-side: EBITDA = Total Revenue - Total Expenses
+    const revNum = parseFloat(tot_revenue);
+    const expNum = parseFloat(tot_expenses);
+    if (isNaN(revNum) || isNaN(expNum)) {
+      return res.status(400).json({ errors: [{ msg: 'Total Revenue and Total Expenses must be valid numbers.' }] });
+    }
+    const computedEbitda = parseFloat((revNum - expNum).toFixed(2));
     let yearwiseId = psu_mstr_id;
 
     // If psu_mstr_id is not provided or empty, create a yearwise record first
@@ -467,7 +592,7 @@ exports.submitIncomeStatement = async (req, res) => {
         WHERE psu_mstr_id=?`;
       const updateValues = [
         tot_revenue, cost_ofgoods_sold, operating_expenses, tot_expenses,
-        ebitda, depreciation, ebit_operating, int_expenses, tax_expenses,
+        computedEbitda, depreciation, ebit_operating, int_expenses, tax_expenses,
         any_other_expenses, net_income, yearwiseId
       ];
       await pool.execute(updateQuery, updateValues);
@@ -480,7 +605,7 @@ exports.submitIncomeStatement = async (req, res) => {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`;
     const insertValues = [
       tot_revenue, cost_ofgoods_sold, operating_expenses, tot_expenses,
-      ebitda, depreciation, ebit_operating, int_expenses, tax_expenses,
+      computedEbitda, depreciation, ebit_operating, int_expenses, tax_expenses,
       any_other_expenses, net_income, yearwiseId
     ];
     const [result] = await pool.execute(insertQuery, insertValues);
@@ -501,7 +626,6 @@ exports.updateIncomeStatement = async (req, res) => {
     cost_ofgoods_sold,
     operating_expenses,
     tot_expenses,
-    ebitda,
     depreciation,
     ebit_operating,
     int_expenses,
@@ -511,6 +635,13 @@ exports.updateIncomeStatement = async (req, res) => {
     psu_mstr_id
   } = req.body;
   try {
+    // EBITDA is always derived server-side: EBITDA = Total Revenue - Total Expenses
+    const revNum = parseFloat(tot_revenue);
+    const expNum = parseFloat(tot_expenses);
+    if (isNaN(revNum) || isNaN(expNum)) {
+      return res.status(400).json({ errors: [{ msg: 'Total Revenue and Total Expenses must be valid numbers.' }] });
+    }
+    const computedEbitda = parseFloat((revNum - expNum).toFixed(2));
     const updateQuery = `UPDATE tbl_income_sheet_indicator SET 
       tot_revenue=?, cost_ofgoods_sold=?, operating_expenses=?, tot_expenses=?, ebitda=?, depreciation=?, ebit_operating=?, int_expenses=?, tax_expenses=?, any_other_expenses=?, net_income=?, psu_mstr_id=?, updated_at=NOW()
       WHERE id=?`;
@@ -519,7 +650,7 @@ exports.updateIncomeStatement = async (req, res) => {
       cost_ofgoods_sold,
       operating_expenses,
       tot_expenses,
-      ebitda,
+      computedEbitda,
       depreciation,
       ebit_operating,
       int_expenses,

@@ -1,20 +1,29 @@
 const bcrypt = require('bcryptjs');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
-const captcha = require('svg-captcha');
+const captcha = require('../utils/captcha');
+
+const CAPTCHA_OPTIONS = {
+  size: 5,
+  width: 200,
+  height: 70,
+  fontSize: 42,
+  noise: 2,
+  dots: 25,
+  background: '#ffffff'
+};
+
+function generateCaptcha() {
+  // Always solid black bold font on white background for maximum clarity
+  return captcha.create(CAPTCHA_OPTIONS);
+}
 const pool = require('../config/db');
 const SecurityService = require('../services/SecurityService');
 
 // Show login page with CAPTCHA
 exports.showLogin = async (req, res) => {
   // Generate CAPTCHA
-  const svg_captcha = captcha.create({ 
-    size: 4,
-    ignoreChars: '0o1i',
-    noise: 0,
-    color: false,
-    background: '#fff'
-  });
+  const svg_captcha = generateCaptcha();
   
   const sessionId = req.sessionID;
   //console.log('Generated CAPTCHA for session:', sessionId);
@@ -64,13 +73,7 @@ body('captcha')
     
     if (!validationErrors.isEmpty()) {
       // Regenerate CAPTCHA
-      const svg_captcha = captcha.create({ 
-        size: 4,
-        ignoreChars: '0o1i',
-        noise: 2,
-        color: false,
-        background: '#fff'
-      });
+      const svg_captcha = generateCaptcha();
       
       const sessionId = req.sessionID;
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
@@ -108,13 +111,7 @@ body('captcha')
       if (isLocked) {
         const remainingTime = await SecurityService.getRemainingLockoutTime(username);
         // Regenerate CAPTCHA
-        const svg_captcha = captcha.create({ 
-          size: 4,
-          ignoreChars: '0o1i',
-          noise: 2,
-          color: false,
-          background: '#fff'
-        });
+        const svg_captcha = generateCaptcha();
         
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
         
@@ -147,13 +144,7 @@ body('captcha')
     
       if (captchaRows.length === 0) {
         // Regenerate CAPTCHA
-        const svg_captcha = captcha.create({ 
-          size: 4,
-          ignoreChars: '0o1i',
-          noise: 2,
-          color: false,
-          background: '#fff'
-        });
+        const svg_captcha = generateCaptcha();
         
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
         
@@ -189,13 +180,7 @@ body('captcha')
         );
 
         // Regenerate CAPTCHA
-        const svg_captcha = captcha.create({ 
-          size: 4,
-          ignoreChars: '0o1i',
-          noise: 2,
-          color: false,
-          background: '#fff'
-        });
+        const svg_captcha = generateCaptcha();
         
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
         
@@ -226,13 +211,7 @@ body('captcha')
         await SecurityService.trackLoginAttempt(username, false, req);
         
         // Regenerate CAPTCHA
-        const svg_captcha = captcha.create({ 
-          size: 4,
-          ignoreChars: '0o1i',
-          noise: 2,
-          color: false,
-          background: '#fff'
-        });
+        const svg_captcha = generateCaptcha();
         
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
         
@@ -267,13 +246,7 @@ body('captcha')
           await SecurityService.lockAccount(username);
           
           // Regenerate CAPTCHA
-          const svg_captcha = captcha.create({ 
-            size: 4,
-            ignoreChars: '0o1i',
-            noise: 2,
-            color: false,
-            background: '#fff'
-          });
+          const svg_captcha = generateCaptcha();
           
           const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
           
@@ -298,13 +271,7 @@ body('captcha')
         }
         
         // Regenerate CAPTCHA
-        const svg_captcha = captcha.create({ 
-          size: 4,
-          ignoreChars: '0o1i',
-          noise: 2,
-          color: false,
-          background: '#fff'
-        });
+        const svg_captcha = generateCaptcha();
         
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
         
@@ -333,7 +300,7 @@ body('captcha')
       await SecurityService.resetFailedAttempts(username);
       const [profileData] = await pool.execute(
       `SELECT * FROM tbl_psu_profile WHERE psu_id = ? and dmd_no = ? and status = ?`,
-      [user.Psu_id, user.DmdNo, 8]
+      [user.Psu_id, user.DmdNo, 5]
     );
       // Save user in session
       req.session.user = { id: user.id, role: user.Role, dmdNo: user.DmdNo, Psu_Name: user.Name, psu_id: user.Psu_id , profileId: profileData.length > 0 ? profileData[0].id : null};
@@ -371,13 +338,7 @@ body('captcha')
       console.error('Login error:', error);
       
       // Regenerate CAPTCHA
-      const svg_captcha = captcha.create({ 
-        size: 4,
-        ignoreChars: '0o1i',
-        noise: 2,
-        color: false,
-        background: '#fff'
-      });
+      const svg_captcha = generateCaptcha();
       
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
       
@@ -458,13 +419,7 @@ exports.register = [
 // Refresh CAPTCHA (AJAX endpoint)
 exports.refreshCaptcha = async (req, res) => {
   try {
-    const svg_captcha = captcha.create({ 
-      size: 4,
-      ignoreChars: '0o1i',
-      noise: 2,
-      color: false,
-      background: '#fff'
-    });
+    const svg_captcha = generateCaptcha();
     
     const sessionId = req.sessionID;
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);

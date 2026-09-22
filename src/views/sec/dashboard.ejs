@@ -300,6 +300,53 @@
     <p>Manage and monitor annual report submissions</p>
   </div>
 
+  <!-- Pending Profile Approval Notification -->
+  <% if (typeof pendingProfiles !== 'undefined' && pendingProfiles.length > 0) { %>
+    <div class="alert alert-info d-flex justify-content-between align-items-center shadow-sm" role="alert">
+      <div>
+        <i class="ti-bell me-2"></i>
+        <strong><%= pendingProfiles.length %> PSU profile(s)</strong> awaiting SEC approval:
+        <%= pendingProfiles.map(p => p.Psu_Name).join(', ') %>
+      </div>
+      <a href="/sec/pending-profile" class="btn btn-info btn-sm" style="white-space: nowrap;">
+        Review Now <i class="ti-arrow-right ms-1"></i>
+      </a>
+    </div>
+    <div class="table-container mb-4">
+      <h4><i class="ti-bell me-2 text-info"></i>Profiles Pending SEC Approval</h4>
+      <table class="table enhanced-table">
+        <thead>
+          <tr>
+            <th style="width: 10%;">Sl No</th>
+            <th style="width: 40%;">PSU</th>
+            <th style="width: 25%;">Submitted On</th>
+            <th style="width: 25%;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% pendingProfiles.forEach((p, index) => { %>
+            <tr>
+              <td><%= index + 1 %></td>
+              <td><strong><%= p.Psu_Name || 'N/A' %></strong></td>
+              <td><%= p.created_at ? new Date(p.created_at).toLocaleDateString('en-GB') : 'N/A' %></td>
+              <td>
+                <a href="/sec/pending-profile" class="btn btn-action btn-view">
+                  <i class="ti-eye me-1"></i>View
+                </a>
+                <button class="btn btn-action btn-approve secApproveBtn" data-id="<%= p.id %>">
+                  <i class="ti-check me-1"></i>Approve
+                </button>
+                <button class="btn btn-action btn-reject secRejectBtn" data-id="<%= p.id %>">
+                  <i class="ti-close me-1"></i>Reject
+                </button>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+
   <!-- Statistics Cards -->
   <div class="row mb-4">
     <!-- Pending Card -->

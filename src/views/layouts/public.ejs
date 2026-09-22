@@ -400,6 +400,17 @@
                 height: 350px;
             }
         }
+
+        /* High-clarity CAPTCHA: solid black font on white, crisp rendering */
+        #captcha-svg svg {
+            width: 100%;
+            max-width: 220px;
+            height: 70px;
+            background: #ffffff;
+            border-radius: 4px;
+            shape-rendering: geometricPrecision;
+            text-rendering: optimizeLegibility;
+        }
     </style>
 </head>
 <body>

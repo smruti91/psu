@@ -104,51 +104,46 @@
 
                                     <td>
 
-                                        <% if(item.profile_status==0){ %>
+                                        <% const ps = Number(item.profile_status); %>
+                                        <% if(ps==0){ %>
 
                                             <span class="badge bg-secondary">
                                                 Draft
                                             </span>
 
-                                        <% }else if(item.profile_status==1){ %>
-
-                                            <span class="badge bg-info">
-                                                Submitted
-                                            </span>
-
-                                        <% }else if(item.profile_status==2){ %>
+                                        <% }else if(ps==1){ %>
 
                                             <span class="badge bg-warning text-dark">
-                                                Pending Department
+                                                Pending at FA
                                             </span>
 
-                                        <% }else if(item.profile_status==3){ %>
-
-                                            <span class="badge bg-primary">
-                                                Pending Finance
-                                            </span>
-
-                                        <% }else if(item.profile_status==4){ %>
+                                        <% }else if(ps==2){ %>
 
                                             <span class="badge bg-danger">
-                                                Rejected
+                                                Rejected by FA
                                             </span>
 
-                                        <% }else if(item.profile_status==5){ %>
+                                        <% }else if(ps==3){ %>
+
+                                            <span class="badge bg-info text-dark">
+                                                Pending at SEC
+                                            </span>
+
+                                        <% }else if(ps==4){ %>
+
+                                            <span class="badge bg-danger">
+                                                Rejected by SEC
+                                            </span>
+
+                                        <% }else if(ps==5){ %>
 
                                             <span class="badge bg-success">
                                                 Approved
                                             </span>
 
-                                        <% }else if(item.profile_status==6){ %>
-
-                                            <span class="badge bg-warning text-dark">
-                                                Pending
-                                            </span>
-
-                                        <% } else if(item.profile_status==8){%>
-                                            <span class="badge bg-warning text-dark">
-                                                Approved
+                                        <% } else { %>
+                                            <span class="badge bg-secondary">
+                                                Unknown (<%= item.profile_status %>)
                                             </span>
                                          <% } %>    
                                     </td>

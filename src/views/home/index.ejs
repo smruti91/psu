@@ -179,12 +179,12 @@
                             <!-- CAPTCHA Section -->
                             <div class="mb-3">
                                 <label class="form-label"><i class="fas fa-shield-alt me-2"></i>Security Code (CAPTCHA)</label>
-                                <div class="captcha-container" style="border: 1px solid #dee2e6; padding: 10px; border-radius: 4px; background: #f8f9fa; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
-                                    <div id="captcha-svg" style="flex: 1; text-align: center;">
+                                <div class="captcha-container" style="border: 2px solid #dee2e6; padding: 10px; border-radius: 6px; background: #ffffff; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+                                    <div id="captcha-svg" style="flex: 1; text-align: center; background: #ffffff; border-radius: 4px; min-height: 70px; display: flex; align-items: center; justify-content: center;">
                                         <% if (captcha) { %>
                                             <%- captcha %>
                                         <% } else { %>
-                                            <svg style="width: 200px; height: 80px; background: #fff;"><text>Loading...</text></svg>
+                                            <svg style="width: 200px; height: 70px; background: #fff;"><text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="20" font-weight="bold" fill="#000">Loading...</text></svg>
                                         <% } %>
                                     </div>
                                     <button type="button" class="btn btn-sm btn-outline-primary ms-2" id="refresh-captcha" style="white-space: nowrap; padding: 8px 12px;">

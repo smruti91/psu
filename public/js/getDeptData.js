@@ -202,9 +202,182 @@ function approveProfile(profileId)
     .then(res => res.json())
     .then(data => {
 
+        if (!data.success) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Failed',
+                text: data.message || 'Unable to approve profile.'
+            });
+            return;
+        }
+
         Swal.fire({
             icon: 'success',
             title: 'Approved',
+            text: data.message
+        }).then(() => {
+
+            location.reload();
+
+        });
+
+    });
+}
+
+// SEC approve / reject (Pending at SEC -> Approved / Rejected by SEC)
+document.querySelectorAll('.secApproveBtn').forEach(btn => {
+
+    btn.addEventListener('click', function () {
+
+        const profileId = this.dataset.id;
+
+        Swal.fire({
+            title: 'Approve PSU Profile?',
+            text: 'This profile will be finally approved.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Approve',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#198754'
+        }).then((result) => {
+
+            if(result.isConfirmed){
+
+                secApproveProfile(profileId);
+
+            }
+
+        });
+
+    });
+
+});
+
+document.querySelectorAll('.secRejectBtn').forEach(btn => {
+
+    btn.addEventListener('click', function () {
+
+        const profileId = this.dataset.id;
+
+        Swal.fire({
+            title: 'Reject PSU Profile',
+            input: 'textarea',
+            inputLabel: 'Rejection Remarks',
+            inputPlaceholder: 'Enter rejection remarks...',
+            inputAttributes: {
+                'aria-label': 'Enter rejection remarks'
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Reject',
+            confirmButtonColor: '#dc3545',
+
+            preConfirm: (remarks) => {
+
+                if (!remarks) {
+
+                    Swal.showValidationMessage(
+                        'Remarks are required'
+                    );
+
+                }
+
+                return remarks;
+
+            }
+
+        }).then((result) => {
+
+            if(result.isConfirmed){
+
+                secRejectProfile(profileId,result.value);
+
+            }
+
+        });
+
+    });
+
+});
+
+function secApproveProfile(profileId)
+{
+    const csrfToken = document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute('content');
+    fetch('/sec/approve-profile', {
+
+        method: 'POST',
+
+        headers: {
+            'Content-Type': 'application/json',
+            'CSRF-Token': csrfToken
+        },
+
+        body: JSON.stringify({
+            profileId
+        })
+
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        if (!data.success) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Failed',
+                text: data.message || 'Unable to approve profile.'
+            });
+            return;
+        }
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Approved',
+            text: data.message
+        }).then(() => {
+
+            location.reload();
+
+        });
+
+    });
+}
+
+function secRejectProfile(profileId, remarks)
+{
+    const csrfToken = document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute('content');
+    fetch('/sec/reject-profile', {
+
+        method: 'POST',
+
+        headers: {
+            'Content-Type': 'application/json',
+            'CSRF-Token': csrfToken
+        },
+
+        body: JSON.stringify({
+            profileId,
+            remarks
+        })
+
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        if (!data.success) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Failed',
+                text: data.message || 'Unable to reject profile.'
+            });
+            return;
+        }
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Rejected',
             text: data.message
         }).then(() => {
 
@@ -238,13 +411,21 @@ function rejectProfile(profileId, remarks)
     .then(res => res.json())
     .then(data => {
         console.log(data)
+        if (!data.success) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Failed',
+                text: data.message || 'Unable to reject profile.'
+            });
+            return;
+        }
         Swal.fire({
             icon: 'success',
             title: 'Rejected',
             text: data.message
         }).then(() => {
 
-            //location.reload();
+            location.reload();
 
         });
 

@@ -1,0 +1,247 @@
+<div class="container-fluid py-4">
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-1">User Management</h3>
+                            <p class="text-muted mb-0">Create department / PSU users and manage access</p>
+                        </div>
+                        <div class="d-flex gap-2 align-items-center">
+                            <span class="badge bg-primary fs-6 px-3 py-2">
+                                Total : <%= users.length %>
+                            </span>
+                            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#addUserModal">
+                                <i class="fa fa-plus"></i> Add User
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="usersTable">
+                    <thead class="table-dark">
+                        <tr>
+                            <th width="60">Sl.</th>
+                            <th>Name</th>
+                            <th>Username</th>
+                            <th width="110">Role</th>
+                            <th>Department</th>
+                            <th>PSU</th>
+                            <th width="110">Status</th>
+                            <th width="140">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (users.length > 0) { %>
+                            <% users.forEach((u, index) => { %>
+                                <tr>
+                                    <td><%= index + 1 %></td>
+                                    <td><strong><%= u.Name %></strong></td>
+                                    <td><%= u.user_name %></td>
+                                    <td>
+                                        <span class="badge bg-info text-dark">
+                                            <%= roleLabels[u.Role] || u.Role %>
+                                        </span>
+                                    </td>
+                                    <td><%= u.DeptName || u.DmdNo || 'N/A' %></td>
+                                    <td><%= u.Psu_Name || 'N/A' %></td>
+                                    <td>
+                                        <% if (Number(u.Status) === 1) { %>
+                                            <span class="badge bg-success">Active</span>
+                                        <% } else { %>
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <% if (Number(u.Status) === 1) { %>
+                                            <button type="button" class="btn btn-sm btn-outline-danger toggleStatusBtn"
+                                                data-id="<%= u.id %>" data-status="0">Deactivate</button>
+                                        <% } else { %>
+                                            <button type="button" class="btn btn-sm btn-outline-success toggleStatusBtn"
+                                                data-id="<%= u.id %>" data-status="1">Activate</button>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="8" class="text-center text-muted">No users found</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addUserModalLabel">Add User</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="addUserError" class="alert alert-danger" style="display:none;"></div>
+                <form id="addUserForm">
+                    <div class="form-group mb-3">
+                        <label class="form-label">Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="newUserName" placeholder="Full name" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="form-label">Username <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="newUserLogin" placeholder="Login username (min 3 chars)" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="form-label">Password <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" id="newUserPassword" placeholder="Min 6 characters" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="form-label">Role <span class="text-danger">*</span></label>
+                        <select class="form-control" id="newUserRole" required>
+                            <option value="">-- Select Role --</option>
+                            <option value="2">Dept</option>
+                            <option value="3">PSU</option>
+                            <option value="4">Finance</option>
+                            <option value="5">SEC</option>
+                            <option value="1">Admin</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-3" id="deptGroup" style="display:none;">
+                        <label class="form-label">Department <span class="text-danger">*</span></label>
+                        <select class="form-control" id="newUserDept">
+                            <option value="">-- Select Department --</option>
+                            <% departments.forEach(d => { %>
+                                <option value="<%= d.DmdNo %>"><%= d.DeptName %> (<%= d.DmdNo %>)</option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="form-group mb-3" id="psuGroup" style="display:none;">
+                        <label class="form-label">PSU <span class="text-danger">*</span></label>
+                        <select class="form-control" id="newUserPsu">
+                            <option value="">-- Select PSU --</option>
+                        </select>
+                        <small class="form-text text-muted">PSUs under the selected department.</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="saveUserBtn">Create User</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var allPsus = <%- JSON.stringify(psus).replace(/</g, '\\u003c') %>;
+    var roleEl = document.getElementById('newUserRole');
+    var deptEl = document.getElementById('newUserDept');
+    var psuEl = document.getElementById('newUserPsu');
+    var deptGroup = document.getElementById('deptGroup');
+    var psuGroup = document.getElementById('psuGroup');
+    var errorBox = document.getElementById('addUserError');
+
+    function showError(msg) {
+        errorBox.textContent = msg;
+        errorBox.style.display = 'block';
+    }
+    function hideError() {
+        errorBox.style.display = 'none';
+    }
+
+    function refreshRoleFields() {
+        var role = roleEl.value;
+        var needDept = (role === '2' || role === '3' || role === '5');
+        deptGroup.style.display = needDept ? 'block' : 'none';
+        psuGroup.style.display = (role === '3') ? 'block' : 'none';
+        if (role === '3') refreshPsuOptions();
+    }
+
+    function refreshPsuOptions() {
+        var dmd = deptEl.value;
+        psuEl.innerHTML = '<option value="">-- Select PSU --</option>';
+        allPsus
+            .filter(function (p) { return String(p.DmdNo) === String(dmd); })
+            .forEach(function (p) {
+                var opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = p.Psu_Name;
+                psuEl.appendChild(opt);
+            });
+    }
+
+    roleEl.addEventListener('change', refreshRoleFields);
+    deptEl.addEventListener('change', function () {
+        if (roleEl.value === '3') refreshPsuOptions();
+    });
+
+    document.getElementById('saveUserBtn').addEventListener('click', async function () {
+        hideError();
+        var payload = {
+            Name: document.getElementById('newUserName').value.trim(),
+            user_name: document.getElementById('newUserLogin').value.trim(),
+            Password: document.getElementById('newUserPassword').value,
+            Role: roleEl.value,
+            DmdNo: deptEl.value,
+            Psu_id: psuEl.value
+        };
+        if (!payload.Name || !payload.user_name || !payload.Password || !payload.Role) {
+            showError('Please fill Name, Username, Password and Role.');
+            return;
+        }
+        try {
+            const response = await fetch('/admin/users/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await response.json();
+            if (result.success) {
+                alert(result.message);
+                location.reload();
+            } else {
+                showError(result.message || 'Unable to create user.');
+            }
+        } catch (err) {
+            console.error(err);
+            showError('Network error. Please try again.');
+        }
+    });
+
+    document.querySelectorAll('.toggleStatusBtn').forEach(function (btn) {
+        btn.addEventListener('click', async function () {
+            if (!confirm('Change status of this user?')) return;
+            try {
+                const response = await fetch('/admin/users/toggle-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ userId: btn.dataset.id, status: btn.dataset.status })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    location.reload();
+                } else {
+                    alert(result.message || 'Unable to update status.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Network error. Please try again.');
+            }
+        });
+    });
+})();
+</script>

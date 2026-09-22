@@ -38,7 +38,7 @@
 
                 <tbody>
 
-                    <% approved.forEach((item, i) => { %>
+                    <% (rejected || []).forEach((item, i) => { %>
 
                     <tr>
                         <td>
@@ -68,7 +68,7 @@
                            <span class="badge bg-danger">Rejected</span>
                         </td>
                         <td>
-                            <p>item.remarks</p>
+                            <%= item.remark || 'N/A' %>
                         </td>
 
                        

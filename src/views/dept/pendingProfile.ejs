@@ -72,9 +72,15 @@
 
                         <td>
 
-                            <span class="badge bg-warning text-light fs-6 px-3 py-2">
-                                Pending at Finance
+                            <% if (Number(item.status) === 3) { %>
+                            <span class="badge bg-info text-dark fs-6 px-3 py-2">
+                                Pending at SEC
                             </span>
+                            <% } else { %>
+                            <span class="badge bg-warning text-light fs-6 px-3 py-2">
+                                Pending at FA
+                            </span>
+                            <% } %>
 
                         </td>
 
@@ -119,9 +125,19 @@
                                                     </p>
                                                     
                                                     <p class="card-text">ROC Document: <span id="rocDocument">
-                                                                                                
-                                                        <a  href="/<%= item.roc_document.replace(/^public\//,'') %>" target="_blank" >View</a>
-                                                    </p>
+                                                        <% if (item.roc_document) { %>
+                                                            <a href="/<%= item.roc_document.replace(/^public\//,'') %>" target="_blank">View</a>
+                                                        <% } else { %>
+                                                            N/A
+                                                        <% } %>
+                                                    </span></p>
+                                                    <p class="card-text">MOA Document: <span id="moaDocument">
+                                                        <% if (item.moa_document) { %>
+                                                            <a href="/<%= item.moa_document.replace(/^public\//,'') %>" target="_blank">View</a>
+                                                        <% } else { %>
+                                                            N/A
+                                                        <% } %>
+                                                    </span></p>
                                                     <div class="mt-3">
                                                         <h6 class="fw-bold">Share Holders</h6>
 
@@ -190,6 +206,41 @@
 
                             </button> 
                             <% } %>
+                            <% if (role == 2) { %>
+                            <button
+                                class="btn btn-success btn-sm approveBtn"
+                                data-id="<%= item.id %>">
+
+                                <i class="fa fa-check"></i> Approve
+
+                            </button>
+                            <% } %>
+                            <% if (role == 5) { %>
+                            <button
+                                class="btn btn-success btn-sm secApproveBtn"
+                                data-id="<%= item.id %>">
+
+                                <i class="fa fa-check"></i> Approve
+
+                            </button>
+
+                            <button
+                                class="btn btn-danger btn-sm secRejectBtn"
+                                data-id="<%= item.id %>">
+
+                                <i class="fa fa-times"></i> Reject
+
+                            </button>
+                            <% } %>
+                            <button
+                                class="btn btn-primary btn-sm historyBtn"
+                                data-id="<%= item.id %>"
+                                data-toggle="modal"
+                                data-target="#historyModal">
+
+                                <i class="fa fa-history"></i> History
+
+                            </button>
                         </td>
 
                     </tr>

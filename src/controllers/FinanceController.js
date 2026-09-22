@@ -139,14 +139,14 @@ exports.getFinYearReport = async(req, res)=>{
 exports.getPendingProfile = async(req, res)=>{
    const dmdNo = req.session.user.dmdNo;
   
-   // Get Profiles
-    const [profiles] = await pool.execute(`
-        SELECT p.*, n.Psu_Name
-        FROM tbl_psu_profile p
-        JOIN tbl_psu_name n ON p.psu_id = n.id
-        WHERE
-        p.status = ?
-    `, [6]);
+    // Get Profiles
+     const [profiles] = await pool.execute(`
+         SELECT p.*, n.Psu_Name
+         FROM tbl_psu_profile p
+         JOIN tbl_psu_name n ON p.psu_id = n.id
+         WHERE
+         p.status = ?
+     `, [PROFILE_STATUS.PENDING_FA]);
 
     // Get Shareholders
     const [shareholders] = await pool.execute(`
@@ -209,7 +209,8 @@ exports.getPsuNames = async (req, res) => {
 exports.downloadReportExcel = async (req, res) => {
   // Implement logic to generate and send Excel report
  const { finYr, dmdNo, psuId } = req.query;
-  const pool = require('../config/db');
+const pool = require('../config/db');
+const { PROFILE_STATUS } = require('../utils/profileStatus');
   const ExcelJS = require('exceljs');
 
   let query = `

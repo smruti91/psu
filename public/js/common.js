@@ -13,6 +13,32 @@ function hideFormButton(form, selector) {
     if (btn) btn.style.display = 'none';
 }
 const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+// --- EBITDA auto-calculation: EBITDA = Total Revenue - Total Expenses (readonly) ---
+function calculateEbitda() {
+  var revEl = document.getElementById('txtTotRevenue');
+  var expEl = document.getElementById('txtTotalExpenses');
+  var ebitdaEl = document.getElementById('txtEbitda');
+  if (!revEl || !expEl || !ebitdaEl) return;
+  var rev = parseFloat((revEl.value || '').trim());
+  var exp = parseFloat((expEl.value || '').trim());
+  if (isNaN(rev) || isNaN(exp)) {
+    // Leave existing value (e.g. loaded from DB) unless both inputs are present but invalid
+    if ((revEl.value.trim() !== '' && isNaN(rev)) || (expEl.value.trim() !== '' && isNaN(exp))) return;
+    if (revEl.value.trim() === '' || expEl.value.trim() === '') { ebitdaEl.value = ''; return; }
+    return;
+  }
+  var result = rev - exp;
+  ebitdaEl.value = String(parseFloat(result.toFixed(2)));
+}
+document.addEventListener('DOMContentLoaded', function () {
+  calculateEbitda();
+  ['txtTotRevenue', 'txtTotalExpenses'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', calculateEbitda);
+  });
+  var incomeForm = document.getElementById('psuFormIncomeStatement');
+  if (incomeForm) incomeForm.addEventListener('submit', calculateEbitda, true);
+});
 // --- Step 1: Income Statement ---
 document.addEventListener('DOMContentLoaded', function () {
   var form1 = document.getElementById('psuFormIncomeStatement');

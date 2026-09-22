@@ -1,4 +1,6 @@
 const pool = require('../config/db');
+const { PROFILE_STATUS } = require('../utils/profileStatus');
+const profileHistoryService = require('../services/profileHistoryService');
 exports.setUserLocals = (req, res, next) => {
   if (req.session && req.session.user) {
     res.locals.user = req.session.user;
@@ -23,6 +25,16 @@ exports.dashboard = async (req, res) => {
   const approvedYears = yearwiseData.filter(row => row.status === 3);
   const rejectedYears = yearwiseData.filter(row => row.status === 2);
 
+  // Profiles awaiting FA approval (status 1) for this department - dashboard notification.
+  const [pendingProfiles] = await pool.execute(
+        `SELECT p.id, p.created_at, n.Psu_Name
+         FROM tbl_psu_profile p
+         JOIN tbl_psu_name n ON p.psu_id = n.id
+         WHERE p.dmd_no = ? AND p.status = ?
+         ORDER BY p.created_at DESC`,
+        [dmdNo, PROFILE_STATUS.PENDING_FA]
+      );
+
   res.render('dept/dashboard', {
     layout: 'layouts/dashboard',
     title: 'PSU Dashboard',
@@ -31,7 +43,8 @@ exports.dashboard = async (req, res) => {
     role: req.session.user.role,
     pendingYears,
     approvedYears,
-    rejectedYears
+    rejectedYears,
+    pendingProfiles
     
   });
 };
@@ -138,13 +151,13 @@ exports.rejectRecord = async (req, res) => {
 exports.getPendingProfile = async(req, res)=>{
    const dmdNo = req.session.user.dmdNo;
   
-   // Get Profiles
-    const [profiles] = await pool.execute(`
-        SELECT p.*, n.Psu_Name
-        FROM tbl_psu_profile p
-        JOIN tbl_psu_name n ON p.psu_id = n.id
-        WHERE p.dmd_no = ? AND p.status = ?
-    `, [dmdNo, 6]);
+    // Get Profiles
+     const [profiles] = await pool.execute(`
+         SELECT p.*, n.Psu_Name
+         FROM tbl_psu_profile p
+         JOIN tbl_psu_name n ON p.psu_id = n.id
+         WHERE p.dmd_no = ? AND p.status = ?
+     `, [dmdNo, PROFILE_STATUS.PENDING_FA]);
 
     // Get Shareholders
     const [shareholders] = await pool.execute(`
@@ -185,8 +198,8 @@ exports.getPendingProfile = async(req, res)=>{
 exports.getApproveProfile = async(req, res)=>{
   const dmdNo = req.session.user.dmdNo;
    const [approvedData] = await pool.execute(
-      `SELECT p.*, n.Psu_Name  FROM tbl_psu_profile as p join tbl_psu_name n on p.psu_id = n.id WHERE dmd_no = ? and status > ? `,
-      [dmdNo, 3]
+      `SELECT p.*, n.Psu_Name  FROM tbl_psu_profile as p join tbl_psu_name n on p.psu_id = n.id WHERE dmd_no = ? and status = ? `,
+      [dmdNo, PROFILE_STATUS.APPROVED]
     );
 
   res.render('dept/approvedProfile', {
@@ -203,8 +216,8 @@ exports.getApproveProfile = async(req, res)=>{
 exports.getRejectedProfile = async(req, res)=>{
   const dmdNo = req.session.user.dmdNo;
    const [rejecteddData] = await pool.execute(
-      `SELECT p.*, n.Psu_Name  FROM tbl_psu_profile as p join tbl_psu_name n on p.psu_id = n.id WHERE dmd_no = ? and status = ? `,
-      [dmdNo, 3]
+      `SELECT p.*, n.Psu_Name  FROM tbl_psu_profile as p join tbl_psu_name n on p.psu_id = n.id WHERE dmd_no = ? and status IN (?, ?) `,
+      [dmdNo, PROFILE_STATUS.REJECTED_FA, PROFILE_STATUS.REJECTED_SEC]
     );
 
   res.render('dept/rejectedProfile', {
@@ -221,20 +234,43 @@ exports.getRejectedProfile = async(req, res)=>{
 exports.approveProfile = async(req, res)=>{
   try {
 
-        const { profileId } = req.body;
+        // Only Dept (2) and Finance (4) may approve FA-pending profiles.
+        const callerRole = String(req.session?.user?.role || '');
+        if (!['2', '4'].includes(callerRole)) {
+            return res.status(403).json({ success: false, message: 'Forbidden.' });
+        }
 
-     
+        const { profileId } = req.body;
+        if (!profileId) {
+            return res.status(400).json({ success: false, message: 'Profile ID is required.' });
+        }
+
+        // FA approval: only Pending-at-FA (1) profiles can move to Pending-at-SEC (3).
+        const [rows] = await pool.execute(
+            'SELECT status FROM tbl_psu_profile WHERE id = ?',
+            [profileId]
+        );
+        if (!rows || rows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Profile not found.' });
+        }
+        if (Number(rows[0].status) !== PROFILE_STATUS.PENDING_FA) {
+            return res.status(400).json({ success: false, message: 'Only profiles pending at FA can be approved.' });
+        }
 
         await pool.execute(
             `UPDATE tbl_psu_profile
-             SET status = ?
+             SET status = ?, updated_at = NOW()
              WHERE id = ?`,
-            [8, profileId]
+            [PROFILE_STATUS.PENDING_SEC, profileId]
+        );
+
+        await profileHistoryService.logProfileTransition(
+            profileId, callerRole === '2' ? 'APPROVE_DEPT' : 'APPROVE_FA', req.session?.user?.id
         );
 
         res.json({
             success: true,
-            message: 'Sent for approval'
+            message: 'Approved. Profile moved to pending at SEC.'
         });
 
     } catch (error) {
@@ -250,20 +286,45 @@ exports.approveProfile = async(req, res)=>{
 exports.rejectProfile = async(req, res)=>{
   try {
 
-        const { profileId, remarks } = req.body;
+        // Only Finance (4) may reject FA-pending profiles.
+        if (String(req.session?.user?.role || '') !== '4') {
+            return res.status(403).json({ success: false, message: 'Forbidden.' });
+        }
 
-     
+        const { profileId, remarks } = req.body;
+        if (!profileId) {
+            return res.status(400).json({ success: false, message: 'Profile ID is required.' });
+        }
+        if (!remarks || !String(remarks).trim()) {
+            return res.status(400).json({ success: false, message: 'Rejection remarks are required.' });
+        }
+
+        // FA rejection: only Pending-at-FA (1) profiles can move to Rejected-by-FA (2).
+        const [rows] = await pool.execute(
+            'SELECT status FROM tbl_psu_profile WHERE id = ?',
+            [profileId]
+        );
+        if (!rows || rows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Profile not found.' });
+        }
+        if (Number(rows[0].status) !== PROFILE_STATUS.PENDING_FA) {
+            return res.status(400).json({ success: false, message: 'Only profiles pending at FA can be rejected.' });
+        }
 
         await pool.execute(
             `UPDATE tbl_psu_profile
-             SET status = ?, remarks = ?
+             SET status = ?, remark = ?, updated_at = NOW()
              WHERE id = ?`,
-            [3, remarks, profileId]
+            [PROFILE_STATUS.REJECTED_FA, remarks, profileId]
+        );
+
+        await profileHistoryService.logProfileTransition(
+            profileId, 'REJECT_FA', req.session?.user?.id
         );
 
         res.json({
             success: true,
-            message: 'Sent for approval'
+            message: 'Profile rejected and sent back to PSU.'
         });
 
     } catch (error) {

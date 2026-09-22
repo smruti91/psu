@@ -150,14 +150,71 @@ if(addBtn){
 if(editBtn){
   editBtn.addEventListener('click', async function(e) {
     e.preventDefault();
+    // Editing a profile that is pending approval (1/3) or already approved (5)
+    // moves it back to Draft - warn the PSU user first.
+    var currentStatus = this.dataset.status;
+    if (currentStatus !== undefined && !['0', '2', '4'].includes(String(currentStatus))) {
+      var confirmed = window.confirm(
+        'This profile is submitted/approved. Editing it will move it back to Draft ' +
+        'and it will need to be sent for approval again. Continue?'
+      );
+      if (!confirmed) return;
+    }
     await openProfileModal('edit');
   });
+}
+
+async function deleteExistingMoaDocument() {
+  const profileId = document.getElementById('profileId')?.value;
+  const deleteBtn = document.getElementById('deleteMoaDocumentBtn');
+
+  if (!profileId || !deleteBtn) return;
+
+  const confirmed = window.confirm('Delete the existing MOA document?');
+  if (!confirmed) return;
+
+  try {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    const response = await fetch('/psu/delete-moa-document', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken
+      },
+      body: JSON.stringify({ profile_id: profileId, _csrf: csrfToken })
+    });
+    const result = await response.json();
+
+    if (result.success) {
+      const container = document.getElementById('moaDocumentActions');
+      if (container) {
+        container.remove();
+      }
+      const uploadContainer = document.getElementById('moaUploadContainer');
+      if (uploadContainer) {
+        uploadContainer.style.display = 'block';
+      }
+      const fileInput = document.getElementById('moa_document');
+      if (fileInput) {
+        fileInput.value = '';
+      }
+    } else {
+      alert(result.message || 'Unable to delete MOA document.');
+    }
+  } catch (error) {
+    console.error('Error deleting MOA document:', error);
+    alert('Unable to delete MOA document.');
+  }
 }
 
 document.addEventListener('click', function (event) {
   if (event.target && event.target.id === 'deleteRocDocumentBtn') {
     event.preventDefault();
     deleteExistingRocDocument();
+  }
+  if (event.target && event.target.id === 'deleteMoaDocumentBtn') {
+    event.preventDefault();
+    deleteExistingMoaDocument();
   }
 });
 
@@ -400,10 +457,13 @@ document.getElementById('sendApprovalBtn').addEventListener('click', async funct
         if(result.success){
             alert('Sent for approval successfully');
             location.reload();
+        } else {
+            alert(result.message || 'Unable to send for approval.');
         }
 
     } catch (err) {
         console.error(err);
+        alert('Unable to send for approval.');
     }
 });
 }

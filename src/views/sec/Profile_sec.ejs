@@ -69,14 +69,15 @@
                         <td>
                        <% 
   const statusLabels = {
-    4: 'Pending at Secretary',
-    5: 'Rejected by Secretary',
-    6: 'Pending at Finance',
-    7: 'Rejected by Finance',
-    8: 'Approved'
+    0: 'Draft',
+    1: 'Pending at FA',
+    2: 'Rejected by FA',
+    3: 'Pending at SEC',
+    4: 'Rejected by SEC',
+    5: 'Approved'
   };
   const label = statusLabels[item.status] || 'Unknown';
-  const badgeClass = item.status === 8 ? 'bg-success' : (item.status % 2 === 0 ? 'bg-info' : 'bg-danger');
+  const badgeClass = item.status === 5 ? 'bg-success' : 'bg-info';
 %>
 <span class="badge <%= badgeClass %>"><%= label %></span>
                         </td>

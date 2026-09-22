@@ -23,14 +23,16 @@ exports.getProfileHistory = async (req, res) => {
 
         const [profileHistory] = await pool.execute(`
             SELECT
-                id,
-                snapshot,
-                action,
-                changed_by,
-                created_at
-            FROM tbl_psu_profile_history
-            WHERE profile_id=?
-            ORDER BY created_at DESC
+                h.id,
+                h.snapshot,
+                h.action,
+                h.changed_by,
+                h.created_at,
+                u.name AS changed_by_name
+            FROM tbl_psu_profile_history h
+            LEFT JOIN tbl_user u ON u.id = h.changed_by
+            WHERE h.profile_id = ?
+            ORDER BY h.created_at DESC
         `,[profileId]);
 
         const [shareholderHistory] = await pool.execute(`
@@ -41,7 +43,9 @@ exports.getProfileHistory = async (req, res) => {
             WHERE profile_id=?
             ORDER BY created_at DESC
         `,[profileId]);
-        console.log(shareholderHistory[0].snapshot);
+        if (shareholderHistory.length > 0 && shareholderHistory[0].snapshot) {
+            console.log(shareholderHistory[0].snapshot);
+        }
  
         res.render('partials/profileHistoryModal',{
 

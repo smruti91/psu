@@ -81,8 +81,10 @@
                             <label class="col-sm-3 col-form-label">EBITDA</label>
                             <div class="col-sm-9">
                                 <input type="text" class="form-control" id="txtEbitda" name="ebitda"
-                                    placeholder="EBITDA"
-                                    value="<%= incomeSheetData ? incomeSheetData.ebitda || '' : '' %>">
+                                    placeholder="EBITDA = Total Revenue - Total Expenses"
+                                    value="<%= incomeSheetData ? incomeSheetData.ebitda || '' : '' %>"
+                                    readonly tabindex="-1" style="background-color: #e9ecef;">
+                                <small class="form-text text-muted">Auto-calculated: EBITDA = Total Revenue - Total Expenses</small>
                             </div>
                         </div>
                         <div class="form-group row">
